@@ -1,6 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import Link from "next/link"
+import { LoadingLink as Link } from "@/components/LoadingLink"
 import ClientForm from "./client-form"
 
 export default async function NewClientPage() {

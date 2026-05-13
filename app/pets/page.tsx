@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
-import Link from "next/link"
+import { LoadingLink as Link } from "@/components/LoadingLink"
 import { Plus, Search } from "lucide-react"
 
 const pool = new Pool({
@@ -18,6 +18,7 @@ async function getPets(search?: string) {
         p.name, 
         p.breed,
         s.name as species,
+        c.id as client_id,
         c.name as client_name
       FROM pets p
       LEFT JOIN species s ON p.species_id = s.id
@@ -58,16 +59,14 @@ export default async function PetsPage(props: {
                             href="/clients/new"
                             className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
                         >
-                            <Plus size={16} />
-                            Client
+                            Add Client
                         </Link>
-                        <Link
+                        {/* <Link
                             href="/pets/new"
                             className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
                         >
-                            <Plus size={16} />
-                            Pet
-                        </Link>
+                            Add Pet
+                        </Link> */}
                     </div>
                 </div>
 
@@ -92,13 +91,13 @@ export default async function PetsPage(props: {
                                     Name
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Species
-                                </th>
-                                {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Breed
-                                </th> */}
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                     Client
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    Breed
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                                    Species
                                 </th>
                             </tr>
                         </thead>
@@ -112,17 +111,27 @@ export default async function PetsPage(props: {
                             ) : (
                                 pets.map((pet) => (
                                     <tr key={pet.id} className="hover:bg-gray-50">
-                                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                                            {pet.name}
+                                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                                            <Link
+                                                href={`/pets/${pet.id}`}
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                            >
+                                                {pet.name}
+                                            </Link>
+                                        </td>
+                                        <td className="whitespace-nowrap px-6 py-4 text-sm">
+                                            <Link
+                                                href={`/clients/${pet.client_id}`}
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                            >
+                                                {pet.client_name}
+                                            </Link>
+                                        </td>
+                                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                                            {pet.breed || "-"}
                                         </td>
                                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                             {pet.species}
-                                        </td>
-                                        {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                            {pet.breed || "-"}
-                                        </td> */}
-                                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                            {pet.client_name}
                                         </td>
                                     </tr>
                                 ))

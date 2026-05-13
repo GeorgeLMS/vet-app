@@ -1,6 +1,6 @@
 "use client"
 import { useActionState } from "react"
-import Link from "next/link"
+import { LoadingLink as Link } from "@/components/LoadingLink"
 import { createClient } from "./actions"
 
 export default function ClientForm() {
