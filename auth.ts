@@ -1,7 +1,7 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { Pool } from "pg"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"  // was: import bcrypt from "bcrypt"
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
