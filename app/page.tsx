@@ -33,7 +33,7 @@ export default async function LoginPage(props: {
                 password: formData.get("password"),
                 redirect: false,
               })
-              redirect("/checkins")
+              redirect("/dashboard")
             } catch (error) {
               if (error instanceof AuthError) {
                 return redirect("/?error=CredentialsSignin")
