@@ -62,13 +62,7 @@ export default async function ClientsPage(props: {
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
                     <div className="flex gap-2">
-                        <form
-                            action={async () => {
-                                "use server"
-                                await signOut({ redirect: false })
-                                redirect("/")
-                            }}
-                        >
+                        <form action="/signout">
                             <SubmitButton>Logout</SubmitButton>
                             {/* <button
                                 type="submit"
