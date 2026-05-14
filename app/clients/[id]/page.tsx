@@ -28,14 +28,17 @@ async function getClientPets(clientId: string) {
     try {
         const { rows } = await client.query(
             `SELECT
-        p.id,
-        p.name,
-        p.breed,
-        s.name as species
-      FROM pets p
-      LEFT JOIN species s ON p.species_id = s.id
-      WHERE p.client_id = $1
-      ORDER BY p.name`,
+                p.id,
+                p.name,
+                p.breed,
+                s.name as species,
+                MAX(v.visit_date) AS last_visit
+            FROM pets p
+            LEFT JOIN species s ON p.species_id = s.id
+            LEFT JOIN visits v ON v.pet_id = p.id
+            WHERE p.client_id = $1
+            GROUP BY p.id, p.name, p.breed, s.name
+            ORDER BY last_visit DESC NULLS LAST, p.name ASC`,
             [clientId]
         )
         return rows
@@ -63,11 +66,11 @@ export default async function ClientPage({
             <div className="mx-auto max-w-4xl">
                 <div className="mb-6">
                     <Link
-                        href="/pets"
+                        href="/clients"
                         className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                     >
                         <ArrowLeft size={16} />
-                        Back to Pets
+                        Back to Clients
                     </Link>
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">{client.name}</h1>
                 </div>
@@ -119,18 +122,24 @@ export default async function ClientPage({
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
                                             Name
                                         </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
                                             Breed
+                                        </th>
+                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                                            Species
+                                        </th>
+                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                                            Last Visit
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
                                     {pets.map((pet) => (
                                         <tr key={pet.id} className="hover:bg-gray-50">
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm font-medium">
                                                 <Link
                                                     href={`/pets/${pet.id}`}
                                                     className="text-blue-600 hover:text-blue-800 hover:underline"
@@ -138,8 +147,20 @@ export default async function ClientPage({
                                                     {pet.name}
                                                 </Link>
                                             </td>
-                                            <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                                {pet.breed || "-"}
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                {pet.breed
+                                                    ? pet.breed.length > 10
+                                                        ? `${pet.breed.slice(0, 8)}...`
+                                                        : pet.breed
+                                                    : "-"}
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                {pet.species || "-"}
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                                {pet.last_visit
+                                                    ? new Date(pet.last_visit).toLocaleDateString()
+                                                    : "Never"}
                                             </td>
                                         </tr>
                                     ))}

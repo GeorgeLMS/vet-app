@@ -75,11 +75,11 @@ export default async function PetPage({
             <div className="mx-auto max-w-4xl">
                 <div className="mb-6">
                     <Link
-                        href="/pets"
+                        href="/clients"
                         className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                     >
                         <ArrowLeft size={16} />
-                        Back to Pets
+                        Back to Clients
                     </Link>
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">{pet.name}</h1>
                 </div>

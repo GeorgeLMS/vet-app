@@ -7,7 +7,7 @@ export default async function LoginPage(props: {
   searchParams: Promise<{ error?: string }>
 }) {
   const session = await auth()
-  if (session) redirect("/pets")
+  if (session) redirect("/clients")
 
   const searchParams = await props.searchParams
 
@@ -31,7 +31,7 @@ export default async function LoginPage(props: {
                 password: formData.get("password"),
                 redirect: false,
               })
-              redirect("/pets")
+              redirect("/clients")
             } catch (error) {
               if (error instanceof AuthError) {
                 return redirect("/?error=CredentialsSignin")
@@ -50,7 +50,7 @@ export default async function LoginPage(props: {
               type="text"
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-              placeholder="enedina"
+              placeholder=""
             />
           </div>
 

@@ -11,8 +11,8 @@ export default async function NewClientPage() {
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-6">
-                    <Link href="/pets" className="text-sm text-blue-600 hover:text-blue-800">
-                        ← Back to Pets
+                    <Link href="/clients" className="text-sm text-blue-600 hover:text-blue-800">
+                        ← Back to Clients
                     </Link>
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">Add New Client</h1>
                 </div>
