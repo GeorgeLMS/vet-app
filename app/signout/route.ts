@@ -1,7 +1,8 @@
 import { signOut } from "@/auth"
 import { NextResponse } from "next/server"
 
-export async function POST() {
+export async function POST(request: Request) {
     await signOut({ redirect: false })
-    return NextResponse.redirect(new URL("/", process.env.NEXTAUTH_URL!))
+    const url = new URL("/", request.url)
+    return NextResponse.redirect(url)
 }
