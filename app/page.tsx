@@ -2,10 +2,15 @@ import { signIn } from "@/auth"
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { AuthError } from "next-auth"
+import { SubmitButton } from "@/components/SubmitButton"
+export const dynamic = 'force-dynamic'
 
 export default async function LoginPage(props: {
   searchParams: Promise<{ error?: string }>
 }) {
+  const session = await auth()
+  if (session) redirect("/clients")
+
   const searchParams = await props.searchParams
 
   return (
@@ -64,12 +69,13 @@ export default async function LoginPage(props: {
             />
           </div>
 
-          <button
+          <SubmitButton>Login</SubmitButton>
+          {/* <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium"
           >
             Login
-          </button>
+          </button> */}
         </form>
       </div>
     </main>

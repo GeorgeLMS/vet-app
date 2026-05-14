@@ -6,6 +6,7 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import EditForm from "./edit-form"
 import { updateClient } from "./actions"
+export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,

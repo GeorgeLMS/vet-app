@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { VisitForm } from "./visit-form"
+export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,

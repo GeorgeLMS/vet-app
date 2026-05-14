@@ -3,6 +3,7 @@ import { Pool } from "pg"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
+export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,

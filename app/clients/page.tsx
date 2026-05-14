@@ -3,6 +3,10 @@ import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { Plus, Search } from "lucide-react"
+import { signOut } from "@/auth"
+import { SubmitButton } from "@/components/SubmitButton"
+
+export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -58,6 +62,20 @@ export default async function ClientsPage(props: {
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
                     <div className="flex gap-2">
+                        <form
+                            action={async () => {
+                                "use server"
+                                await signOut({ redirectTo: "/" })
+                            }}
+                        >
+                            <SubmitButton>Logout</SubmitButton>
+                            {/* <button
+                                type="submit"
+                                className="flex items-center gap-1 rounded-md bg-gray-600 px-3 py-2 text-sm font-medium text-white hover:bg-gray-700"
+                            >
+                                Logout
+                            </button> */}
+                        </form>
                         <Link
                             href="/clients/new"
                             className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"

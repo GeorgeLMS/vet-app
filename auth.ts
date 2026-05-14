@@ -26,7 +26,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const client = await pool.connect()
                 try {
                     const { rows } = await client.query(
-                        `SELECT id, username, password_hash FROM users WHERE username = $1`,
+                        `SELECT id, username, password_hash FROM users WHERE LOWER(username) = LOWER($1)
+`,
                         [username]
                     )
 

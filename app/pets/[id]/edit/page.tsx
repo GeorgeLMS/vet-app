@@ -5,6 +5,7 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 import { EditPetForm } from "./edit-form"
+export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,

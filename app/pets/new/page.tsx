@@ -1,5 +1,8 @@
 import { Pool } from "pg"
 import PetForm from "./pet-form"
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
+export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -21,6 +24,9 @@ export default async function NewPetPage({
 }: {
     searchParams: Promise<{ clientId: string }>
 }) {
+    const session = await auth()
+    if (!session) redirect("/")
+
     const { clientId } = await searchParams
     const species = await getSpecies()
 

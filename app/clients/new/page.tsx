@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import ClientForm from "./client-form"
+export const dynamic = 'force-dynamic'
 
 export default async function NewClientPage() {
     const session = await auth()
