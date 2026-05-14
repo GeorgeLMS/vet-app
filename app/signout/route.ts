@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 
 export async function POST(request: Request) {
+    const cookieStore = await cookies()
+    const allCookies = cookieStore.getAll()
+    console.log("COOKIES:", allCookies.map(c => c.name))
+
     const response = NextResponse.redirect("https://vet-app-lilac.vercel.app")
-    response.cookies.delete("authjs.session-token")
-    response.cookies.delete("__Secure-authjs.session-token")
+    for (const cookie of allCookies) {
+        response.cookies.delete(cookie.name)
+    }
     return response
 }
