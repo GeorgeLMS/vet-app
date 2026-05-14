@@ -31,6 +31,7 @@ export async function createVisit(
     const visitDate = formData.get("visit_date")?.toString() ?? ""
     const procedure = formData.get("procedure")?.toString().trim() ?? ""
     const notes = formData.get("notes")?.toString().trim() ?? ""
+    const from = formData.get("from")?.toString() ?? "" // add this
 
     const data = { visit_date: visitDate, procedure, notes }
     const errors: FormState["errors"] = {}
@@ -80,5 +81,5 @@ export async function createVisit(
     }
 
     revalidatePath(`/pets/${petId}`)
-    redirect(`/pets/${petId}`)
+    redirect(`/pets/${petId}${from ? `?from=${from}` : ''}`) // change this
 }

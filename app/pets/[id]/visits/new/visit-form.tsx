@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState } from "react"
+import { useSearchParams } from "next/navigation" // add this
 import { createVisit, type FormState } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
@@ -12,6 +13,9 @@ export function VisitForm({
     petId: string
     procedures: { id: string; name: string }[]
 }) {
+    const searchParams = useSearchParams() // add this
+    const from = searchParams.get('from') // add this
+
     const boundAction = createVisit.bind(null, petId)
     const [state, action] = useActionState<FormState, FormData>(
         boundAction,
@@ -26,6 +30,8 @@ export function VisitForm({
 
     return (
         <form action={action} className="space-y-4">
+            {from && <input type="hidden" name="from" value={from} />} {/* add this */}
+
             {state?.errors?.general && (
                 <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                     {state.errors.general}
@@ -90,7 +96,7 @@ export function VisitForm({
             <div className="flex gap-3 pt-4">
                 <SubmitButton>Save Visit</SubmitButton>
                 <Link
-                    href={`/pets/${petId}`}
+                    href={`/pets/${petId}${from ? `?from=${from}` : ''}`} // update this too
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
                 >
                     Cancel

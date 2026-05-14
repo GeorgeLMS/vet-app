@@ -5,6 +5,7 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { Plus, Search } from "lucide-react"
 import { signOut } from "@/auth"
 import { SubmitButton } from "@/components/SubmitButton"
+import { ArrowLeft } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -60,7 +61,13 @@ export default async function ClientsPage(props: {
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
                 <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
+                    {/* <h1 className="text-3xl font-bold text-gray-900">Clients</h1> */}
+                    <div className="mb-4 flex items-center gap-2">
+                        <Link href="/dashboard" className="text-blue-600 hover:text-blue-700">
+                            <ArrowLeft size={24} />
+                        </Link>
+                        <h1 className="text-xl font-bold text-gray-900">Clients</h1>
+                    </div>
                     <div className="flex gap-2">
                         <form
                             action={async () => {

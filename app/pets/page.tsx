@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
-import { Plus, Search } from "lucide-react"
+import { ArrowLeft, Plus, Search } from "lucide-react"
 export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
@@ -54,7 +54,13 @@ export default async function PetsPage(props: {
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
                 <div className="mb-6 flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gray-900">Pets</h1>
+                    {/* <h1 className="text-3xl font-bold text-gray-900">Pets</h1> */}
+                    <div className="mb-4 flex items-center gap-2">
+                        <Link href="/dashboard" className="text-blue-600 hover:text-blue-700">
+                            <ArrowLeft size={24} />
+                        </Link>
+                        <h1 className="text-xl font-bold text-gray-900">Pets</h1>
+                    </div>
                     <div className="flex gap-2">
                         <Link
                             href="/clients/new"

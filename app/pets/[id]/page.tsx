@@ -4,6 +4,7 @@ import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
+
 export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
@@ -58,29 +59,36 @@ async function getPetVisits(petId: string) {
 }
 
 export default async function PetPage({
-    params
+    params,
+    searchParams
 }: {
     params: Promise<{ id: string }>
+    searchParams: Promise<{ from?: string }>
 }) {
     const session = await auth()
     if (!session) redirect("/")
 
     const { id } = await params
+    const { from } = await searchParams // add this
+
     const pet = await getPet(id)
     if (!pet) notFound()
 
     const visits = await getPetVisits(id)
+
+    const backHref = from === 'checkins' ? '/checkins' : '/clients'
+    const backLabel = from === 'checkins' ? 'Back to Check-ins' : 'Back to Clients'
 
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-6">
                     <Link
-                        href="/clients"
+                        href={backHref}
                         className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                     >
                         <ArrowLeft size={16} />
-                        Back to Clients
+                        {backLabel}
                     </Link>
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">{pet.name}</h1>
                 </div>
@@ -146,7 +154,7 @@ export default async function PetPage({
                                 Visits ({visits.length})
                             </h2>
                             <Link
-                                href={`/pets/${id}/visits/new`}
+                                href={`/pets/${id}/visits/new${from ? `?from=${from}` : ''}`}
                                 className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700"
                             >
                                 Add Visit

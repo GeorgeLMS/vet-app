@@ -49,7 +49,7 @@ export default async function EditClientPage({
                         className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                     >
                         <ArrowLeft size={16} />
-                        Back to Client
+                        Back to Clients
                     </Link>
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">Edit Client</h1>
                 </div>
