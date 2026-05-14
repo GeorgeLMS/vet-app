@@ -65,7 +65,8 @@ export default async function ClientsPage(props: {
                         <form
                             action={async () => {
                                 "use server"
-                                await signOut({ redirectTo: "/" })
+                                await signOut({ redirect: false })
+                                redirect("/")
                             }}
                         >
                             <SubmitButton>Logout</SubmitButton>
