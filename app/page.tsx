@@ -6,9 +6,6 @@ import { AuthError } from "next-auth"
 export default async function LoginPage(props: {
   searchParams: Promise<{ error?: string }>
 }) {
-  const session = await auth()
-  if (session) redirect("/clients")
-
   const searchParams = await props.searchParams
 
   return (
