@@ -11,41 +11,41 @@ const pool = new Pool({
 
 export type FormState = {
     errors?: {
-        visit_date?: string
+        consultation_date?: string
         procedure?: string
         notes?: string
         general?: string
     }
     data?: {
-        visit_date?: string
+        consultation_date?: string
         procedure?: string
         notes?: string
     }
 }
 
-export async function createVisit(
+export async function createConsultation(
     petId: string,
     _prev: FormState,
     formData: FormData
 ): Promise<FormState> {
-    const visitDate = formData.get("visit_date")?.toString() ?? ""
+    const consultationDate = formData.get("consultation_date")?.toString() ?? ""
     const procedure = formData.get("procedure")?.toString().trim() ?? ""
     const notes = formData.get("notes")?.toString().trim() ?? ""
     const from = formData.get("from")?.toString() ?? "" // add this
 
-    const data = { visit_date: visitDate, procedure, notes }
+    const data = { consultation_date: consultationDate, procedure, notes }
     const errors: FormState["errors"] = {}
 
-    if (!visitDate) {
-        errors.visit_date = "Date is required"
+    if (!consultationDate) {
+        errors.consultation_date = "Date is required"
     } else {
-        const date = new Date(visitDate)
+        const date = new Date(consultationDate)
         if (isNaN(date.getTime())) {
-            errors.visit_date = "Invalid date"
+            errors.consultation_date = "Invalid date"
         } else {
             const year = date.getFullYear()
             if (year < 2000 || year > 2100) {
-                errors.visit_date = "Date must be between 2000 and 2100"
+                errors.consultation_date = "Date must be between 2000 and 2100"
             }
         }
     }
@@ -67,13 +67,13 @@ export async function createVisit(
     const client = await pool.connect()
     try {
         await client.query(
-            `INSERT INTO visits (pet_id, visit_date, procedure, notes)
-             VALUES ($1, $2, $3, $4)`,
-            [petId, visitDate, procedure, notes || null]
+            `INSERT INTO consultations (pet_id, consultation_date, procedure, notes)
+VALUES ($1, $2, $3, $4)`,
+            [petId, consultationDate, procedure, notes || null]
         )
     } catch (e) {
         return {
-            errors: { general: "Failed to create visit. Please try again." },
+            errors: { general: "Failed to create consultation. Please try again." },
             data
         }
     } finally {

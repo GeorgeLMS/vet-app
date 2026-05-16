@@ -5,6 +5,8 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 import { EditPetForm } from "./edit-form"
+import NavBar from "@/components/NavBar"
+
 export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
@@ -52,15 +54,11 @@ export default async function EditPetPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
-                <div className="mb-6">
-                    <Link
-                        href={`/pets/${id}`}
-                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                    >
-                        <ArrowLeft size={16} />
-                        Back to {pet.name}
-                    </Link>
+                <div className="mb-2">
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">Edit Pet</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <NavBar />
+                    </div>
                 </div>
                 <div className="rounded-lg bg-white p-6 shadow">
                     <EditPetForm petId={id} pet={pet} species={species} />

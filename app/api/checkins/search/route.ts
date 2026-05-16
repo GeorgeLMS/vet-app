@@ -23,9 +23,15 @@ export async function GET(req: NextRequest) {
                 p.id as pet_id,
                 p.name as pet_name,
                 p.breed,
+                p.notes as pet_notes,
                 c.name as client_name,
                 c.phone,
-                s.name as species
+                s.name as species,
+                (
+                    SELECT MAX(created_at) 
+                    FROM consultations 
+                    WHERE pet_id = p.id
+                ) as last_consultation_at
             FROM pets p
             JOIN clients c ON c.id = p.client_id
             JOIN species s ON s.id = p.species_id

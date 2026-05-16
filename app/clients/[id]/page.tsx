@@ -2,7 +2,13 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus, PlusCircle, PlusIcon, PlusSquare } from "lucide-react"
+import NavBar from "@/components/NavBar"
+import NavButton from "@/components/NavButton"
+import { Pencil } from "lucide-react"
+import { SpeciesIcon } from "@/components/SpeciesIcon"
+import { ClientPetTable } from "./client-pet-table" // relative import
+
 import { notFound } from "next/navigation"
 export const dynamic = 'force-dynamic'
 
@@ -29,17 +35,17 @@ async function getClientPets(clientId: string) {
     try {
         const { rows } = await client.query(
             `SELECT
-                p.id,
-                p.name,
-                p.breed,
-                s.name as species,
-                MAX(v.visit_date) AS last_visit
-            FROM pets p
-            LEFT JOIN species s ON p.species_id = s.id
-            LEFT JOIN visits v ON v.pet_id = p.id
-            WHERE p.client_id = $1
-            GROUP BY p.id, p.name, p.breed, s.name
-            ORDER BY last_visit DESC NULLS LAST, p.name ASC`,
+    p.id,
+    p.name,
+    p.breed,
+    s.name as species,
+    MAX(con.consultation_date) AS last_consultation
+FROM pets p
+LEFT JOIN species s ON p.species_id = s.id
+LEFT JOIN consultations con ON con.pet_id = p.id
+WHERE p.client_id = $1
+GROUP BY p.id, p.name, p.breed, s.name
+ORDER BY last_consultation DESC NULLS LAST, p.name ASC`,
             [clientId]
         )
         return rows
@@ -65,27 +71,31 @@ export default async function ClientPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
-                <div className="mb-6">
-                    <Link
+                <div className="mb-2">
+                    {/* <Link
                         href="/clients"
                         className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                     >
                         <ArrowLeft size={16} />
                         Back to Clients
-                    </Link>
+                    </Link> */}
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">{client.name}</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <NavBar />
+                    </div>
                 </div>
 
-                <div className="grid gap-6">
-                    <div className="rounded-lg bg-white p-6 shadow">
-                        <div className="mb-4 flex justify-between items-center">
+                <div className="grid gap-2">
+                    <div className="rounded-lg bg-white p-4 shadow">
+                        <div className="mb-2 flex justify-between items-center">
                             <h2 className="text-xl font-semibold text-gray-900">Client Details</h2>
-                            <Link
+                            {/* <Link
                                 href={`/clients/${id}/edit`}
                                 className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700"
                             >
                                 Edit Client
-                            </Link>
+                            </Link> */}
+                            <NavButton href={`/clients/${id}/edit`} icon={<Pencil size={18} />} label="Edit client" />
                         </div>
                         <dl className="space-y-2">
                             <div>
@@ -108,69 +118,14 @@ export default async function ClientPage({
                             <h2 className="text-xl font-semibold text-gray-900">
                                 Pets ({pets.length})
                             </h2>
-                            <Link
-                                href={`/pets/new?clientId=${id}`}
-                                className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700"
-                            >
-                                Add Pet
-                            </Link>
+                            <NavButton href={`/pets/new?clientId=${id}`} icon={<Plus size={18} />} label="Add Pet" />
                         </div>
-                        {pets.length === 0 ? (
-                            <div className="px-6 py-8 text-center text-gray-500">
-                                No pets registered for this client.
-                            </div>
-                        ) : (
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                            Name
-                                        </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                            Breed
-                                        </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                            Species
-                                        </th>
-                                        <th className="px-3 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                            Last Visit
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200 bg-white">
-                                    {pets.map((pet) => (
-                                        <tr key={pet.id} className="hover:bg-gray-50">
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm font-medium">
-                                                <Link
-                                                    href={`/pets/${pet.id}`}
-                                                    className="text-blue-600 hover:text-blue-800 hover:underline"
-                                                >
-                                                    {pet.name}
-                                                </Link>
-                                            </td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {pet.breed
-                                                    ? pet.breed.length > 10
-                                                        ? `${pet.breed.slice(0, 8)}...`
-                                                        : pet.breed
-                                                    : "-"}
-                                            </td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {pet.species || "-"}
-                                            </td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {pet.last_visit
-                                                    ? new Date(pet.last_visit).toLocaleDateString()
-                                                    : "Never"}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                        <ClientPetTable pets={pets} />
                     </div>
+
+
                 </div>
-            </div>
-        </main>
+            </div >
+        </main >
     )
 }

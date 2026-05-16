@@ -18,8 +18,10 @@ export type FormState = {
         birth_date?: string
         weight?: string
         notes?: string
+        client?: string
+        new_client_name?: string
+        new_client_phone?: string
     }
-    // Add fields to preserve values
     values?: {
         name?: string
         species_id?: string
@@ -27,31 +29,36 @@ export type FormState = {
         birth_date?: string
         weight?: string
         notes?: string
+        new_client_name?: string
+        new_client_phone?: string
     }
 }
 
-export async function createPet(
+export async function createPetWithClient(
     prevState: FormState,
     formData: FormData
 ): Promise<FormState> {
     const session = await auth()
     if (!session) redirect("/")
 
-    const client_id = formData.get("client_id") as string
     const name = formData.get("name") as string
     const species_id = formData.get("species_id") as string
     const breed = formData.get("breed") as string
     const birth_date = formData.get("birth_date") as string
     const weight = formData.get("weight") as string
     const notes = formData.get("notes") as string
+    const client_id = formData.get("client_id") as string
+    const new_client_name = formData.get("new_client_name") as string
+    const new_client_phone = formData.get("new_client_phone") as string
+    const from = formData.get("from") as string
 
     const errors: FormState["errors"] = {}
-    const values = { name, species_id, breed, birth_date, weight, notes }
+    const values = { name, species_id, breed, birth_date, weight, notes, new_client_name, new_client_phone }
 
-    if (!name) errors.name = "Pet name is required"
+    // Validate pet fields
+    if (!name || name.trim().length === 0) errors.name = "Pet name is required"
     if (name && name.length > 100) errors.name = "Pet name cannot exceed 100 characters"
     if (!species_id) errors.species_id = "Species is required"
-    if (!client_id) errors.general = "Client is required"
     if (breed && breed.length > 20) errors.breed = "Breed cannot exceed 20 characters"
 
     let birthDateValue: Date | null = null
@@ -72,18 +79,64 @@ export async function createPet(
 
     if (notes && notes.length > 5000) errors.notes = "Notes cannot exceed 5000 characters"
 
-    if (Object.keys(errors).length > 0) {
-        return { errors, values } // Return values so form doesn't blank
+    // Validate client: need either existing client_id OR new client info
+    if (!client_id && !new_client_name) {
+        errors.client = "Please select or create an owner"
     }
+    if (new_client_name) {
+        if (new_client_name.trim().length === 0) {
+            errors.new_client_name = "Client name is required"
+        }
+        if (new_client_name.length > 100) {
+            errors.new_client_name = "Client name cannot exceed 100 characters"
+        }
+    }
+    if (new_client_phone && new_client_phone.length > 20) {
+        errors.new_client_phone = "Phone cannot exceed 20 characters"
+    }
+
+    if (Object.keys(errors).length > 0) {
+        return { errors, values }
+    }
+
+    let finalClientId: number // declare it here so it's accessible after try/catch
 
     const client = await pool.connect()
     try {
+        await client.query('BEGIN')
+
+        // Create new client if needed
+        if (new_client_name) {
+            const clientRes = await client.query(
+                `INSERT INTO clients (name, phone)
+                 VALUES ($1, $2)
+                 RETURNING id`,
+                [new_client_name.trim(), new_client_phone || null]
+            )
+            finalClientId = clientRes.rows[0].id
+        } else {
+            finalClientId = parseInt(client_id)
+        }
+
+        // Create pet
         await client.query(
             `INSERT INTO pets (client_id, name, species_id, breed, birth_date, weight, notes)
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [client_id, name, parseInt(species_id), breed || null, birthDateValue, weightNum, notes || null]
+            [
+                finalClientId,
+                name.trim(),
+                parseInt(species_id),
+                breed || null,
+                birthDateValue,
+                weightNum,
+                notes || null
+            ]
         )
+
+        await client.query('COMMIT')
+
     } catch (error: any) {
+        await client.query('ROLLBACK')
         console.error("Failed to create pet:", error)
         if (error.code === '22003') return { errors: { weight: "Weight value is out of range" }, values }
         if (error.code === '22001') return { errors: { general: "One of the fields is too long" }, values }
@@ -92,6 +145,12 @@ export async function createPet(
         client.release()
     }
 
-    revalidatePath(`/clients/${client_id}`)
-    redirect(`/clients/${client_id}`)
+    // Redirect based on where they came from
+    if (from === 'checkins') {
+        revalidatePath('/checkins')
+        redirect('/checkins')
+    } else {
+        revalidatePath(`/clients/${finalClientId}`)
+        redirect(`/clients/${finalClientId}`)
+    }
 }

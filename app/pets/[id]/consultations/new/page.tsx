@@ -5,7 +5,9 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { VisitForm } from "./visit-form"
+import { ConsultationForm } from "./page-form"
+import NavBar from "@/components/NavBar"
+
 export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
@@ -38,7 +40,7 @@ async function getProcedures() {
     }
 }
 
-export default async function NewVisitPage({
+export default async function NewConsultationPage({
     params
 }: {
     params: Promise<{ id: string }>
@@ -55,14 +57,14 @@ export default async function NewVisitPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
-                <div className="mb-6">
-                    <Link href={`/pets/${id}`} className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
-                        <ArrowLeft size={16} /> Back to {pet.name}
-                    </Link>
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Add Visit</h1>
+                <div className="mb-2">
+                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Add Consultation</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <NavBar />
+                    </div>
                 </div>
                 <div className="rounded-lg bg-white p-6 shadow">
-                    <VisitForm petId={id} procedures={procedures} />
+                    <ConsultationForm petId={id} procedures={procedures} />
                 </div>
             </div>
         </main>

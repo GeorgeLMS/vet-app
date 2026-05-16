@@ -1,24 +1,35 @@
 'use client'
 
-import Link from 'next/link'
-import { useState } from 'react'
+import Link, { LinkProps } from 'next/link'
+import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
+import { AnchorHTMLAttributes } from 'react'
 
-export function LoadingLink({
-    href,
-    children,
-    className
-}: {
-    href: string
-    children: React.ReactNode
-    className?: string
-}) {
+type LoadingLinkProps = LinkProps &
+    Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> & {
+        children: React.ReactNode
+        className?: string
+    }
+
+export function LoadingLink({ children, className, ...props }: LoadingLinkProps) {
     const [pending, setPending] = useState(false)
+    const pathname = usePathname()
+
+    useEffect(() => {
+        setPending(false)
+    }, [pathname])
 
     return (
         <Link
-            href={href}
+            {...props}
             prefetch={false}
-            onClick={() => setPending(true)}
+            onClick={(e) => {
+                const href = typeof props.href === 'string' ? props.href : props.href.pathname || props.href.toString()
+                if (href === pathname) return
+
+                setPending(true)
+                props.onClick?.(e)
+            }}
             className={
                 className
                     ? `${className} flex items-center gap-2 ${pending ? 'opacity-80 cursor-wait' : ''}`
@@ -27,7 +38,7 @@ export function LoadingLink({
         >
             {pending && (
                 <svg
-                    className="h-4 w-4 animate-spin"
+                    className="h-4 w-4 animate-spin shrink-0"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"

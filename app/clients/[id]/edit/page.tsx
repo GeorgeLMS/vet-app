@@ -6,6 +6,8 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import EditForm from "./edit-form"
 import { updateClient } from "./actions"
+import NavBar from "@/components/NavBar"
+
 export const dynamic = 'force-dynamic'
 
 const pool = new Pool({
@@ -43,18 +45,21 @@ export default async function EditClientPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
-                <div className="mb-6">
-                    <Link
+                <div className="mb-2">
+                    {/* <Link
                         href={`/clients/${id}`}
                         className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
                     >
                         <ArrowLeft size={16} />
                         Back to Clients
-                    </Link>
+                    </Link> */}
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">Edit Client</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <NavBar />
+                    </div>
                 </div>
 
-                <div className="rounded-lg bg-white p-6 shadow">
+                <div className="rounded-lg bg-white p-4 shadow">
                     <EditForm client={client} action={updateClientWithId} />
                 </div>
             </div>

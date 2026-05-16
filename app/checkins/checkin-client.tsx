@@ -17,7 +17,7 @@ type Checkin = {
     client_name: string
     phone: string | null
     species: string
-    has_visit_today: boolean // add this
+    has_consultation_today: boolean
 }
 
 type SearchResult = {
@@ -27,6 +27,8 @@ type SearchResult = {
     client_name: string
     phone: string | null
     species: string
+    last_consultation_at: string | null
+    pet_notes: string | null
 }
 
 export function CheckinClient({
@@ -42,10 +44,10 @@ export function CheckinClient({
     const [broughtBy, setBroughtBy] = useState("")
     const [notes, setNotes] = useState("")
     const [menuOpenId, setMenuOpenId] = useState<number | null>(null)
-    const [seenMenuOpenId, setSeenMenuOpenId] = useState<number | null>(null) // add this
+    const [seenMenuOpenId, setSeenMenuOpenId] = useState<number | null>(null)
     const [loading, setLoading] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
-    const seenMenuRef = useRef<HTMLDivElement>(null) // add this
+    const seenMenuRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         if (query.length < 2) { setResults([]); return }
@@ -63,7 +65,7 @@ export function CheckinClient({
                 setMenuOpenId(null)
             }
             if (seenMenuRef.current && !seenMenuRef.current.contains(e.target as Node)) {
-                setSeenMenuOpenId(null) // add this
+                setSeenMenuOpenId(null)
             }
         }
         document.addEventListener("mousedown", handleClick)
@@ -83,6 +85,14 @@ export function CheckinClient({
 
     function formatTime(ts: string) {
         return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    }
+
+    function formatDate(ts: string) {
+        return new Date(ts).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        })
     }
 
     function SpeciesIcon({ species, className = "w-4 h-4" }: { species: string, className?: string }) {
@@ -110,31 +120,97 @@ export function CheckinClient({
                                 <button
                                     key={r.pet_id}
                                     onClick={() => { setSelectedPet(r); setQuery(r.pet_name); setResults([]) }}
-                                    className="w-full px-3 py-2.5 text-left text-sm hover:bg-gray-50 border-b last:border-0"
+                                    className="w-full px-3 py-2.5 text-left hover:bg-gray-50 border-b last:border-0"
                                 >
-                                    <div className="flex items-center gap-2 font-medium text-gray-900">
-                                        <SpeciesIcon species={r.species} className="w-4 h-4" />
-                                        {r.pet_name}
+                                    <div className="flex items-start justify-between gap-3">
+                                        {/* Left side: pet info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 font-medium text-gray-900 text-base">
+                                                <SpeciesIcon species={r.species} className="w-5 h-5 flex-shrink-0" />
+                                                <span className="truncate">{r.pet_name}</span>
+                                            </div>
+                                            {r.breed && <div className="text-sm text-gray-500 ml-7 truncate">{r.breed}</div>}
+                                            <div className="text-sm text-gray-400 ml-7 truncate">{r.client_name}</div>
+                                        </div>
+
+                                        {/* Right side: last consultation + notes */}
+                                        <div className="text-right flex-shrink-0 w-28">
+                                            {r.last_consultation_at && (
+                                                <div className="text-xs text-gray-500 whitespace-nowrap">
+                                                    Last: {formatDate(r.last_consultation_at)}
+                                                </div>
+                                            )}
+                                            {r.pet_notes && (
+                                                <div
+                                                    className="text-xs text-amber-600 italic mt-0.5 line-clamp-2 break-words"
+                                                    title={r.pet_notes}
+                                                >
+                                                    {r.pet_notes}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    {r.breed && <div className="text-xs text-gray-500 ml-6">{r.breed}</div>}
-                                    <div className="text-xs text-gray-400 ml-6">{r.client_name}</div>
                                 </button>
                             ))}
+
+                            {query.length >= 2 && (
+                                <Link
+                                    href={`/pets/new?name=${encodeURIComponent(query)}&from=checkins`}
+                                    className="flex items-center gap-2 w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 border-t border-gray-200 text-blue-600 font-medium"
+                                >
+                                    <span className="text-lg leading-none">+</span>
+                                    Create "{query}" as new pet
+                                </Link>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Also handle case where 0 results but query >= 2 */}
+                    {results.length === 0 && query.length >= 2 && !selectedPet && (
+                        <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
+                            <Link
+                                href={`/pets/new?name=${encodeURIComponent(query)}&from=checkins`}
+                                className="flex items-center gap-2 w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 text-blue-600 font-medium"
+                            >
+                                <span className="text-lg leading-none">+</span>
+                                Create "{query}" as new pet
+                            </Link>
                         </div>
                     )}
                 </div>
-
                 {selectedPet && (
                     <div className="mt-3 space-y-2">
-                        <div className="rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
-                            <div className="flex items-center gap-2 font-medium text-blue-900">
-                                <SpeciesIcon species={selectedPet.species} className="w-4 h-4" />
-                                {selectedPet.pet_name}
+                        <div className="rounded-md bg-blue-50 px-3 py-2.5 text-sm">
+                            <div className="flex items-start justify-between gap-3">
+                                {/* Left side: pet info */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 font-medium text-gray-900 text-base">
+                                        <SpeciesIcon species={selectedPet.species} className="w-5 h-5 flex-shrink-0" />
+                                        <span className="truncate">{selectedPet.pet_name}</span>
+                                    </div>
+                                    {selectedPet.breed && (
+                                        <div className="text-sm text-gray-500 ml-7 truncate">{selectedPet.breed}</div>
+                                    )}
+                                    <div className="text-sm text-gray-400 ml-7 truncate">{selectedPet.client_name}</div>
+                                </div>
+
+                                {/* Right side: last consultation + notes */}
+                                <div className="text-right flex-shrink-0 w-28">
+                                    {selectedPet.last_consultation_at && (
+                                        <div className="text-xs text-gray-500 whitespace-nowrap">
+                                            Last: {formatDate(selectedPet.last_consultation_at)}
+                                        </div>
+                                    )}
+                                    {selectedPet.pet_notes && (
+                                        <div
+                                            className="text-xs text-amber-600 italic mt-0.5 line-clamp-2 break-words"
+                                            title={selectedPet.pet_notes}
+                                        >
+                                            {selectedPet.pet_notes}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            {selectedPet.breed && (
-                                <div className="text-xs text-blue-700 ml-6">{selectedPet.breed}</div>
-                            )}
-                            <div className="text-xs text-blue-600 ml-6">{selectedPet.client_name}</div>
                         </div>
                         <input
                             type="text"
@@ -143,13 +219,19 @@ export function CheckinClient({
                             placeholder="Brought by (if not owner)"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <input
-                            type="text"
-                            value={notes}
-                            onChange={e => setNotes(e.target.value)}
-                            placeholder="Notes (optional)"
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                        <div>
+                            <label htmlFor="checkin-notes" className="block text-xs font-medium text-gray-600 mb-1">
+                                Check-In Note
+                            </label>
+                            <input
+                                type="text"
+                                id="checkin-notes"
+                                value={notes}
+                                onChange={e => setNotes(e.target.value)}
+                                placeholder="Reason for visit, symptoms, etc."
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
                         <button
                             onClick={handleCheckIn}
                             disabled={loading}
@@ -181,14 +263,14 @@ export function CheckinClient({
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs text-gray-400 font-mono w-4">{i + 1}.</span>
-                                            <SpeciesIcon species={c.species} className="w-3.5 h-3.5" />
-                                            <span className="font-medium text-gray-900">{c.pet_name}</span>
+                                            <SpeciesIcon species={c.species} className="w-4 h-4" />
+                                            <span className="font-medium text-gray-900 text-base">{c.pet_name}</span>
                                         </div>
-                                        {c.breed && <div className="ml-6 text-xs text-gray-500">{c.breed}</div>}
-                                        <div className="ml-6 text-xs text-gray-400">
+                                        {c.breed && <div className="ml-7 text-sm text-gray-500">{c.breed}</div>}
+                                        <div className="ml-7 text-sm text-gray-400">
                                             {c.client_name}{c.brought_by ? ` · brought by ${c.brought_by}` : ""}
                                         </div>
-                                        {c.notes && <div className="ml-6 text-xs text-gray-400 italic">{c.notes}</div>}
+                                        {c.notes && <div className="ml-7 text-xs text-gray-400 italic">{c.notes}</div>}
                                     </div>
                                     <span className="text-xs text-gray-400">{formatTime(c.checked_in_at)}</span>
                                 </button>
@@ -228,7 +310,7 @@ export function CheckinClient({
 
             {/* Seen */}
             {seen.length > 0 && (
-                <div className="rounded-lg bg-white shadow overflow-hidden">
+                <div className="rounded-lg bg-white shadow pb-24">
                     <div className="px-4 py-3 border-b bg-gray-50">
                         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                             Seen Today <span className="ml-1 rounded-full bg-gray-200 text-gray-600 px-2 py-0.5 text-xs">{seen.length}</span>
@@ -239,21 +321,20 @@ export function CheckinClient({
                             <div key={c.id} className="relative">
                                 <button
                                     onClick={() => setSeenMenuOpenId(seenMenuOpenId === c.id ? null : c.id)}
-                                    className={`w-full px-4 py-3 text-left flex items-center justify-between border-b last:border-0 hover:bg-gray-50 active:bg-gray-100 ${c.has_visit_today ? 'opacity-60' : ''
-                                        }`}
+                                    className={`w-full px-4 py-3 text-left flex items-center justify-between border-b last:border-0 hover:bg-gray-50 active:bg-gray-100 ${c.has_consultation_today ? 'opacity-60' : ''}`}
                                 >
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <SpeciesIcon
                                                 species={c.species}
-                                                className={`w-3.5 h-3.5 ${c.has_visit_today ? 'opacity-50' : ''}`}
+                                                className={`w-3.5 h-3.5 ${c.has_consultation_today ? 'opacity-50' : ''}`}
                                             />
-                                            <span className={`font-medium text-gray-900 ${c.has_visit_today ? 'line-through text-gray-500' : ''}`}>
+                                            <span className={`font-medium text-gray-900 ${c.has_consultation_today ? 'line-through text-gray-500' : ''}`}>
                                                 {c.pet_name}
                                             </span>
-                                            {!c.has_visit_today && (
+                                            {!c.has_consultation_today && (
                                                 <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                                                    Visit not registered
+                                                    Consultation not registered
                                                 </span>
                                             )}
                                         </div>
@@ -281,12 +362,12 @@ export function CheckinClient({
                                         >
                                             View Pet
                                         </Link>
-                                        {!c.has_visit_today && (
+                                        {!c.has_consultation_today && (
                                             <Link
-                                                href={`/pets/${c.pet_id}/visits/new?from=checkins`}
+                                                href={`/pets/${c.pet_id}/consultations/new?from=checkins`}
                                                 className="block px-4 py-2 hover:bg-gray-50 text-blue-600 font-medium border-t"
                                             >
-                                                Register Visit
+                                                Register Consultation
                                             </Link>
                                         )}
                                     </div>

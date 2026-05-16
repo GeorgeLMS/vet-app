@@ -3,9 +3,8 @@ import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { Plus, Search } from "lucide-react"
-import { signOut } from "@/auth"
-import { SubmitButton } from "@/components/SubmitButton"
-import { ArrowLeft } from "lucide-react"
+import NavButton from "@/components/NavButton"
+import NavBar from "@/components/NavBar"
 
 export const dynamic = 'force-dynamic'
 
@@ -18,16 +17,16 @@ async function getClients(search?: string) {
     const client = await pool.connect()
     try {
         let query = `
-            SELECT 
-                c.id,
-                c.name,
-                c.phone,
-                c.email,
-                c.address,
-                MAX(v.visit_date) AS last_visit
-            FROM clients c
-            LEFT JOIN pets p ON p.client_id = c.id
-            LEFT JOIN visits v ON v.pet_id = p.id
+SELECT
+    c.id,
+    c.name,
+    c.phone,
+    c.email,
+    c.address,
+    MAX(con.consultation_date) AS last_consultation
+FROM clients c
+LEFT JOIN pets p ON p.client_id = c.id
+LEFT JOIN consultations con ON con.pet_id = p.id
         `
         const params: any[] = []
 
@@ -60,37 +59,13 @@ export default async function ClientsPage(props: {
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
-                <div className="mb-6 flex items-center justify-between">
-                    {/* <h1 className="text-3xl font-bold text-gray-900">Clients</h1> */}
-                    <div className="mb-4 flex items-center gap-2">
-                        <Link href="/dashboard" className="text-blue-600 hover:text-blue-700">
-                            <ArrowLeft size={24} />
-                        </Link>
-                        <h1 className="text-xl font-bold text-gray-900">Clients</h1>
-                    </div>
-                    <div className="flex gap-2">
-                        <form
-                            action={async () => {
-                                "use server"
-                                await signOut({ redirect: false })
-                                redirect("/")
-                            }}
-                        >
-                            <button type="submit" className="flex items-center gap-1 rounded-md bg-gray-600 px-3 py-2 text-sm font-medium text-white hover:bg-gray-700">
-                                Logout
-                            </button>
-                        </form>
-                        <Link
-                            href="/clients/new"
-                            className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            <Plus size={16} />
-                            Add Client
-                        </Link>
-                    </div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Clients</h1>
+                <div className="flex items-center justify-between mb-2">
+                    <NavBar />
+                    <NavButton href="/clients/new" icon={<Plus size={18} />} label="Add client" />
                 </div>
 
-                <form className="mb-6">
+                <form className="mb-2">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
@@ -117,7 +92,7 @@ export default async function ClientsPage(props: {
                                     Email
                                 </th> */}
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Last Visit
+                                    Last Consultation
                                 </th>
                             </tr>
                         </thead>
@@ -146,8 +121,8 @@ export default async function ClientsPage(props: {
                                             {client.email || "-"}
                                         </td> */}
                                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                            {client.last_visit
-                                                ? new Date(client.last_visit).toLocaleDateString()
+                                            {client.last_consultation
+                                                ? new Date(client.last_consultation).toLocaleDateString()
                                                 : "Never"}
                                         </td>
                                     </tr>

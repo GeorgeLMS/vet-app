@@ -34,7 +34,6 @@ export async function markSeen(checkinId: number, petId: number) {
     } finally {
         client.release()
     }
-    //redirect(`/pets/${petId}/visits/new?from=checkins`)
 }
 
 export async function deleteCheckin(checkinId: number) {

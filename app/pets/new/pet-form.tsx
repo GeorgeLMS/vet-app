@@ -1,152 +1,352 @@
 "use client"
-import { useActionState } from "react"
+import { useActionState, useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
-import { createPet, type FormState } from "./actions"
+import { createPetWithClient, type FormState } from "./actions"
+import NavBar from "@/components/NavBar"
+
+type ClientSearchResult = {
+    id: number
+    name: string
+    phone: string | null
+}
 
 export default function PetForm({
     species,
-    clientId
+    clientId: initialClientId
 }: {
     species: { id: number; name: string }[]
-    clientId: string
+    clientId?: string
 }) {
-    const [state, formAction] = useActionState(createPet, {}, `/pets/new?clientId=${clientId}`)
+    const searchParams = useSearchParams()
+    const prefilledName = searchParams.get('name') || ''
+    const fromCheckins = searchParams.get('from') === 'checkins'
+
+    const [state, formAction] = useActionState(createPetWithClient, {}, '/pets/new')
+
+    // Client search state - initialize with initialClientId
+    const [clientId, setClientId] = useState<string | null>(initialClientId || null)
+    const [clientQuery, setClientQuery] = useState("")
+    const [clientResults, setClientResults] = useState<ClientSearchResult[]>([])
+    const [selectedClient, setSelectedClient] = useState<ClientSearchResult | null>(null)
+    const [showNewClient, setShowNewClient] = useState(false)
+
+    // Search clients as user types
+    useEffect(() => {
+        if (clientId || clientQuery.length < 2) {
+            setClientResults([])
+            return
+        }
+        const timer = setTimeout(async () => {
+            const res = await fetch(`/api/clients/search?q=${encodeURIComponent(clientQuery)}`)
+            const data = await res.json()
+            setClientResults(data)
+        }, 300)
+        return () => clearTimeout(timer)
+    }, [clientQuery, clientId])
+
+    const cancelHref = initialClientId
+        ? `/clients/${initialClientId}`
+        : fromCheckins
+            ? '/checkins'
+            : '/pets'
 
     return (
-        <div className="mx-auto max-w-2xl p-6">
-            <h1 className="mb-6 text-2xl font-bold text-gray-900">Add New Pet</h1>
-
-            <form action={formAction} className="space-y-6 rounded-lg bg-white p-6 shadow">
-                <input type="hidden" name="client_id" value={clientId} />
-
-                {state.errors?.general && (
-                    <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
-                        {state.errors.general}
+        <main className="min-h-screen bg-gray-100 p-6">
+            <div className="mx-auto max-w-2xl">
+                <div className="mb-2">
+                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Add New Pet</h1>
+                    <div className="flex items-center justify-between mb-2">
+                        <NavBar />
                     </div>
-                )}
-
-                <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-900">
-                        Pet Name *
-                    </label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        maxLength={100}
-                        defaultValue={state.values?.name}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {state.errors?.name && (
-                        <p className="mt-1 text-sm text-red-600">{state.errors.name}</p>
-                    )}
                 </div>
 
-                <div>
-                    <label htmlFor="species_id" className="block text-sm font-medium text-gray-900">
-                        Species *
-                    </label>
-                    <select
-                        id="species_id"
-                        name="species_id"
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        defaultValue={state.values?.species_id || ""}
-                    >
-                        <option value="" disabled>Select species</option>
-                        {species.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.name}
-                            </option>
-                        ))}
-                    </select>
-                    {state.errors?.species_id && (
-                        <p className="mt-1 text-sm text-red-600">{state.errors.species_id}</p>
-                    )}
-                </div>
+                <form action={formAction} className="space-y-6 rounded-lg bg-white p-6 shadow">
+                    {/* Only render client_id if we have one selected */}
+                    {clientId && <input type="hidden" name="client_id" value={clientId} />}
+                    {fromCheckins && <input type="hidden" name="from" value="checkins" />}
 
-                <div>
-                    <label htmlFor="breed" className="block text-sm font-medium text-gray-900">
-                        Breed
-                    </label>
-                    <input
-                        type="text"
-                        id="breed"
-                        name="breed"
-                        maxLength={20}
-                        placeholder="Labrador, Siamese, etc"
-                        defaultValue={state.values?.breed}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {state.errors?.breed && (
-                        <p className="mt-1 text-sm text-red-600">{state.errors.breed}</p>
+                    {state.errors?.general && (
+                        <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+                            {state.errors.general}
+                        </div>
                     )}
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label htmlFor="birth_date" className="block text-sm font-medium text-gray-900">
-                            Birth Date
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-900">
+                            Pet Name *
                         </label>
                         <input
-                            type="date"
-                            id="birth_date"
-                            name="birth_date"
-                            max={new Date().toISOString().split('T')[0]}
-                            defaultValue={state.values?.birth_date}
+                            type="text"
+                            id="name"
+                            name="name"
+                            maxLength={100}
+                            defaultValue={state.values?.name || prefilledName}
                             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        {state.errors?.birth_date && (
-                            <p className="mt-1 text-sm text-red-600">{state.errors.birth_date}</p>
+                        {state.errors?.name && (
+                            <p className="mt-1 text-sm text-red-600">{state.errors.name}</p>
                         )}
                     </div>
+
+                    {/* CLIENT SECTION */}
+                    <div className="border-t pt-6">
+                        <h3 className="text-base font-semibold text-gray-900 mb-3">Owner Information *</h3>
+
+                        {/* Show selected client if we have one */}
+                        {clientId && selectedClient && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Selected Owner
+                                </label>
+                                <div className="rounded-md bg-blue-50 px-3 py-2 flex items-center justify-between">
+                                    <div>
+                                        <div className="font-medium text-blue-900">{selectedClient.name}</div>
+                                        {selectedClient.phone && (
+                                            <div className="text-xs text-blue-700">{selectedClient.phone}</div>
+                                        )}
+                                    </div>
+                                    {!initialClientId && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setSelectedClient(null)
+                                                setClientId(null)
+                                            }}
+                                            className="text-sm text-blue-600 hover:text-blue-700"
+                                        >
+                                            Change
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Show search only if NO client selected */}
+                        {!clientId && !showNewClient && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-900 mb-1">
+                                    Search existing client
+                                </label>
+                                <input
+                                    type="text"
+                                    value={clientQuery}
+                                    onChange={e => setClientQuery(e.target.value)}
+                                    placeholder="Search by name or phone..."
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                {clientResults.length > 0 && (
+                                    <div className="mt-1 rounded-md border border-gray-200 bg-white shadow-sm max-h-48 overflow-auto">
+                                        {clientResults.map(c => (
+                                            <button
+                                                type="button"
+                                                key={c.id}
+                                                onClick={() => {
+                                                    setSelectedClient(c)
+                                                    setClientId(String(c.id))
+                                                    setClientQuery("")
+                                                    setClientResults([])
+                                                }}
+                                                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 border-b last:border-0"
+                                            >
+                                                <div className="font-medium text-gray-900">{c.name}</div>
+                                                {c.phone && <div className="text-xs text-gray-500">{c.phone}</div>}
+                                            </button>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowNewClient(true)
+                                                setClientResults([])
+                                            }}
+                                            className="w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 text-blue-600 font-medium flex items-center gap-2 border-t"
+                                        >
+                                            <span className="text-lg leading-none">+</span>
+                                            Create new client "{clientQuery}"
+                                        </button>
+                                    </div>
+                                )}
+
+                                {clientQuery.length >= 2 && clientResults.length === 0 && (
+                                    <div className="mt-1 rounded-md border border-gray-200 bg-white shadow-sm">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewClient(true)}
+                                            className="w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 text-blue-600 font-medium flex items-center gap-2"
+                                        >
+                                            <span className="text-lg leading-none">+</span>
+                                            Create new client "{clientQuery}"
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {showNewClient && (
+                            <div className="space-y-3 rounded-md bg-gray-50 p-4">
+                                <p className="text-sm font-medium text-gray-700">New Client Details</p>
+                                <div>
+                                    <label htmlFor="new_client_name" className="block text-sm font-medium text-gray-900">
+                                        Client Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="new_client_name"
+                                        name="new_client_name"
+                                        maxLength={100}
+                                        defaultValue={state.values?.new_client_name || clientQuery}
+                                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    {state.errors?.new_client_name && (
+                                        <p className="mt-1 text-sm text-red-600">{state.errors.new_client_name}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label htmlFor="new_client_phone" className="block text-sm font-medium text-gray-900">
+                                        Phone
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        id="new_client_phone"
+                                        name="new_client_phone"
+                                        maxLength={20}
+                                        defaultValue={state.values?.new_client_phone}
+                                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    {state.errors?.new_client_phone && (
+                                        <p className="mt-1 text-sm text-red-600">{state.errors.new_client_phone}</p>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowNewClient(false)}
+                                    className="text-sm text-gray-600 hover:text-gray-700"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                        {state.errors?.client && (
+                            <p className="mt-1 text-sm text-red-600">{state.errors.client}</p>
+                        )}
+                    </div>
+
+                    {/* Show selected client if initialClientId was passed */}
+                    {initialClientId && clientId && (
+                        <div className="border-t pt-6">
+                            <h3 className="text-base font-semibold text-gray-900 mb-3">Owner</h3>
+                            <div className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600">
+                                Client already selected
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="border-t pt-6">
+                        <label htmlFor="species_id" className="block text-sm font-medium text-gray-900">
+                            Species *
+                        </label>
+                        <select
+                            id="species_id"
+                            name="species_id"
+                            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            defaultValue={state.values?.species_id || ""}
+                        >
+                            <option value="" disabled>Select species</option>
+                            {species.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                    {s.name}
+                                </option>
+                            ))}
+                        </select>
+                        {state.errors?.species_id && (
+                            <p className="mt-1 text-sm text-red-600">{state.errors.species_id}</p>
+                        )}
+                    </div>
+
                     <div>
-                        <label htmlFor="weight" className="block text-sm font-medium text-gray-900">
-                            Weight (kg)
+                        <label htmlFor="breed" className="block text-sm font-medium text-gray-900">
+                            Breed
                         </label>
                         <input
-                            type="number"
-                            step="0.01"
-                            max="999.99"
-                            min="0"
-                            id="weight"
-                            name="weight"
-                            defaultValue={state.values?.weight}
+                            type="text"
+                            id="breed"
+                            name="breed"
+                            maxLength={20}
+                            placeholder="Labrador, Siamese, etc"
+                            defaultValue={state.values?.breed}
                             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        {state.errors?.weight && (
-                            <p className="mt-1 text-sm text-red-600">{state.errors.weight}</p>
+                        {state.errors?.breed && (
+                            <p className="mt-1 text-sm text-red-600">{state.errors.breed}</p>
                         )}
                     </div>
-                </div>
 
-                <div>
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-900">
-                        Notes
-                    </label>
-                    <textarea
-                        id="notes"
-                        name="notes"
-                        rows={3}
-                        maxLength={5000}
-                        defaultValue={state.values?.notes}
-                        className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {state.errors?.notes && (
-                        <p className="mt-1 text-sm text-red-600">{state.errors.notes}</p>
-                    )}
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="birth_date" className="block text-sm font-medium text-gray-900">
+                                Birth Date
+                            </label>
+                            <input
+                                type="date"
+                                id="birth_date"
+                                name="birth_date"
+                                max={new Date().toISOString().split('T')[0]}
+                                defaultValue={state.values?.birth_date}
+                                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            {state.errors?.birth_date && (
+                                <p className="mt-1 text-sm text-red-600">{state.errors.birth_date}</p>
+                            )}
+                        </div>
+                        <div>
+                            <label htmlFor="weight" className="block text-sm font-medium text-gray-900">
+                                Weight (kg)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                max="999.99"
+                                min="0"
+                                id="weight"
+                                name="weight"
+                                defaultValue={state.values?.weight}
+                                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            {state.errors?.weight && (
+                                <p className="mt-1 text-sm text-red-600">{state.errors.weight}</p>
+                            )}
+                        </div>
+                    </div>
 
-                <div className="flex gap-3">
-                    <SubmitButton>Save Pet</SubmitButton>
-                    <Link
-                        href={`/clients/${clientId}`}
-                        className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
-                    >
-                        Cancel
-                    </Link>
-                </div>
-            </form>
-        </div>
+                    <div>
+                        <label htmlFor="notes" className="block text-sm font-medium text-gray-900">
+                            Notes
+                        </label>
+                        <textarea
+                            id="notes"
+                            name="notes"
+                            rows={3}
+                            maxLength={5000}
+                            defaultValue={state.values?.notes}
+                            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {state.errors?.notes && (
+                            <p className="mt-1 text-sm text-red-600">{state.errors.notes}</p>
+                        )}
+                    </div>
+
+                    <div className="flex gap-3">
+                        <SubmitButton>Save Pet</SubmitButton>
+                        <Link
+                            href={cancelHref}
+                            className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
+                        >
+                            Cancel
+                        </Link>
+                    </div>
+                </form>
+            </div>
+        </main>
     )
 }

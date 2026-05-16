@@ -2,11 +2,11 @@
 
 import { useActionState } from "react"
 import { useSearchParams } from "next/navigation" // add this
-import { createVisit, type FormState } from "./actions"
+import { createConsultation, type FormState } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
 
-export function VisitForm({
+export function ConsultationForm({
     petId,
     procedures,
 }: {
@@ -16,12 +16,12 @@ export function VisitForm({
     const searchParams = useSearchParams() // add this
     const from = searchParams.get('from') // add this
 
-    const boundAction = createVisit.bind(null, petId)
+    const boundAction = createConsultation.bind(null, petId)
     const [state, action] = useActionState<FormState, FormData>(
         boundAction,
         {
             data: {
-                visit_date: new Date().toISOString().split("T")[0],
+                consultation_date: new Date().toISOString().split("T")[0],
                 procedure: "",
                 notes: "",
             }
@@ -39,18 +39,18 @@ export function VisitForm({
             )}
 
             <div>
-                <label htmlFor="visit_date" className="block text-sm font-medium text-gray-700">
-                    Visit Date *
+                <label htmlFor="consultation_date" className="block text-sm font-medium text-gray-700">
+                    Consultation Date *
                 </label>
                 <input
                     type="date"
-                    id="visit_date"
-                    name="visit_date"
-                    defaultValue={state.data?.visit_date}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.visit_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                    id="consultation_date"
+                    name="consultation_date"
+                    defaultValue={state.data?.consultation_date}
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.consultation_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
                 />
-                {state?.errors?.visit_date && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.visit_date}</p>
+                {state?.errors?.consultation_date && (
+                    <p className="mt-1 text-sm text-red-600">{state.errors.consultation_date}</p>
                 )}
             </div>
 
@@ -86,7 +86,7 @@ export function VisitForm({
                     rows={4}
                     defaultValue={state.data?.notes}
                     className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.notes ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
-                    placeholder="Any additional notes about this visit..."
+                    placeholder="Any additional notes about this consultation..."
                 />
                 {state?.errors?.notes && (
                     <p className="mt-1 text-sm text-red-600">{state.errors.notes}</p>
@@ -94,7 +94,7 @@ export function VisitForm({
             </div>
 
             <div className="flex gap-3 pt-4">
-                <SubmitButton>Save Visit</SubmitButton>
+                <SubmitButton>Save Consultation</SubmitButton>
                 <Link
                     href={`/pets/${petId}${from ? `?from=${from}` : ''}`} // update this too
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"

@@ -103,7 +103,7 @@ export default function ClientForm() {
             </div>
 
             <div className="flex gap-3">
-                <SubmitButton>Save Client</SubmitButton>
+                <SubmitButton>Save</SubmitButton>
                 <Link
                     href="/pets"
                     className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
