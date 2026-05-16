@@ -46,14 +46,7 @@ export default async function EditClientPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
-                    {/* <Link
-                        href={`/clients/${id}`}
-                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                    >
-                        <ArrowLeft size={16} />
-                        Back to Clients
-                    </Link> */}
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Edit Client</h1>
+                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Editar Cliente</h1>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>

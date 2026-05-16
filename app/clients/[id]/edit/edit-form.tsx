@@ -40,7 +40,7 @@ export default function EditForm({
 
             <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name *
+                    Nombre *
                 </label>
                 <input
                     type="text"
@@ -71,7 +71,7 @@ export default function EditForm({
 
             <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone
+                    Teléfono
                 </label>
                 <input
                     type="tel"
@@ -87,7 +87,7 @@ export default function EditForm({
 
             <div>
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address
+                    Dirección
                 </label>
                 <textarea
                     id="address"
@@ -103,7 +103,7 @@ export default function EditForm({
 
             <div>
                 <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                    Notes
+                    Notas
                 </label>
                 <textarea
                     id="notes"
@@ -118,12 +118,12 @@ export default function EditForm({
             </div>
 
             <div className="flex gap-3 pt-4">
-                <SubmitButton>Save Changes</SubmitButton>
+                <SubmitButton>Guardar Cambios</SubmitButton>
                 <Link
                     href={`/clients/${client.id}`}
                     className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
                 >
-                    Cancel
+                    Cancelar
                 </Link>
             </div>
         </form>

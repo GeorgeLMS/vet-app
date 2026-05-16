@@ -7,7 +7,7 @@ import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import { Pencil } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
-import { ClientPetTable } from "./client-pet-table" // relative import
+import { ClientPetTable } from "./client-pet-table"
 
 import { notFound } from "next/navigation"
 export const dynamic = 'force-dynamic'
@@ -72,13 +72,6 @@ export default async function ClientPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-2">
-                    {/* <Link
-                        href="/clients"
-                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                    >
-                        <ArrowLeft size={16} />
-                        Back to Clients
-                    </Link> */}
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">{client.name}</h1>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
@@ -88,14 +81,8 @@ export default async function ClientPage({
                 <div className="grid gap-2">
                     <div className="rounded-lg bg-white p-4 shadow">
                         <div className="mb-2 flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">Client Details</h2>
-                            {/* <Link
-                                href={`/clients/${id}/edit`}
-                                className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700"
-                            >
-                                Edit Client
-                            </Link> */}
-                            <NavButton href={`/clients/${id}/edit`} icon={<Pencil size={18} />} label="Edit client" />
+                            <h2 className="text-xl font-semibold text-gray-900">Detalles del Cliente</h2>
+                            <NavButton href={`/clients/${id}/edit`} icon={<Pencil size={18} />} label="Editar cliente" />
                         </div>
                         <dl className="space-y-2">
                             <div>
@@ -103,11 +90,11 @@ export default async function ClientPage({
                                 <dd className="text-sm text-gray-900">{client.email || "-"}</dd>
                             </div>
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Phone</dt>
+                                <dt className="text-sm font-medium text-gray-500">Teléfono</dt>
                                 <dd className="text-sm text-gray-900">{client.phone || "-"}</dd>
                             </div>
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Address</dt>
+                                <dt className="text-sm font-medium text-gray-500">Dirección</dt>
                                 <dd className="text-sm text-gray-900">{client.address || "-"}</dd>
                             </div>
                         </dl>
@@ -116,16 +103,14 @@ export default async function ClientPage({
                     <div className="rounded-lg bg-white shadow">
                         <div className="border-b px-6 py-4 flex justify-between items-center">
                             <h2 className="text-xl font-semibold text-gray-900">
-                                Pets ({pets.length})
+                                Mascotas ({pets.length})
                             </h2>
-                            <NavButton href={`/pets/new?clientId=${id}`} icon={<Plus size={18} />} label="Add Pet" />
+                            <NavButton href={`/pets/new?clientId=${id}`} icon={<Plus size={18} />} label="Agregar Mascota" />
                         </div>
                         <ClientPetTable pets={pets} />
                     </div>
-
-
                 </div>
-            </div >
-        </main >
+            </div>
+        </main>
     )
 }

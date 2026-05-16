@@ -59,10 +59,10 @@ export default async function ClientsPage(props: {
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Clients</h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Clientes</h1>
                 <div className="flex items-center justify-between mb-2">
                     <NavBar />
-                    <NavButton href="/clients/new" icon={<Plus size={18} />} label="Add client" />
+                    <NavButton href="/clients/new" icon={<Plus size={18} />} label="Agregar cliente" />
                 </div>
 
                 <form className="mb-2">
@@ -72,7 +72,7 @@ export default async function ClientsPage(props: {
                             type="text"
                             name="search"
                             defaultValue={searchParams.search}
-                            placeholder="Search by name, phone, or email..."
+                            placeholder="Buscar por nombre, teléfono o email..."
                             className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -83,24 +83,21 @@ export default async function ClientsPage(props: {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Name
+                                    Nombre
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Phone
+                                    Teléfono
                                 </th>
-                                {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Email
-                                </th> */}
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Last Consultation
+                                    Última Consulta
                                 </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
                             {clients.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                                        No clients found. Add one to get started.
+                                    <td colSpan={3} className="px-6 py-8 text-center text-gray-500">
+                                        No se encontraron clientes. Agrega uno para comenzar.
                                     </td>
                                 </tr>
                             ) : (
@@ -117,13 +114,10 @@ export default async function ClientsPage(props: {
                                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                             {client.phone || "-"}
                                         </td>
-                                        {/* <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                            {client.email || "-"}
-                                        </td> */}
                                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                                             {client.last_consultation
-                                                ? new Date(client.last_consultation).toLocaleDateString()
-                                                : "Never"}
+                                                ? new Date(client.last_consultation).toLocaleDateString('es-MX')
+                                                : "Nunca"}
                                         </td>
                                     </tr>
                                 ))

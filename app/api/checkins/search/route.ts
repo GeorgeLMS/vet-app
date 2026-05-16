@@ -26,6 +26,8 @@ export async function GET(req: NextRequest) {
                 p.notes as pet_notes,
                 c.name as client_name,
                 c.phone,
+                pc.name_es as color, 
+    pc.hex as color_hex,
                 s.name as species,
                 (
                     SELECT MAX(created_at) 
@@ -35,6 +37,7 @@ export async function GET(req: NextRequest) {
             FROM pets p
             JOIN clients c ON c.id = p.client_id
             JOIN species s ON s.id = p.species_id
+            LEFT JOIN pet_colors pc ON pc.id = p.color_id 
             WHERE p.name ILIKE $1 OR c.name ILIKE $1
             ORDER BY p.name
             LIMIT 8`,

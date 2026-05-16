@@ -7,7 +7,7 @@ import { notFound } from "next/navigation"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import { Pencil, Plus } from "lucide-react"
-
+import { SpeciesIcon } from "@/components/SpeciesIcon"
 
 export const dynamic = 'force-dynamic'
 
@@ -27,11 +27,14 @@ async function getPet(id: string) {
         p.birth_date,
         p.weight,
         p.notes,
-        s.name as species,
+        s.name_es as species,
+        pc.name_es as color,
+        pc.hex as color_hex,
         c.id as client_id,
         c.name as client_name
       FROM pets p
       LEFT JOIN species s ON p.species_id = s.id
+      LEFT JOIN pet_colors pc ON pc.id = p.color_id
       LEFT JOIN clients c ON p.client_id = c.id
       WHERE p.id = $1`,
             [id]
@@ -73,7 +76,7 @@ export default async function PetPage({
     if (!session) redirect("/")
 
     const { id } = await params
-    const { from } = await searchParams // add this
+    const { from } = await searchParams
 
     const pet = await getPet(id)
     if (!pet) notFound()
@@ -81,7 +84,7 @@ export default async function PetPage({
     const consultations = await getPetConsultations(id)
 
     const backHref = from === 'checkins' ? '/checkins' : '/clients'
-    const backLabel = from === 'checkins' ? 'Back to Check-ins' : 'Back to Clients'
+    const backLabel = from === 'checkins' ? 'Volver a Ingresos' : 'Volver a Clientes'
 
     return (
         <main className="min-h-screen bg-gray-100 p-6">
@@ -94,23 +97,16 @@ export default async function PetPage({
                 </div>
 
                 <div className="grid gap-4">
-                    {/* Pet Details - single card */}
+                    {/* Detalles de la Mascota */}
                     <div className="rounded-lg bg-white p-6 shadow">
                         <div className="mb-4 flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">Pet Details</h2>
-                            {/* <Link
-                                href={`/pets/${pet.id}/edit`}
-                                className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm hover:bg-blue-700"
-                            >
-                                Edit
-                            </Link> */}
-                            <NavButton href={`/pets/${pet.id}/edit`} icon={<Pencil size={18} />} label="Edit pet" />
-
+                            <h2 className="text-xl font-semibold text-gray-900">Detalles de la Mascota</h2>
+                            <NavButton href={`/pets/${pet.id}/edit`} icon={<Pencil size={18} />} label="Editar mascota" />
                         </div>
 
                         <dl className="space-y-2">
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Owner</dt>
+                                <dt className="text-sm font-medium text-gray-500">Dueño</dt>
                                 <dd className="text-sm">
                                     <Link
                                         href={`/clients/${pet.client_id}`}
@@ -122,42 +118,59 @@ export default async function PetPage({
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Breed</dt>
-                                <dd className="text-sm text-gray-900">
-                                    {pet.species} {pet.breed && `- ${pet.breed}`}
+                                <dt className="text-sm font-medium text-gray-500">Raza</dt>
+                                <dd className="text-sm text-gray-900 flex items-center gap-2">
+                                    <SpeciesIcon species={pet.species} className="w-4 h-4" />
+                                    <span>{pet.breed && ` ${pet.breed}`}</span>
+                                    {pet.color && (
+                                        <>
+                                            <span className="text-gray-400">·</span>
+                                            {pet.color_hex && (
+                                                <div
+                                                    className="w-3 h-3 rounded border border-gray-300 flex-shrink-0"
+                                                    style={{ backgroundColor: pet.color_hex }}
+                                                    title={pet.color}
+                                                />
+                                            )}
+                                            <span>{pet.color}</span>
+                                        </>
+                                    )}
                                 </dd>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <dt className="text-sm font-medium text-gray-500">Birth Date</dt>
+                                    <dt className="text-sm font-medium text-gray-500">Fecha de Nacimiento</dt>
                                     <dd className="text-sm text-gray-900">
-                                        {pet.birth_date ? new Date(pet.birth_date).toLocaleDateString() : "-"}
+                                        {pet.birth_date ? new Date(pet.birth_date).toLocaleDateString('es-MX', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            timeZone: 'America/Tijuana'
+                                        }) : "-"}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-sm font-medium text-gray-500">Weight</dt>
+                                    <dt className="text-sm font-medium text-gray-500">Peso</dt>
                                     <dd className="text-sm text-gray-900">{pet.weight ? `${pet.weight} kg` : "-"}</dd>
                                 </div>
                             </div>
 
                             <div>
-                                <dt className="text-sm font-medium text-gray-500">Notes</dt>
+                                <dt className="text-sm font-medium text-gray-500">Notas</dt>
                                 <dd className="text-sm text-gray-900">{pet.notes || "-"}</dd>
                             </div>
                         </dl>
                     </div>
 
-                    {/* consultations Section */}
+                    {/* Sección de Consultas */}
                     <div className="space-y-3">
                         {/* Header Card */}
                         <div className="rounded-lg bg-white p-4 shadow flex justify-between items-center">
                             <h2 className="text-xl font-semibold text-gray-900">
-                                Consultations ({consultations.length})
+                                Consultas ({consultations.length})
                             </h2>
-
-                            <NavButton href={`/pets/${id}/consultations/new${from ? `?from=${from}` : ''}`} icon={<Plus size={18} />} label="Add Pet" />
-
+                            <NavButton href={`/pets/${id}/consultations/new${from ? `?from=${from}` : ''}`} icon={<Plus size={18} />} label="Agregar Consulta" />
                         </div>
 
                         {/* Empty State */}
@@ -168,10 +181,10 @@ export default async function PetPage({
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                 </div>
-                                <p className="text-gray-500">No consultations recorded for this pet.</p>
+                                <p className="text-gray-500">No hay consultas registradas para esta mascota.</p>
                             </div>
                         ) : (
-                            /* consultation Cards */
+                            /* Consultation Cards */
                             <>
                                 {consultations.map((consultation) => (
                                     <div
@@ -180,10 +193,11 @@ export default async function PetPage({
                                     >
                                         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-2">
                                             <span className="text-xs font-medium text-blue-600">
-                                                {new Date(consultation.consultation_date).toLocaleDateString('en-US', {
+                                                {new Date(consultation.consultation_date).toLocaleDateString('es-MX', {
                                                     month: 'short',
                                                     day: 'numeric',
-                                                    year: 'numeric'
+                                                    year: 'numeric',
+                                                    timeZone: 'America/Tijuana'
                                                 })}
                                             </span>
                                             <h3 className="text-base font-medium text-gray-900">

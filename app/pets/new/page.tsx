@@ -19,16 +19,46 @@ async function getSpecies() {
     }
 }
 
+async function getPetColors() {
+    const client = await pool.connect()
+    try {
+        const { rows } = await client.query('SELECT id, name_es, hex FROM pet_colors ORDER BY display_order, name_es')
+        return rows
+    } finally {
+        client.release()
+    }
+}
+
+async function getClient(id: string) {
+    const client = await pool.connect()
+    try {
+        const { rows } = await client.query(
+            `SELECT id, name, phone FROM clients WHERE id = $1`,
+            [id]
+        )
+        return rows[0]
+    } finally {
+        client.release()
+    }
+}
+
 export default async function NewPetPage({
     searchParams
 }: {
-    searchParams: Promise<{ clientId: string }>
+    searchParams: Promise<{ clientId?: string, name?: string, from?: string }>
 }) {
     const session = await auth()
     if (!session) redirect("/")
 
-    const { clientId } = await searchParams
+    const { clientId, name, from } = await searchParams
     const species = await getSpecies()
+    const colors = await getPetColors()
+    const client = clientId ? await getClient(clientId) : null
 
-    return <PetForm species={species} clientId={clientId} />
+    return <PetForm
+        species={species}
+        colors={colors}
+        clientId={clientId}
+        initialClient={client}
+    />
 }

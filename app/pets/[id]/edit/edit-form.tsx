@@ -1,25 +1,29 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { updatePet, type FormState } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
+import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
 
 export function EditPetForm({
     petId,
     pet,
     species,
+    colors,
 }: {
     petId: string
     pet: {
         name: string
         species_id: number
+        color_id: number | null
         breed: string | null
         birth_date: string | null
         weight: number | null
         notes: string | null
     }
-    species: { id: number; name: string }[]
+    species: { id: number; name_es: string }[]
+    colors: PetColor[]
 }) {
     const boundAction = updatePet.bind(null, petId)
     const [state, action] = useActionState<FormState, FormData>(
@@ -28,6 +32,7 @@ export function EditPetForm({
             data: {
                 name: pet.name,
                 species_id: pet.species_id.toString(),
+                color_id: pet.color_id?.toString() ?? "",
                 breed: pet.breed ?? "",
                 birth_date: pet.birth_date ? new Date(pet.birth_date).toISOString().split("T")[0] : "",
                 weight: pet.weight?.toString() ?? "",
@@ -35,6 +40,8 @@ export function EditPetForm({
             }
         }
     )
+
+    const [colorId, setColorId] = useState(state.data?.color_id || pet.color_id?.toString() || "")
 
     return (
         <form action={action} className="space-y-4">
@@ -45,7 +52,7 @@ export function EditPetForm({
             )}
 
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name *</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nombre *</label>
                 <input
                     type="text"
                     id="name"
@@ -56,24 +63,33 @@ export function EditPetForm({
                 {state?.errors?.name && <p className="mt-1 text-sm text-red-600">{state.errors.name}</p>}
             </div>
 
-            <div>
-                <label htmlFor="species_id" className="block text-sm font-medium text-gray-700">Species *</label>
-                <select
-                    id="species_id"
-                    name="species_id"
-                    defaultValue={state.data?.species_id}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.species_id ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
-                >
-                    <option value="">Select species</option>
-                    {species.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                </select>
-                {state?.errors?.species_id && <p className="mt-1 text-sm text-red-600">{state.errors.species_id}</p>}
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label htmlFor="species_id" className="block text-sm font-medium text-gray-700">Especie *</label>
+                    <select
+                        id="species_id"
+                        name="species_id"
+                        defaultValue={state.data?.species_id}
+                        className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.species_id ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                    >
+                        <option value="">Seleccionar especie</option>
+                        {species.map((s) => (
+                            <option key={s.id} value={s.id}>{s.name_es}</option>
+                        ))}
+                    </select>
+                    {state?.errors?.species_id && <p className="mt-1 text-sm text-red-600">{state.errors.species_id}</p>}
+                </div>
+
+                <PetColorSelect
+                    colors={colors}
+                    value={colorId}
+                    onChange={setColorId}
+                    error={state.errors?.color_id}
+                />
             </div>
 
             <div>
-                <label htmlFor="breed" className="block text-sm font-medium text-gray-700">Breed</label>
+                <label htmlFor="breed" className="block text-sm font-medium text-gray-700">Raza</label>
                 <input
                     type="text"
                     id="breed"
@@ -86,7 +102,7 @@ export function EditPetForm({
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700">Birth Date</label>
+                    <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
                     <input
                         type="date"
                         id="birth_date"
@@ -97,7 +113,7 @@ export function EditPetForm({
                     {state?.errors?.birth_date && <p className="mt-1 text-sm text-red-600">{state.errors.birth_date}</p>}
                 </div>
                 <div>
-                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700">Peso (kg)</label>
                     <input
                         type="number"
                         step="0.01"
@@ -111,7 +127,7 @@ export function EditPetForm({
             </div>
 
             <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notes</label>
+                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">Notas</label>
                 <textarea
                     id="notes"
                     name="notes"
@@ -123,12 +139,12 @@ export function EditPetForm({
             </div>
 
             <div className="flex gap-3 pt-4">
-                <SubmitButton>Save Changes</SubmitButton>
+                <SubmitButton>Guardar Cambios</SubmitButton>
                 <Link
                     href={`/pets/${petId}`}
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
                 >
-                    Cancel
+                    Cancelar
                 </Link>
             </div>
         </form>

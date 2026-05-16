@@ -15,7 +15,7 @@ export function ClientPetTable({ pets }: { pets: Pet[] }) {
     if (pets.length === 0) {
         return (
             <div className="px-6 py-8 text-center text-gray-500">
-                No pets registered for this client.
+                No hay mascotas registradas para este cliente.
             </div>
         )
     }
@@ -25,10 +25,10 @@ export function ClientPetTable({ pets }: { pets: Pet[] }) {
             <thead className="bg-gray-50">
                 <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                        Pet
+                        Mascota
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                        Last Consultation
+                        Última Consulta
                     </th>
                 </tr>
             </thead>
@@ -46,7 +46,7 @@ export function ClientPetTable({ pets }: { pets: Pet[] }) {
                                         {pet.name}
                                     </div>
                                     <p className="text-xs text-gray-500">
-                                        {pet.breed || pet.species || 'Unknown'}
+                                        {pet.breed || pet.species || 'Desconocido'}
                                     </p>
                                 </div>
                             </Link>
@@ -57,12 +57,12 @@ export function ClientPetTable({ pets }: { pets: Pet[] }) {
                                 className="block whitespace-nowrap px-4 py-3 text-sm text-gray-500"
                             >
                                 {pet.last_consultation
-                                    ? new Date(pet.last_consultation).toLocaleDateString('en-US', {
+                                    ? new Date(pet.last_consultation).toLocaleDateString('es-MX', {
                                         month: 'short',
                                         day: 'numeric',
                                         year: 'numeric',
                                     })
-                                    : "Never"}
+                                    : "Nunca"}
                             </Link>
                         </td>
                     </tr>

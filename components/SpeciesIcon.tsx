@@ -1,4 +1,4 @@
-import { Cat, Dog, HelpCircle } from "lucide-react"
+import { Cat, Dog, PawPrint } from "lucide-react"
 
 type SpeciesIconProps = {
     species: string | null
@@ -10,18 +10,21 @@ export function SpeciesIcon({ species, className, size = 20 }: SpeciesIconProps)
     const iconClass = className || "w-5 h-5"
 
     if (!species) {
-        return <HelpCircle className={`${iconClass} text-gray-400`} size={size} />
+        return <PawPrint className={`${iconClass} text-gray-400`} size={size} />
     }
 
-    const normalized = species.toLowerCase()
+    const normalized = species.toLowerCase().trim()
 
-    if (normalized === 'cat') {
-        return <Cat className={`${iconClass} text-blue-500`} size={size} />
+    // Cat / Gato
+    if (normalized === 'cat' || normalized === 'gato') {
+        return <Cat className={`${iconClass} text-purple-600`} size={size} />
     }
 
-    if (normalized === 'dog') {
+    // Dog / Perro  
+    if (normalized === 'dog' || normalized === 'perro') {
         return <Dog className={`${iconClass} text-amber-600`} size={size} />
     }
 
-    return <HelpCircle className={`${iconClass} text-gray-400`} size={size} />
+    // Default fallback for any other species
+    return <PawPrint className={`${iconClass} text-gray-500`} size={size} />
 }

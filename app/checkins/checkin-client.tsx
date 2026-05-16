@@ -14,6 +14,8 @@ type Checkin = {
     notes: string | null
     pet_name: string
     breed: string | null
+    color: string | null
+    color_hex: string | null
     client_name: string
     phone: string | null
     species: string
@@ -24,11 +26,28 @@ type SearchResult = {
     pet_id: number
     pet_name: string
     breed: string | null
+    color: string | null
+    color_hex: string | null
     client_name: string
     phone: string | null
     species: string
     last_consultation_at: string | null
     pet_notes: string | null
+}
+
+function ColorDisplay({ name, hex, className = "" }: { name: string | null; hex: string | null; className?: string }) {
+    if (!name) return null
+    return (
+        <div className={`flex items-center gap-1.5 ${className}`}>
+            {hex && (
+                <div
+                    className="w-3 h-3 rounded border border-gray-300 flex-shrink-0"
+                    style={{ backgroundColor: hex }}
+                />
+            )}
+            <span>{name}</span>
+        </div>
+    )
 }
 
 export function CheckinClient({
@@ -84,34 +103,39 @@ export function CheckinClient({
     }
 
     function formatTime(ts: string) {
-        return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        return new Date(ts).toLocaleTimeString('es-MX', {
+            hour: "2-digit",
+            minute: "2-digit",
+            timeZone: 'America/Tijuana'
+        })
     }
 
     function formatDate(ts: string) {
-        return new Date(ts).toLocaleDateString('en-US', {
+        return new Date(ts).toLocaleDateString('es-MX', {
             year: 'numeric',
             month: 'short',
-            day: 'numeric'
+            day: 'numeric',
+            timeZone: 'America/Tijuana'
         })
     }
 
     function SpeciesIcon({ species, className = "w-4 h-4" }: { species: string, className?: string }) {
-        if (species === "Dog") return <Dog className={`${className} text-amber-600`} />
-        if (species === "Cat") return <Cat className={`${className} text-purple-600`} />
+        if (species === "Dog" || species === "Perro") return <Dog className={`${className} text-amber-600`} />
+        if (species === "Cat" || species === "Gato") return <Cat className={`${className} text-purple-600`} />
         return <PawPrint className={`${className} text-gray-500`} />
     }
 
     return (
         <div className="space-y-4">
-            {/* Search / Check-in */}
+            {/* Buscar / Registrar Ingreso */}
             <div className="rounded-lg bg-white p-4 shadow">
-                <h2 className="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Check In</h2>
+                <h2 className="mb-3 text-sm font-semibold text-gray-700 uppercase tracking-wide">Registrar Ingreso</h2>
                 <div className="relative">
                     <input
                         type="text"
                         value={query}
                         onChange={e => { setQuery(e.target.value); setSelectedPet(null) }}
-                        placeholder="Search pet or client name..."
+                        placeholder="Buscar mascota o cliente..."
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {results.length > 0 && !selectedPet && (
@@ -123,21 +147,20 @@ export function CheckinClient({
                                     className="w-full px-3 py-2.5 text-left hover:bg-gray-50 border-b last:border-0"
                                 >
                                     <div className="flex items-start justify-between gap-3">
-                                        {/* Left side: pet info */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 font-medium text-gray-900 text-base">
                                                 <SpeciesIcon species={r.species} className="w-5 h-5 flex-shrink-0" />
                                                 <span className="truncate">{r.pet_name}</span>
                                             </div>
                                             {r.breed && <div className="text-sm text-gray-500 ml-7 truncate">{r.breed}</div>}
+                                            <ColorDisplay name={r.color} hex={r.color_hex} className="text-sm text-gray-500 ml-7" />
                                             <div className="text-sm text-gray-400 ml-7 truncate">{r.client_name}</div>
                                         </div>
 
-                                        {/* Right side: last consultation + notes */}
                                         <div className="text-right flex-shrink-0 w-28">
                                             {r.last_consultation_at && (
                                                 <div className="text-xs text-gray-500 whitespace-nowrap">
-                                                    Last: {formatDate(r.last_consultation_at)}
+                                                    Última: {formatDate(r.last_consultation_at)}
                                                 </div>
                                             )}
                                             {r.pet_notes && (
@@ -159,13 +182,12 @@ export function CheckinClient({
                                     className="flex items-center gap-2 w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 border-t border-gray-200 text-blue-600 font-medium"
                                 >
                                     <span className="text-lg leading-none">+</span>
-                                    Create "{query}" as new pet
+                                    Crear "{query}" como nueva mascota
                                 </Link>
                             )}
                         </div>
                     )}
 
-                    {/* Also handle case where 0 results but query >= 2 */}
                     {results.length === 0 && query.length >= 2 && !selectedPet && (
                         <div className="absolute z-10 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
                             <Link
@@ -173,7 +195,7 @@ export function CheckinClient({
                                 className="flex items-center gap-2 w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 text-blue-600 font-medium"
                             >
                                 <span className="text-lg leading-none">+</span>
-                                Create "{query}" as new pet
+                                Crear "{query}" como nueva mascota
                             </Link>
                         </div>
                     )}
@@ -182,7 +204,6 @@ export function CheckinClient({
                     <div className="mt-3 space-y-2">
                         <div className="rounded-md bg-blue-50 px-3 py-2.5 text-sm">
                             <div className="flex items-start justify-between gap-3">
-                                {/* Left side: pet info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 font-medium text-gray-900 text-base">
                                         <SpeciesIcon species={selectedPet.species} className="w-5 h-5 flex-shrink-0" />
@@ -191,14 +212,14 @@ export function CheckinClient({
                                     {selectedPet.breed && (
                                         <div className="text-sm text-gray-500 ml-7 truncate">{selectedPet.breed}</div>
                                     )}
+                                    <ColorDisplay name={selectedPet.color} hex={selectedPet.color_hex} className="text-sm text-gray-500 ml-7" />
                                     <div className="text-sm text-gray-400 ml-7 truncate">{selectedPet.client_name}</div>
                                 </div>
 
-                                {/* Right side: last consultation + notes */}
                                 <div className="text-right flex-shrink-0 w-28">
                                     {selectedPet.last_consultation_at && (
                                         <div className="text-xs text-gray-500 whitespace-nowrap">
-                                            Last: {formatDate(selectedPet.last_consultation_at)}
+                                            Última: {formatDate(selectedPet.last_consultation_at)}
                                         </div>
                                     )}
                                     {selectedPet.pet_notes && (
@@ -216,19 +237,19 @@ export function CheckinClient({
                             type="text"
                             value={broughtBy}
                             onChange={e => setBroughtBy(e.target.value)}
-                            placeholder="Brought by (if not owner)"
+                            placeholder="Traído por (si no es el dueño)"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <div>
                             <label htmlFor="checkin-notes" className="block text-xs font-medium text-gray-600 mb-1">
-                                Check-In Note
+                                Nota de Ingreso
                             </label>
                             <input
                                 type="text"
                                 id="checkin-notes"
                                 value={notes}
                                 onChange={e => setNotes(e.target.value)}
-                                placeholder="Reason for visit, symptoms, etc."
+                                placeholder="Motivo de visita, síntomas, etc."
                                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
@@ -237,21 +258,21 @@ export function CheckinClient({
                             disabled={loading}
                             className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            {loading ? "Checking in..." : "Confirm Check-in"}
+                            {loading ? "Registrando..." : "Confirmar Ingreso"}
                         </button>
                     </div>
                 )}
             </div>
 
-            {/* Waiting */}
+            {/* En Espera */}
             <div className="rounded-lg bg-white shadow">
                 <div className="px-4 py-3 border-b bg-gray-50">
                     <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                        Waiting <span className="ml-1 rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs">{waiting.length}</span>
+                        En Espera <span className="ml-1 rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-xs">{waiting.length}</span>
                     </h2>
                 </div>
                 {waiting.length === 0 ? (
-                    <p className="px-4 py-6 text-sm text-center text-gray-400">No one waiting</p>
+                    <p className="px-4 py-6 text-sm text-center text-gray-400">Nadie esperando</p>
                 ) : (
                     <div ref={menuRef}>
                         {waiting.map((c, i) => (
@@ -267,8 +288,9 @@ export function CheckinClient({
                                             <span className="font-medium text-gray-900 text-base">{c.pet_name}</span>
                                         </div>
                                         {c.breed && <div className="ml-7 text-sm text-gray-500">{c.breed}</div>}
+                                        <ColorDisplay name={c.color} hex={c.color_hex} className="ml-7 text-sm text-gray-500" />
                                         <div className="ml-7 text-sm text-gray-400">
-                                            {c.client_name}{c.brought_by ? ` · brought by ${c.brought_by}` : ""}
+                                            {c.client_name}{c.brought_by ? ` · traído por ${c.brought_by}` : ""}
                                         </div>
                                         {c.notes && <div className="ml-7 text-xs text-gray-400 italic">{c.notes}</div>}
                                     </div>
@@ -281,24 +303,24 @@ export function CheckinClient({
                                             onClick={async () => { setMenuOpenId(null); await markSeen(c.id, c.pet_id) }}
                                             className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium border-b"
                                         >
-                                            ✓ Mark as Seen
+                                            ✓ Marcar como Visto
                                         </button>
                                         <Link
                                             href={`/pets/${c.pet_id}?from=checkins`}
                                             className="block px-4 py-2 hover:bg-gray-50 text-gray-700 border-b"
                                         >
-                                            View Pet
+                                            Ver Mascota
                                         </Link>
                                         <button
                                             onClick={async () => {
                                                 setMenuOpenId(null)
-                                                if (confirm(`Delete check-in for ${c.pet_name}? This cannot be undone.`)) {
+                                                if (confirm(`¿Eliminar registro de ${c.pet_name}? No se puede deshacer.`)) {
                                                     await deleteCheckin(c.id)
                                                 }
                                             }}
                                             className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600"
                                         >
-                                            Delete
+                                            Eliminar
                                         </button>
                                     </div>
                                 )}
@@ -308,12 +330,12 @@ export function CheckinClient({
                 )}
             </div>
 
-            {/* Seen */}
+            {/* Vistos Hoy */}
             {seen.length > 0 && (
                 <div className="rounded-lg bg-white shadow pb-24">
                     <div className="px-4 py-3 border-b bg-gray-50">
                         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                            Seen Today <span className="ml-1 rounded-full bg-gray-200 text-gray-600 px-2 py-0.5 text-xs">{seen.length}</span>
+                            Vistos Hoy <span className="ml-1 rounded-full bg-gray-200 text-gray-600 px-2 py-0.5 text-xs">{seen.length}</span>
                         </h2>
                     </div>
                     <div ref={seenMenuRef}>
@@ -334,17 +356,18 @@ export function CheckinClient({
                                             </span>
                                             {!c.has_consultation_today && (
                                                 <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                                                    Consultation not registered
+                                                    Consulta no registrada
                                                 </span>
                                             )}
                                         </div>
                                         {c.breed && <div className="ml-6 text-xs text-gray-500">{c.breed}</div>}
+                                        <ColorDisplay name={c.color} hex={c.color_hex} className="ml-6 text-xs text-gray-500" />
                                         <div className="text-xs text-gray-400 ml-6">
-                                            {c.client_name}{c.brought_by ? ` · brought by ${c.brought_by}` : ""}
+                                            {c.client_name}{c.brought_by ? ` · traído por ${c.brought_by}` : ""}
                                         </div>
                                         {c.notes && (
                                             <div className="ml-6 text-xs text-gray-500 italic">
-                                                Note: {c.notes}
+                                                Nota: {c.notes}
                                             </div>
                                         )}
                                     </div>
@@ -360,14 +383,14 @@ export function CheckinClient({
                                             href={`/pets/${c.pet_id}?from=checkins`}
                                             className="block px-4 py-2 hover:bg-gray-50 text-gray-700"
                                         >
-                                            View Pet
+                                            Ver Mascota
                                         </Link>
                                         {!c.has_consultation_today && (
                                             <Link
                                                 href={`/pets/${c.pet_id}/consultations/new?from=checkins`}
                                                 className="block px-4 py-2 hover:bg-gray-50 text-blue-600 font-medium border-t"
                                             >
-                                                Register Consultation
+                                                Registrar Consulta
                                             </Link>
                                         )}
                                     </div>

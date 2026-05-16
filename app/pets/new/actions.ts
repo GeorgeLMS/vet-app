@@ -14,6 +14,7 @@ export type FormState = {
         general?: string
         name?: string
         species_id?: string
+        color_id?: string
         breed?: string
         birth_date?: string
         weight?: string
@@ -25,6 +26,7 @@ export type FormState = {
     values?: {
         name?: string
         species_id?: string
+        color_id?: string
         breed?: string
         birth_date?: string
         weight?: string
@@ -43,6 +45,7 @@ export async function createPetWithClient(
 
     const name = formData.get("name") as string
     const species_id = formData.get("species_id") as string
+    const color_id = formData.get("color_id") as string // added
     const breed = formData.get("breed") as string
     const birth_date = formData.get("birth_date") as string
     const weight = formData.get("weight") as string
@@ -53,7 +56,7 @@ export async function createPetWithClient(
     const from = formData.get("from") as string
 
     const errors: FormState["errors"] = {}
-    const values = { name, species_id, breed, birth_date, weight, notes, new_client_name, new_client_phone }
+    const values = { name, species_id, color_id, breed, birth_date, weight, notes, new_client_name, new_client_phone }
 
     // Validate pet fields
     if (!name || name.trim().length === 0) errors.name = "Pet name is required"
@@ -99,7 +102,7 @@ export async function createPetWithClient(
         return { errors, values }
     }
 
-    let finalClientId: number // declare it here so it's accessible after try/catch
+    let finalClientId: number
 
     const client = await pool.connect()
     try {
@@ -120,12 +123,13 @@ export async function createPetWithClient(
 
         // Create pet
         await client.query(
-            `INSERT INTO pets (client_id, name, species_id, breed, birth_date, weight, notes)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            `INSERT INTO pets (client_id, name, species_id, color_id, breed, birth_date, weight, notes)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
             [
                 finalClientId,
                 name.trim(),
                 parseInt(species_id),
+                color_id ? parseInt(color_id) : null, // added
                 breed || null,
                 birthDateValue,
                 weightNum,

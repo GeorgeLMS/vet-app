@@ -13,6 +13,7 @@ export type FormState = {
     errors?: {
         name?: string
         species_id?: string
+        color_id?: string
         birth_date?: string
         weight?: string
         breed?: string
@@ -22,6 +23,7 @@ export type FormState = {
     data?: {
         name?: string
         species_id?: string
+        color_id?: string
         breed?: string
         birth_date?: string
         weight?: string
@@ -36,12 +38,13 @@ export async function updatePet(
 ): Promise<FormState> {
     const name = formData.get("name")?.toString().trim() ?? ""
     const speciesId = formData.get("species_id")?.toString() ?? ""
+    const colorId = formData.get("color_id")?.toString() ?? ""
     const breed = formData.get("breed")?.toString().trim() ?? ""
     const birthDate = formData.get("birth_date")?.toString() ?? ""
     const weight = formData.get("weight")?.toString().trim() ?? ""
     const notes = formData.get("notes")?.toString().trim() ?? ""
 
-    const data = { name, species_id: speciesId, breed, birth_date: birthDate, weight, notes }
+    const data = { name, species_id: speciesId, color_id: colorId, breed, birth_date: birthDate, weight, notes }
     const errors: FormState["errors"] = {}
 
     if (!name) {
@@ -91,11 +94,12 @@ export async function updatePet(
     try {
         await client.query(
             `UPDATE pets 
-             SET name = $1, species_id = $2, breed = $3, birth_date = $4, weight = $5, notes = $6
-             WHERE id = $7`,
+             SET name = $1, species_id = $2, color_id = $3, breed = $4, birth_date = $5, weight = $6, notes = $7
+             WHERE id = $8`,
             [
                 name,
                 parseInt(speciesId),
+                colorId ? parseInt(colorId) : null,
                 breed || null,
                 birthDate || null,
                 weight ? parseFloat(weight) : null,

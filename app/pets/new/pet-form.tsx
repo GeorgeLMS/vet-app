@@ -3,6 +3,7 @@ import { useActionState, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
+import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
 import { createPetWithClient, type FormState } from "./actions"
 import NavBar from "@/components/NavBar"
 
@@ -12,12 +13,22 @@ type ClientSearchResult = {
     phone: string | null
 }
 
+type InitialClient = {
+    id: number
+    name: string
+    phone: string | null
+} | null
+
 export default function PetForm({
     species,
-    clientId: initialClientId
+    colors,
+    clientId: initialClientId,
+    initialClient
 }: {
     species: { id: number; name: string }[]
+    colors: PetColor[]
     clientId?: string
+    initialClient?: InitialClient
 }) {
     const searchParams = useSearchParams()
     const prefilledName = searchParams.get('name') || ''
@@ -25,11 +36,16 @@ export default function PetForm({
 
     const [state, formAction] = useActionState(createPetWithClient, {}, '/pets/new')
 
-    // Client search state - initialize with initialClientId
+    // Form state
+    const [colorId, setColorId] = useState(state.values?.color_id || "")
+
+    // Client search state - initialize with initialClientId and initialClient
     const [clientId, setClientId] = useState<string | null>(initialClientId || null)
     const [clientQuery, setClientQuery] = useState("")
     const [clientResults, setClientResults] = useState<ClientSearchResult[]>([])
-    const [selectedClient, setSelectedClient] = useState<ClientSearchResult | null>(null)
+    const [selectedClient, setSelectedClient] = useState<ClientSearchResult | null>(
+        initialClient ? { id: initialClient.id, name: initialClient.name, phone: initialClient.phone } : null
+    )
     const [showNewClient, setShowNewClient] = useState(false)
 
     // Search clients as user types
@@ -56,7 +72,7 @@ export default function PetForm({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Add New Pet</h1>
+                    <h1 className="mt-2 text-3xl font-bold text-gray-900">Agregar Mascota Nueva</h1>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>
@@ -75,7 +91,7 @@ export default function PetForm({
 
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-900">
-                            Pet Name *
+                            Nombre de la Mascota *
                         </label>
                         <input
                             type="text"
@@ -92,13 +108,13 @@ export default function PetForm({
 
                     {/* CLIENT SECTION */}
                     <div className="border-t pt-6">
-                        <h3 className="text-base font-semibold text-gray-900 mb-3">Owner Information *</h3>
+                        <h3 className="text-base font-semibold text-gray-900 mb-3">Información del Dueño *</h3>
 
                         {/* Show selected client if we have one */}
                         {clientId && selectedClient && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Selected Owner
+                                    Dueño
                                 </label>
                                 <div className="rounded-md bg-blue-50 px-3 py-2 flex items-center justify-between">
                                     <div>
@@ -116,7 +132,7 @@ export default function PetForm({
                                             }}
                                             className="text-sm text-blue-600 hover:text-blue-700"
                                         >
-                                            Change
+                                            Cambiar
                                         </button>
                                     )}
                                 </div>
@@ -127,13 +143,13 @@ export default function PetForm({
                         {!clientId && !showNewClient && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-900 mb-1">
-                                    Search existing client
+                                    Buscar cliente existente
                                 </label>
                                 <input
                                     type="text"
                                     value={clientQuery}
                                     onChange={e => setClientQuery(e.target.value)}
-                                    placeholder="Search by name or phone..."
+                                    placeholder="Buscar por nombre o teléfono..."
                                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
                                 {clientResults.length > 0 && (
@@ -163,7 +179,7 @@ export default function PetForm({
                                             className="w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 text-blue-600 font-medium flex items-center gap-2 border-t"
                                         >
                                             <span className="text-lg leading-none">+</span>
-                                            Create new client "{clientQuery}"
+                                            Crear nuevo cliente "{clientQuery}"
                                         </button>
                                     </div>
                                 )}
@@ -176,7 +192,7 @@ export default function PetForm({
                                             className="w-full px-3 py-2.5 text-left text-sm hover:bg-blue-50 text-blue-600 font-medium flex items-center gap-2"
                                         >
                                             <span className="text-lg leading-none">+</span>
-                                            Create new client "{clientQuery}"
+                                            Crear nuevo cliente "{clientQuery}"
                                         </button>
                                     </div>
                                 )}
@@ -185,10 +201,10 @@ export default function PetForm({
 
                         {showNewClient && (
                             <div className="space-y-3 rounded-md bg-gray-50 p-4">
-                                <p className="text-sm font-medium text-gray-700">New Client Details</p>
+                                <p className="text-sm font-medium text-gray-700">Datos del Nuevo Cliente</p>
                                 <div>
                                     <label htmlFor="new_client_name" className="block text-sm font-medium text-gray-900">
-                                        Client Name *
+                                        Nombre del Cliente *
                                     </label>
                                     <input
                                         type="text"
@@ -204,7 +220,7 @@ export default function PetForm({
                                 </div>
                                 <div>
                                     <label htmlFor="new_client_phone" className="block text-sm font-medium text-gray-900">
-                                        Phone
+                                        Teléfono
                                     </label>
                                     <input
                                         type="tel"
@@ -223,7 +239,7 @@ export default function PetForm({
                                     onClick={() => setShowNewClient(false)}
                                     className="text-sm text-gray-600 hover:text-gray-700"
                                 >
-                                    Cancel
+                                    Cancelar
                                 </button>
                             </div>
                         )}
@@ -232,48 +248,47 @@ export default function PetForm({
                         )}
                     </div>
 
-                    {/* Show selected client if initialClientId was passed */}
-                    {initialClientId && clientId && (
-                        <div className="border-t pt-6">
-                            <h3 className="text-base font-semibold text-gray-900 mb-3">Owner</h3>
-                            <div className="rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600">
-                                Client already selected
-                            </div>
+                    <div className="border-t pt-6 grid grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="species_id" className="block text-sm font-medium text-gray-900">
+                                Especie *
+                            </label>
+                            <select
+                                id="species_id"
+                                name="species_id"
+                                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                defaultValue={state.values?.species_id || ""}
+                            >
+                                <option value="" disabled>Seleccionar especie</option>
+                                {species.map((s) => (
+                                    <option key={s.id} value={s.id}>
+                                        {s.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {state.errors?.species_id && (
+                                <p className="mt-1 text-sm text-red-600">{state.errors.species_id}</p>
+                            )}
                         </div>
-                    )}
 
-                    <div className="border-t pt-6">
-                        <label htmlFor="species_id" className="block text-sm font-medium text-gray-900">
-                            Species *
-                        </label>
-                        <select
-                            id="species_id"
-                            name="species_id"
-                            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            defaultValue={state.values?.species_id || ""}
-                        >
-                            <option value="" disabled>Select species</option>
-                            {species.map((s) => (
-                                <option key={s.id} value={s.id}>
-                                    {s.name}
-                                </option>
-                            ))}
-                        </select>
-                        {state.errors?.species_id && (
-                            <p className="mt-1 text-sm text-red-600">{state.errors.species_id}</p>
-                        )}
+                        <PetColorSelect
+                            colors={colors}
+                            value={colorId}
+                            onChange={setColorId}
+                            error={state.errors?.color_id}
+                        />
                     </div>
 
                     <div>
                         <label htmlFor="breed" className="block text-sm font-medium text-gray-900">
-                            Breed
+                            Raza
                         </label>
                         <input
                             type="text"
                             id="breed"
                             name="breed"
                             maxLength={20}
-                            placeholder="Labrador, Siamese, etc"
+                            placeholder="Labrador, Siamés, etc"
                             defaultValue={state.values?.breed}
                             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -285,7 +300,7 @@ export default function PetForm({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="birth_date" className="block text-sm font-medium text-gray-900">
-                                Birth Date
+                                Fecha de Nacimiento
                             </label>
                             <input
                                 type="date"
@@ -301,7 +316,7 @@ export default function PetForm({
                         </div>
                         <div>
                             <label htmlFor="weight" className="block text-sm font-medium text-gray-900">
-                                Weight (kg)
+                                Peso (kg)
                             </label>
                             <input
                                 type="number"
@@ -321,7 +336,7 @@ export default function PetForm({
 
                     <div>
                         <label htmlFor="notes" className="block text-sm font-medium text-gray-900">
-                            Notes
+                            Notas
                         </label>
                         <textarea
                             id="notes"
@@ -337,12 +352,12 @@ export default function PetForm({
                     </div>
 
                     <div className="flex gap-3">
-                        <SubmitButton>Save Pet</SubmitButton>
+                        <SubmitButton>Guardar Mascota</SubmitButton>
                         <Link
                             href={cancelHref}
                             className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
                         >
-                            Cancel
+                            Cancelar
                         </Link>
                     </div>
                 </form>

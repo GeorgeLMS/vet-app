@@ -13,6 +13,7 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
 })
+
 async function getPets(search?: string) {
     const client = await pool.connect()
     try {
@@ -22,7 +23,7 @@ async function getPets(search?: string) {
         p.name,
         p.breed,
         p.notes,
-        s.name as species,
+        s.name_es as species,
         c.id as client_id,
         c.name as client_name,
         MAX(con.consultation_date) as last_consultation_date
@@ -34,11 +35,11 @@ async function getPets(search?: string) {
         const params: any[] = []
 
         if (search) {
-            query += ` WHERE p.name ILIKE $1 OR c.name ILIKE $1 OR p.breed ILIKE $1 OR s.name ILIKE $1`
+            query += ` WHERE p.name ILIKE $1 OR c.name ILIKE $1 OR p.breed ILIKE $1 OR s.name_es ILIKE $1`
             params.push(`%${search}%`)
         }
 
-        query += ` GROUP BY p.id, p.name, p.breed, p.notes, s.name, c.id, c.name`
+        query += ` GROUP BY p.id, p.name, p.breed, p.notes, s.name_es, c.id, c.name`
         query += ` ORDER BY p.id DESC`
 
         const { rows } = await client.query(query, params)
@@ -47,8 +48,6 @@ async function getPets(search?: string) {
         client.release()
     }
 }
-
-
 
 export default async function PetsPage(props: {
     searchParams: Promise<{ search?: string; page?: string }>
@@ -62,29 +61,11 @@ export default async function PetsPage(props: {
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
-                {/* <div className="mb-6 flex items-center justify-between">
-                    <div className="mb-4 flex items-center gap-2">
-
-                        <h1 className="text-2xl font-bold text-gray-900">Pets</h1>
-                        <div className="flex items-center justify-between mb-2">
-                            <NavBar />
-                        </div>
-                    </div>
-                    <div className="flex gap-2">
-                        <Link
-                            href="/clients/new"
-                            className="flex items-center gap-1 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            Add Client
-                        </Link>
-                    </div>
-                </div> */}
-
                 <div className="mb-2">
-                    <h1 className="mt-2 text-2xl font-bold text-gray-900">Pets</h1>
+                    <h1 className="mt-2 text-2xl font-bold text-gray-900">Mascotas</h1>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
-                        <NavButton href="/pets/new" icon={<Plus size={18} />} label="Add client" />
+                        <NavButton href="/pets/new" icon={<Plus size={18} />} label="Agregar Mascota" />
                     </div>
                 </div>
                 <form className="mb-6">
@@ -94,7 +75,7 @@ export default async function PetsPage(props: {
                             type="text"
                             name="search"
                             defaultValue={searchParams.search}
-                            placeholder="Search pets or clients..."
+                            placeholder="Buscar mascotas o clientes..."
                             className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
@@ -105,13 +86,13 @@ export default async function PetsPage(props: {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Pet
+                                    Mascota
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Notes
+                                    Notas
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Client
+                                    Cliente
                                 </th>
                             </tr>
                         </thead>
@@ -119,7 +100,7 @@ export default async function PetsPage(props: {
                             {pets.length === 0 ? (
                                 <tr>
                                     <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                                        No pets found. Add one to get started.
+                                        No se encontraron mascotas. Agrega una para empezar.
                                     </td>
                                 </tr>
                             ) : (
@@ -136,7 +117,7 @@ export default async function PetsPage(props: {
                                                         {pet.name}
                                                     </Link>
                                                     <p className="text-xs text-gray-500">
-                                                        {pet.breed || pet.species || 'Unknown'}
+                                                        {pet.breed || pet.species || 'Desconocido'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -156,8 +137,13 @@ export default async function PetsPage(props: {
                                             </Link>
                                             <p className="text-xs text-gray-400 mt-0.5">
                                                 {pet.last_consultation_date
-                                                    ? `Last: ${new Date(pet.last_consultation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-                                                    : 'No consultations'
+                                                    ? `Última: ${new Date(pet.last_consultation_date).toLocaleDateString('es-MX', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                        timeZone: 'America/Tijuana'
+                                                    })}`
+                                                    : 'Sin consultas'
                                                 }
                                             </p>
                                         </td>
