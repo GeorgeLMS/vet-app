@@ -18,7 +18,8 @@ async function getPet(id: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id, name, breed, birth_date, weight, notes, species_id, color_id, client_id FROM pets WHERE id = $1`,
+            `SELECT id, name, breed, birth_date, weight, notes, species_id, color_id, client_id, gender
+             FROM pets WHERE id = $1`,
             [id]
         )
         return rows[0]

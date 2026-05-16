@@ -18,6 +18,7 @@ export type FormState = {
         weight?: string
         breed?: string
         notes?: string
+        gender?: string // <-- add this
         general?: string
     }
     data?: {
@@ -28,6 +29,7 @@ export type FormState = {
         birth_date?: string
         weight?: string
         notes?: string
+        gender?: string // <-- add this
     }
 }
 
@@ -43,8 +45,9 @@ export async function updatePet(
     const birthDate = formData.get("birth_date")?.toString() ?? ""
     const weight = formData.get("weight")?.toString().trim() ?? ""
     const notes = formData.get("notes")?.toString().trim() ?? ""
+    const gender = formData.get("gender")?.toString() ?? "" // <-- add this
 
-    const data = { name, species_id: speciesId, color_id: colorId, breed, birth_date: birthDate, weight, notes }
+    const data = { name, species_id: speciesId, color_id: colorId, breed, birth_date: birthDate, weight, notes, gender }
     const errors: FormState["errors"] = {}
 
     if (!name) {
@@ -86,6 +89,11 @@ export async function updatePet(
         errors.notes = "Notes must be 500 characters or less"
     }
 
+    // Optional: validate gender
+    if (gender && gender !== "Macho" && gender !== "Hembra") {
+        errors.gender = "Invalid gender"
+    }
+
     if (Object.keys(errors).length > 0) {
         return { errors, data }
     }
@@ -94,8 +102,8 @@ export async function updatePet(
     try {
         await client.query(
             `UPDATE pets 
-             SET name = $1, species_id = $2, color_id = $3, breed = $4, birth_date = $5, weight = $6, notes = $7
-             WHERE id = $8`,
+             SET name = $1, species_id = $2, color_id = $3, breed = $4, birth_date = $5, weight = $6, notes = $7, gender = $8
+             WHERE id = $9`,
             [
                 name,
                 parseInt(speciesId),
@@ -104,6 +112,7 @@ export async function updatePet(
                 birthDate || null,
                 weight ? parseFloat(weight) : null,
                 notes || null,
+                gender || null, // <-- add this
                 petId,
             ]
         )

@@ -5,6 +5,7 @@ import { updatePet, type FormState } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
 import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
+import PetGenderRadio from "@/components/PetGenderRadio"
 
 export function EditPetForm({
     petId,
@@ -21,6 +22,7 @@ export function EditPetForm({
         birth_date: string | null
         weight: number | null
         notes: string | null
+        gender: string | null  // <-- add this
     }
     species: { id: number; name_es: string }[]
     colors: PetColor[]
@@ -37,11 +39,13 @@ export function EditPetForm({
                 birth_date: pet.birth_date ? new Date(pet.birth_date).toISOString().split("T")[0] : "",
                 weight: pet.weight?.toString() ?? "",
                 notes: pet.notes ?? "",
+                gender: pet.gender ?? "", // <-- add this
             }
         }
     )
 
     const [colorId, setColorId] = useState(state.data?.color_id || pet.color_id?.toString() || "")
+    const [gender, setGender] = useState(state.data?.gender || pet.gender || "") // <-- add this
 
     return (
         <form action={action} className="space-y-4">
@@ -87,6 +91,12 @@ export function EditPetForm({
                     error={state.errors?.color_id}
                 />
             </div>
+
+            <PetGenderRadio
+                value={gender}
+                onChange={setGender}
+                error={state.errors?.gender}
+            />
 
             <div>
                 <label htmlFor="breed" className="block text-sm font-medium text-gray-700">Raza</label>

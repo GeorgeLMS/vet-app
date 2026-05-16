@@ -22,6 +22,7 @@ export type FormState = {
         client?: string
         new_client_name?: string
         new_client_phone?: string
+        gender?: string // <-- add this
     }
     values?: {
         name?: string
@@ -33,6 +34,7 @@ export type FormState = {
         notes?: string
         new_client_name?: string
         new_client_phone?: string
+        gender?: string // <-- add this
     }
 }
 
@@ -45,7 +47,7 @@ export async function createPetWithClient(
 
     const name = formData.get("name") as string
     const species_id = formData.get("species_id") as string
-    const color_id = formData.get("color_id") as string // added
+    const color_id = formData.get("color_id") as string
     const breed = formData.get("breed") as string
     const birth_date = formData.get("birth_date") as string
     const weight = formData.get("weight") as string
@@ -54,15 +56,21 @@ export async function createPetWithClient(
     const new_client_name = formData.get("new_client_name") as string
     const new_client_phone = formData.get("new_client_phone") as string
     const from = formData.get("from") as string
+    const gender = formData.get("gender") as string // <-- add this
 
     const errors: FormState["errors"] = {}
-    const values = { name, species_id, color_id, breed, birth_date, weight, notes, new_client_name, new_client_phone }
+    const values = { name, species_id, color_id, breed, birth_date, weight, notes, new_client_name, new_client_phone, gender }
 
     // Validate pet fields
     if (!name || name.trim().length === 0) errors.name = "Pet name is required"
     if (name && name.length > 100) errors.name = "Pet name cannot exceed 100 characters"
     if (!species_id) errors.species_id = "Species is required"
     if (breed && breed.length > 20) errors.breed = "Breed cannot exceed 20 characters"
+
+    // Optional gender validation
+    if (gender && gender !== "Macho" && gender !== "Hembra") {
+        errors.gender = "Invalid gender"
+    }
 
     let birthDateValue: Date | null = null
     if (birth_date) {
@@ -123,17 +131,18 @@ export async function createPetWithClient(
 
         // Create pet
         await client.query(
-            `INSERT INTO pets (client_id, name, species_id, color_id, breed, birth_date, weight, notes)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            `INSERT INTO pets (client_id, name, species_id, color_id, breed, birth_date, weight, notes, gender)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
             [
                 finalClientId,
                 name.trim(),
                 parseInt(species_id),
-                color_id ? parseInt(color_id) : null, // added
+                color_id ? parseInt(color_id) : null,
                 breed || null,
                 birthDateValue,
                 weightNum,
-                notes || null
+                notes || null,
+                gender || null // <-- add this
             ]
         )
 

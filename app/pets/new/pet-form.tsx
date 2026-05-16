@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
 import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
+import PetGenderRadio from "@/components/PetGenderRadio"
 import { createPetWithClient, type FormState } from "./actions"
 import NavBar from "@/components/NavBar"
 
@@ -38,6 +39,7 @@ export default function PetForm({
 
     // Form state
     const [colorId, setColorId] = useState(state.values?.color_id || "")
+    const [gender, setGender] = useState(state.values?.gender || "") // <-- add this
 
     // Client search state - initialize with initialClientId and initialClient
     const [clientId, setClientId] = useState<string | null>(initialClientId || null)
@@ -278,6 +280,12 @@ export default function PetForm({
                             error={state.errors?.color_id}
                         />
                     </div>
+
+                    <PetGenderRadio
+                        value={gender}
+                        onChange={setGender}
+                        error={state.errors?.gender}
+                    />
 
                     <div>
                         <label htmlFor="breed" className="block text-sm font-medium text-gray-900">
