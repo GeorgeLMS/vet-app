@@ -8,12 +8,16 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
 })
+pool.on('connect', (client) => {
+    client.query(`SET timezone = 'America/Tijuana'`)
+})
 
 export async function checkIn(petId: number, broughtBy: string, notes: string) {
     const client = await pool.connect()
     try {
         await client.query(
-            `INSERT INTO checkins (pet_id, brought_by, notes) VALUES ($1, $2, $3)`,
+            `INSERT INTO checkins (pet_id, brought_by, notes, checked_in_at) 
+             VALUES ($1, $2, $3, CURRENT_DATE)`,
             [petId, broughtBy || null, notes || null]
         )
     } finally {

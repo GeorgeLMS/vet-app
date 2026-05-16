@@ -25,6 +25,7 @@ async function getPets() {
                 s.name_es as species,
                 c.id as client_id,
                 c.name as client_name,
+                p.gender,
                 MAX(con.consultation_date) as last_consultation_date
             FROM pets p
             LEFT JOIN species s ON p.species_id = s.id

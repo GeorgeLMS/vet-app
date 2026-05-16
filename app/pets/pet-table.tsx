@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { Search } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
+import { GenderIcon } from "@/components/GenderIcon" // <-- add this
 
 type Pet = {
     id: string
@@ -11,6 +12,7 @@ type Pet = {
     breed: string | null
     notes: string | null
     species: string | null
+    gender: string | null // <-- add this
     client_id: string
     client_name: string
     last_consultation_date: string | null
@@ -27,7 +29,9 @@ export default function PetTable({ pets }: { pets: Pet[] }) {
             pet.name.toLowerCase().includes(query) ||
             pet.client_name.toLowerCase().includes(query) ||
             pet.breed?.toLowerCase().includes(query) ||
-            pet.species?.toLowerCase().includes(query)
+            pet.species?.toLowerCase().includes(query) ||
+            pet.gender?.toLowerCase().includes(query) // <-- add this
+
         )
     }, [search, pets])
 
@@ -74,7 +78,7 @@ export default function PetTable({ pets }: { pets: Pet[] }) {
                                 <tr key={pet.id} className="hover:bg-gray-50">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
-                                            <SpeciesIcon species={pet.species} />
+                                            <SpeciesIcon species={pet.species} gender={pet.gender} showGenderIcon={true} />
                                             <div>
                                                 <Link
                                                     href={`/pets/${pet.id}`}

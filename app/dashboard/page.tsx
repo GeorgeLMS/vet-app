@@ -6,10 +6,12 @@ import { Users, PawPrint, ClipboardList, CheckCircle, Clock, AlertCircle } from 
 import { signOut } from "@/auth"
 
 export const dynamic = 'force-dynamic'
-
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
+})
+pool.on('connect', (client) => {
+    client.query(`SET timezone = 'America/Tijuana'`)
 })
 
 async function getDashboardData() {
@@ -26,13 +28,11 @@ async function getDashboardData() {
                     EXISTS(
                         SELECT 1 FROM consultations con
                         WHERE con.pet_id = c.pet_id
-                        AND (con.consultation_date AT TIME ZONE 'America/Tijuana')::date =
-                            (CURRENT_TIMESTAMP AT TIME ZONE 'America/Tijuana')::date
+                        AND con.consultation_date::date = CURRENT_DATE
                     ) as has_consultation
                 FROM checkins c
                 JOIN pets p ON c.pet_id = p.id
-                WHERE (c.checked_in_at AT TIME ZONE 'America/Tijuana')::date =
-                      (CURRENT_TIMESTAMP AT TIME ZONE 'America/Tijuana')::date
+                WHERE c.checked_in_at::date = CURRENT_DATE
             )
             SELECT
                 COUNT(*) FILTER (WHERE seen_at IS NULL) as waiting_count,
@@ -59,7 +59,6 @@ async function getDashboardData() {
         client.release()
     }
 }
-
 function formatTime(dateStr: string) {
     return new Date(dateStr).toLocaleTimeString('es-MX', {
         hour: '2-digit',

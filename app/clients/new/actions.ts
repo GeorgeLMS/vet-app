@@ -8,6 +8,10 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
 })
 
+pool.on('connect', (client) => {
+    client.query(`SET timezone = 'America/Tijuana'`)
+})
+
 type FormState = {
     errors?: {
         name?: string
@@ -39,64 +43,76 @@ export async function createClient(prevState: FormState, formData: FormData): Pr
 
     const errors: FormState["errors"] = {}
 
-    // Name: required
     if (!name) {
-        errors.name = "Client name is required"
+        errors.name = "El nombre del cliente es requerido"
     } else if (name.length > 200) {
-        errors.name = "Name must be 200 characters or less"
+        errors.name = "El nombre debe tener 200 caracteres o menos"
     }
 
-    // Email: optional, but validate format if provided
     if (email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(email)) {
-            errors.email = "Enter a valid email address"
+            errors.email = "Ingresa un correo electrónico válido"
         } else if (email.length > 200) {
-            errors.email = "Email must be 200 characters or less"
+            errors.email = "El correo debe tener 200 caracteres o menos"
         }
     }
 
-    // Phone: optional, basic sanity check if provided. No max length.
     if (phone) {
         const phoneDigits = phone.replace(/\D/g, "")
         if (phoneDigits.length > 0 && phoneDigits.length < 7) {
-            errors.phone = "Phone number seems too short"
+            errors.phone = "El número de teléfono parece muy corto"
         }
     }
 
-    // Address: optional, max 200
     if (address && address.length > 200) {
-        errors.address = "Address must be 200 characters or less"
+        errors.address = "La dirección debe tener 200 caracteres o menos"
     }
 
-    // Notes: optional, max 200
     if (notes && notes.length > 200) {
-        errors.notes = "Notes must be 200 characters or less"
+        errors.notes = "Las notas deben tener 200 caracteres o menos"
     }
 
     if (Object.keys(errors).length > 0) {
         return {
             errors,
-            data: { name, phone, email, address, notes } // return what user typed
+            data: { name, phone, email, address, notes }
         }
     }
 
+    let newClientId: number
     const db = await pool.connect()
     try {
-        await db.query(
-            `INSERT INTO clients (name, phone, email, address, notes) 
-       VALUES ($1, $2, $3, $4, $5)`,
+        const { rows } = await db.query(
+            `INSERT INTO clients (name, phone, email, address, notes)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING id`,
             [name, phone || null, email || null, address || null, notes || null]
         )
+        newClientId = rows[0].id
     } catch (e: any) {
-        console.error("Create client error:", e) // This logs to your terminal
+        // Check if it's the redirect error first
+        if (e?.digest?.startsWith('NEXT_REDIRECT')) {
+            throw e // Re-throw so Next.js can handle it
+        }
+
+        console.error("Create client error:", e)
 
         if (e.code === "23505") {
-            return { errors: { email: "A client with this email already exists" } }
+            return {
+                errors: { email: "Ya existe un cliente con este correo" },
+                data: { name, phone, email, address, notes }
+            }
+        }
+
+        return {
+            errors: { general: "Ocurrió un error al guardar el cliente" },
+            data: { name, phone, email, address, notes }
         }
     } finally {
         db.release()
     }
 
-    redirect("/pets")
+    // Redirect OUTSIDE try/catch so it doesn't get caught
+    redirect(`/clients/${newClientId}`)
 }

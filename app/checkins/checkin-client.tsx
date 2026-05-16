@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react"
 import { checkIn, markSeen, deleteCheckin } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
-import { Dog, Cat, PawPrint, MoreVertical } from "lucide-react"
+import { MoreVertical } from "lucide-react"
+import { SpeciesIcon } from "@/components/SpeciesIcon" // <-- use the shared one
 
 type Checkin = {
     id: number
@@ -18,7 +19,8 @@ type Checkin = {
     color_hex: string | null
     client_name: string
     phone: string | null
-    species: string
+    species: string | null
+    gender: string | null // <-- add this
     has_consultation_today: boolean
 }
 
@@ -30,7 +32,8 @@ type SearchResult = {
     color_hex: string | null
     client_name: string
     phone: string | null
-    species: string
+    species: string | null
+    gender: string | null // <-- add this
     last_consultation_at: string | null
     pet_notes: string | null
 }
@@ -119,11 +122,7 @@ export function CheckinClient({
         })
     }
 
-    function SpeciesIcon({ species, className = "w-4 h-4" }: { species: string, className?: string }) {
-        if (species === "Dog" || species === "Perro") return <Dog className={`${className} text-amber-600`} />
-        if (species === "Cat" || species === "Gato") return <Cat className={`${className} text-purple-600`} />
-        return <PawPrint className={`${className} text-gray-500`} />
-    }
+    // Delete this local SpeciesIcon - we're using the shared one now
 
     return (
         <div className="space-y-4">
@@ -149,7 +148,7 @@ export function CheckinClient({
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 font-medium text-gray-900 text-base">
-                                                <SpeciesIcon species={r.species} className="w-5 h-5 flex-shrink-0" />
+                                                <SpeciesIcon species={r.species} gender={r.gender} size={20} />
                                                 <span className="truncate">{r.pet_name}</span>
                                             </div>
                                             {r.breed && <div className="text-sm text-gray-500 ml-7 truncate">{r.breed}</div>}
@@ -206,7 +205,7 @@ export function CheckinClient({
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 font-medium text-gray-900 text-base">
-                                        <SpeciesIcon species={selectedPet.species} className="w-5 h-5 flex-shrink-0" />
+                                        <SpeciesIcon species={selectedPet.species} gender={selectedPet.gender} size={20} />
                                         <span className="truncate">{selectedPet.pet_name}</span>
                                     </div>
                                     {selectedPet.breed && (
@@ -284,7 +283,7 @@ export function CheckinClient({
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs text-gray-400 font-mono w-4">{i + 1}.</span>
-                                            <SpeciesIcon species={c.species} className="w-4 h-4" />
+                                            <SpeciesIcon species={c.species} gender={c.gender} size={16} />
                                             <span className="font-medium text-gray-900 text-base">{c.pet_name}</span>
                                         </div>
                                         {c.breed && <div className="ml-7 text-sm text-gray-500">{c.breed}</div>}
@@ -349,7 +348,8 @@ export function CheckinClient({
                                         <div className="flex items-center gap-2">
                                             <SpeciesIcon
                                                 species={c.species}
-                                                className={`w-3.5 h-3.5 ${c.has_consultation_today ? 'opacity-50' : ''}`}
+                                                gender={c.gender}
+                                                size={14}
                                             />
                                             <span className={`font-medium text-gray-900 ${c.has_consultation_today ? 'line-through text-gray-500' : ''}`}>
                                                 {c.pet_name}
