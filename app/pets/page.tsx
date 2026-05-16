@@ -1,11 +1,10 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
-import { LoadingLink as Link } from "@/components/LoadingLink"
-import { ArrowLeft, Plus, Search, Cat, Dog, HelpCircle } from "lucide-react"
-import { SpeciesIcon } from "@/components/SpeciesIcon"
+import { Plus } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
+import PetTable from "./pet-table" // <-- changed from client-table
 
 export const dynamic = 'force-dynamic'
 
@@ -14,49 +13,37 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
 })
 
-async function getPets(search?: string) {
+async function getPets() {
     const client = await pool.connect()
     try {
-        let query = `
-      SELECT
-        p.id,
-        p.name,
-        p.breed,
-        p.notes,
-        s.name_es as species,
-        c.id as client_id,
-        c.name as client_name,
-        MAX(con.consultation_date) as last_consultation_date
-      FROM pets p
-      LEFT JOIN species s ON p.species_id = s.id
-      LEFT JOIN clients c ON p.client_id = c.id
-      LEFT JOIN consultations con ON p.id = con.pet_id
-    `
-        const params: any[] = []
-
-        if (search) {
-            query += ` WHERE p.name ILIKE $1 OR c.name ILIKE $1 OR p.breed ILIKE $1 OR s.name_es ILIKE $1`
-            params.push(`%${search}%`)
-        }
-
-        query += ` GROUP BY p.id, p.name, p.breed, p.notes, s.name_es, c.id, c.name`
-        query += ` ORDER BY p.id DESC`
-
-        const { rows } = await client.query(query, params)
+        const { rows } = await client.query(`
+            SELECT
+                p.id,
+                p.name,
+                p.breed,
+                p.notes,
+                s.name_es as species,
+                c.id as client_id,
+                c.name as client_name,
+                MAX(con.consultation_date) as last_consultation_date
+            FROM pets p
+            LEFT JOIN species s ON p.species_id = s.id
+            LEFT JOIN clients c ON p.client_id = c.id
+            LEFT JOIN consultations con ON p.id = con.pet_id
+            GROUP BY p.id, p.name, p.breed, p.notes, s.name_es, c.id, c.name
+            ORDER BY p.id DESC
+        `)
         return rows
     } finally {
         client.release()
     }
 }
 
-export default async function PetsPage(props: {
-    searchParams: Promise<{ search?: string; page?: string }>
-}) {
+export default async function PetsPage() {
     const session = await auth()
     if (!session) redirect("/")
 
-    const searchParams = await props.searchParams
-    const pets = await getPets(searchParams.search)
+    const pets = await getPets()
 
     return (
         <main className="min-h-screen bg-gray-100 p-6">
@@ -68,91 +55,8 @@ export default async function PetsPage(props: {
                         <NavButton href="/pets/new" icon={<Plus size={18} />} label="Agregar Mascota" />
                     </div>
                 </div>
-                <form className="mb-6">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                        <input
-                            type="text"
-                            name="search"
-                            defaultValue={searchParams.search}
-                            placeholder="Buscar mascotas o clientes..."
-                            className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                </form>
 
-                <div className="overflow-hidden rounded-lg bg-white shadow">
-                    <table className="w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Mascota
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Notas
-                                </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                    Cliente
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                            {pets.length === 0 ? (
-                                <tr>
-                                    <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                                        No se encontraron mascotas. Agrega una para empezar.
-                                    </td>
-                                </tr>
-                            ) : (
-                                pets.map((pet) => (
-                                    <tr key={pet.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <SpeciesIcon species={pet.species} />
-                                                <div>
-                                                    <Link
-                                                        href={`/pets/${pet.id}`}
-                                                        className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                                                    >
-                                                        {pet.name}
-                                                    </Link>
-                                                    <p className="text-xs text-gray-500">
-                                                        {pet.breed || pet.species || 'Desconocido'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 text-xs text-gray-500 max-w-">
-                                            <p className="line-clamp-3 break-words" title={pet.notes || ''}>
-                                                {pet.notes || '-'}
-                                            </p>
-                                        </td>
-                                        <td className="px-4 py-3 max-w-">
-                                            <Link
-                                                href={`/clients/${pet.client_id}`}
-                                                className="text-xs text-blue-600 hover:text-blue-700 hover:underline truncate block"
-                                                title={pet.client_name}
-                                            >
-                                                {pet.client_name}
-                                            </Link>
-                                            <p className="text-xs text-gray-400 mt-0.5">
-                                                {pet.last_consultation_date
-                                                    ? `Última: ${new Date(pet.last_consultation_date).toLocaleDateString('es-MX', {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric',
-                                                        timeZone: 'America/Tijuana'
-                                                    })}`
-                                                    : 'Sin consultas'
-                                                }
-                                            </p>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                <PetTable pets={pets} />
             </div>
         </main>
     )

@@ -170,19 +170,20 @@ export default async function DashboardPage() {
                             Ingresos de Hoy
                         </Link>
                         <Link
-                            href="/clients"
-                            className="flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-4 px-6 rounded-lg transition"
-                        >
-                            <Users size={20} />
-                            Clientes
-                        </Link>
-                        <Link
                             href="/pets"
                             className="flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-4 px-6 rounded-lg transition"
                         >
                             <PawPrint size={20} />
                             Mascotas
                         </Link>
+                        <Link
+                            href="/clients"
+                            className="flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-4 px-6 rounded-lg transition"
+                        >
+                            <Users size={20} />
+                            Clientes
+                        </Link>
+
                     </div>
                 </div>
             </div>
