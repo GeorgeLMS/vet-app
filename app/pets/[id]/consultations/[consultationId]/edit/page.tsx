@@ -1,11 +1,7 @@
 import { auth } from "@/auth"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 import { Pool } from "pg"
-import { LoadingLink as Link } from "@/components/LoadingLink"
-import { ArrowLeft } from "lucide-react"
-import { notFound } from "next/navigation"
-import { revalidatePath } from "next/cache"
-import { ConsultationForm } from "./page-form"
+import { EditConsultationForm } from "./page-form"
 import NavBar from "@/components/NavBar"
 
 export const dynamic = 'force-dynamic'
@@ -15,16 +11,18 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
 })
 
-// Set timezone for all connections
 pool.on('connect', (client) => {
     client.query(`SET timezone = 'America/Tijuana'`)
 })
 
-async function getPet(id: string) {
+async function getConsultation(id: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id, name FROM pets WHERE id = $1`,
+            `SELECT c.id, c.pet_id, c.consultation_date, c.procedure, c.notes, p.name as pet_name
+             FROM consultations c
+             JOIN pets p ON c.pet_id = p.id
+             WHERE c.id = $1`,
             [id]
         )
         return rows[0]
@@ -45,17 +43,17 @@ async function getProcedures() {
     }
 }
 
-export default async function NewConsultationPage({
+export default async function EditConsultationPage({
     params
 }: {
-    params: Promise<{ id: string }>
+    params: Promise<{ id: string; consultationId: string }>
 }) {
     const session = await auth()
     if (!session) redirect("/")
 
-    const { id } = await params
-    const pet = await getPet(id)
-    if (!pet) notFound()
+    const { id, consultationId } = await params
+    const consultation = await getConsultation(consultationId)
+    if (!consultation) notFound()
 
     const procedures = await getProcedures()
 
@@ -64,14 +62,17 @@ export default async function NewConsultationPage({
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">
-                        Nueva Consulta para {pet.name}
+                        Editar Consulta - {consultation.pet_name}
                     </h1>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>
                 </div>
                 <div className="rounded-lg bg-white p-6 shadow">
-                    <ConsultationForm petId={id} procedures={procedures} />
+                    <EditConsultationForm
+                        consultation={consultation}
+                        procedures={procedures}
+                    />
                 </div>
             </div>
         </main>

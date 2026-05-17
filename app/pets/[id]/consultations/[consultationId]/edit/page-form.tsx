@@ -2,36 +2,37 @@
 
 import { useActionState } from "react"
 import { useSearchParams } from "next/navigation"
-import { createConsultation, updateConsultation, type FormState } from "./actions"
+import { updateConsultation, type FormState } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SubmitButton } from "@/components/SubmitButton"
 
-export function ConsultationForm({
-    petId,
+type Consultation = {
+    id: string
+    pet_id: string
+    consultation_date: string
+    procedure: string
+    notes: string | null
+    pet_name: string
+}
+
+export function EditConsultationForm({
+    consultation,
     procedures,
-    consultation, // add this for edit mode
 }: {
-    petId: string
+    consultation: Consultation
     procedures: { id: string; name: string }[]
-    consultation?: { id: string; consultation_date: string; procedure: string; notes: string | null }
 }) {
     const searchParams = useSearchParams()
     const from = searchParams.get('from')
-    const isEdit = !!consultation
 
-    const boundAction = isEdit
-        ? updateConsultation.bind(null, consultation.id, petId)
-        : createConsultation.bind(null, petId)
-
+    const boundAction = updateConsultation.bind(null, consultation.id, consultation.pet_id)
     const [state, action] = useActionState<FormState, FormData>(
         boundAction,
         {
             data: {
-                consultation_date: consultation?.consultation_date
-                    ? new Date(consultation.consultation_date).toISOString().split("T")[0]
-                    : new Date().toISOString().split("T")[0],
-                procedure: consultation?.procedure ?? "",
-                notes: consultation?.notes ?? "",
+                consultation_date: new Date(consultation.consultation_date).toISOString().split("T")[0],
+                procedure: consultation.procedure,
+                notes: consultation.notes || "",
             }
         }
     )
@@ -102,9 +103,9 @@ export function ConsultationForm({
             </div>
 
             <div className="flex gap-3 pt-4">
-                <SubmitButton>{isEdit ? 'Actualizar Consulta' : 'Guardar Consulta'}</SubmitButton>
+                <SubmitButton>Actualizar Consulta</SubmitButton>
                 <Link
-                    href={`/pets/${petId}${from ? `?from=${from}` : ''}`}
+                    href={`/pets/${consultation.pet_id}${from ? `?from=${from}` : ''}`}
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
                 >
                     Cancelar

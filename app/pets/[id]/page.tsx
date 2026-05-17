@@ -16,6 +16,10 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
 })
 
+pool.on('connect', (client) => {
+    client.query(`SET timezone = 'America/Tijuana'`)
+})
+
 async function getPet(id: string) {
     const client = await pool.connect()
     try {
@@ -191,18 +195,25 @@ export default async function PetPage({
                                         key={consultation.id}
                                         className="rounded-lg bg-white p-4 shadow border-l-4 border-blue-500"
                                     >
-                                        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-2">
-                                            <span className="text-xs font-medium text-blue-600">
-                                                {new Date(consultation.consultation_date).toLocaleDateString('es-MX', {
-                                                    month: 'short',
-                                                    day: 'numeric',
-                                                    year: 'numeric',
-                                                    timeZone: 'America/Tijuana'
-                                                })}
-                                            </span>
-                                            <h3 className="text-base font-medium text-gray-900">
-                                                {consultation.procedure}
-                                            </h3>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                                                <span className="text-xs font-medium text-blue-600">
+                                                    {new Date(consultation.consultation_date).toLocaleDateString('es-MX', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric',
+                                                        timeZone: 'America/Tijuana'
+                                                    })}
+                                                </span>
+                                                <h3 className="text-base font-medium text-gray-900">
+                                                    {consultation.procedure}
+                                                </h3>
+                                            </div>
+                                            <NavButton
+                                                href={`/pets/${id}/consultations/${consultation.id}/edit${from ? `?from=${from}` : ''}`}
+                                                icon={<Pencil size={18} />}
+                                                label="Editar consulta"
+                                            />
                                         </div>
 
                                         {consultation.notes && (
