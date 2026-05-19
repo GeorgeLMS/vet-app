@@ -200,7 +200,7 @@ export default async function PetPage({
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                                                 <span className="text-xs font-medium text-blue-600">
-                                                    {new Date(consultation.consultation_date).toLocaleDateString('es-MX', {
+                                                    {new Date(consultation.consultation_date + 'T00:00:00').toLocaleDateString('es-MX', {
                                                         month: 'short',
                                                         day: 'numeric',
                                                         year: 'numeric',
