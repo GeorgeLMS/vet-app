@@ -16,13 +16,13 @@ pool.on('connect', (client) => {
 export type FormState = {
     errors?: {
         consultation_date?: string
-        procedure?: string
+        procedure_id?: string  // changed
         notes?: string
         general?: string
     }
     data?: {
         consultation_date?: string
-        procedure?: string
+        procedure_id?: string  // changed
         notes?: string
     }
 }
@@ -36,11 +36,11 @@ export async function createConsultation(
     if (!session) redirect("/")
 
     const consultationDate = formData.get("consultation_date")?.toString() ?? ""
-    const procedure = formData.get("procedure")?.toString().trim() ?? ""
+    const procedureId = formData.get("procedure_id")?.toString() ?? ""  // changed
     const notes = formData.get("notes")?.toString().trim() ?? ""
     const from = formData.get("from")?.toString() ?? ""
 
-    const data = { consultation_date: consultationDate, procedure, notes }
+    const data = { consultation_date: consultationDate, procedure_id: procedureId, notes }
     const errors: FormState["errors"] = {}
 
     if (!consultationDate) {
@@ -57,10 +57,8 @@ export async function createConsultation(
         }
     }
 
-    if (!procedure) {
-        errors.procedure = "El procedimiento es requerido"
-    } else if (procedure.length > 500) {
-        errors.procedure = "El procedimiento debe tener 500 caracteres o menos"
+    if (!procedureId) {  // changed
+        errors.procedure_id = "El procedimiento es requerido"
     }
 
     if (notes && notes.length > 1000) {
@@ -74,9 +72,9 @@ export async function createConsultation(
     const client = await pool.connect()
     try {
         await client.query(
-            `INSERT INTO consultations (pet_id, consultation_date, procedure, notes)
+            `INSERT INTO consultations (pet_id, consultation_date, procedure_id, notes)
              VALUES ($1, $2, $3, $4)`,
-            [petId, consultationDate, procedure, notes || null]
+            [petId, consultationDate, procedureId, notes || null]  // changed
         )
     } catch (e: any) {
         if (e?.digest?.startsWith('NEXT_REDIRECT')) throw e
@@ -103,11 +101,11 @@ export async function updateConsultation(
     if (!session) redirect("/")
 
     const consultationDate = formData.get("consultation_date")?.toString() ?? ""
-    const procedure = formData.get("procedure")?.toString().trim() ?? ""
+    const procedureId = formData.get("procedure_id")?.toString() ?? ""  // changed
     const notes = formData.get("notes")?.toString().trim() ?? ""
     const from = formData.get("from")?.toString() ?? ""
 
-    const data = { consultation_date: consultationDate, procedure, notes }
+    const data = { consultation_date: consultationDate, procedure_id: procedureId, notes }
     const errors: FormState["errors"] = {}
 
     if (!consultationDate) {
@@ -124,10 +122,8 @@ export async function updateConsultation(
         }
     }
 
-    if (!procedure) {
-        errors.procedure = "El procedimiento es requerido"
-    } else if (procedure.length > 500) {
-        errors.procedure = "El procedimiento debe tener 500 caracteres o menos"
+    if (!procedureId) {  // changed
+        errors.procedure_id = "El procedimiento es requerido"
     }
 
     if (notes && notes.length > 1000) {
@@ -142,9 +138,9 @@ export async function updateConsultation(
     try {
         await client.query(
             `UPDATE consultations
-             SET consultation_date = $1, procedure = $2, notes = $3, updated_at = NOW()
+             SET consultation_date = $1, procedure_id = $2, notes = $3, updated_at = NOW()
              WHERE id = $4`,
-            [consultationDate, procedure, notes || null, consultationId]
+            [consultationDate, procedureId, notes || null, consultationId]  // changed
         )
     } catch (e: any) {
         if (e?.digest?.startsWith('NEXT_REDIRECT')) throw e
@@ -165,8 +161,8 @@ export async function getConsultation(id: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id, pet_id, consultation_date, procedure, notes
-             FROM consultations WHERE id = $1`,
+            `SELECT id, pet_id, consultation_date, procedure_id, notes
+             FROM consultations WHERE id = $1`,  // changed
             [id]
         )
         return rows[0]

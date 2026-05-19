@@ -38,14 +38,14 @@ async function getTodayCheckins() {
     EXISTS(
         SELECT 1 FROM consultations con
         WHERE con.pet_id = c.pet_id
-        AND (con.consultation_date = CURRENT_DATE)
+        AND (con.consultation_date::date = CURRENT_DATE)
     ) as has_consultation_today
 FROM checkins c
 JOIN pets p ON c.pet_id = p.id
 JOIN clients cl ON p.client_id = cl.id
 LEFT JOIN species s ON p.species_id = s.id
 LEFT JOIN pet_colors pc ON pc.id = p.color_id
-WHERE (c.checked_in_at  = CURRENT_DATE)
+WHERE (c.checked_in_at::date  = CURRENT_DATE)
 ORDER BY c.checked_in_at ASC`
         )
         return rows

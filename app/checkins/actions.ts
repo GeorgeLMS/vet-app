@@ -17,7 +17,7 @@ export async function checkIn(petId: number, broughtBy: string, notes: string) {
     try {
         await client.query(
             `INSERT INTO checkins (pet_id, brought_by, notes, checked_in_at) 
-             VALUES ($1, $2, $3, CURRENT_DATE)`,
+             VALUES ($1, $2, $3, CURRENT_TIMESTAMP)`,
             [petId, broughtBy || null, notes || null]
         )
     } finally {

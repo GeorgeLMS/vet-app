@@ -17,13 +17,13 @@ pool.on('connect', (client) => {
 export type FormState = {
     errors?: {
         consultation_date?: string
-        procedure?: string
+        procedure_id?: string
         notes?: string
         general?: string
     }
     data?: {
         consultation_date?: string
-        procedure?: string
+        procedure_id?: string
         notes?: string
     }
 }
@@ -38,11 +38,11 @@ export async function updateConsultation(
     if (!session) redirect("/")
 
     const consultationDate = formData.get("consultation_date")?.toString() ?? ""
-    const procedure = formData.get("procedure")?.toString().trim() ?? ""
+    const procedureId = formData.get("procedure_id")?.toString() ?? ""
     const notes = formData.get("notes")?.toString().trim() ?? ""
     const from = formData.get("from")?.toString() ?? ""
 
-    const data = { consultation_date: consultationDate, procedure, notes }
+    const data = { consultation_date: consultationDate, procedure_id: procedureId, notes }
     const errors: FormState["errors"] = {}
 
     if (!consultationDate) {
@@ -59,10 +59,8 @@ export async function updateConsultation(
         }
     }
 
-    if (!procedure) {
-        errors.procedure = "El procedimiento es requerido"
-    } else if (procedure.length > 500) {
-        errors.procedure = "El procedimiento debe tener 500 caracteres o menos"
+    if (!procedureId) {
+        errors.procedure_id = "El procedimiento es requerido"
     }
 
     if (notes && notes.length > 1000) {
@@ -76,10 +74,10 @@ export async function updateConsultation(
     const client = await pool.connect()
     try {
         await client.query(
-            `UPDATE consultations 
-             SET consultation_date = $1, procedure = $2, notes = $3 
+            `UPDATE consultations
+             SET consultation_date = $1, procedure_id = $2, notes = $3
              WHERE id = $4`,
-            [consultationDate, procedure, notes || null, consultationId]
+            [consultationDate, procedureId, notes || null, consultationId]
         )
     } catch (e: any) {
         if (e?.digest?.startsWith('NEXT_REDIRECT')) {

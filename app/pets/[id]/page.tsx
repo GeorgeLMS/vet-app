@@ -54,13 +54,15 @@ async function getPetConsultations(petId: string) {
     try {
         const { rows } = await client.query(
             `SELECT
-    id,
-    consultation_date,
-    procedure,
-    notes
-FROM consultations
-WHERE pet_id = $1
-ORDER BY consultation_date DESC`,
+                c.id,
+                c.consultation_date,
+                c.procedure_id,
+                c.notes,
+                p.name as procedure_name
+            FROM consultations c
+            LEFT JOIN procedures p ON c.procedure_id = p.id
+            WHERE c.pet_id = $1
+            ORDER BY c.consultation_date DESC`,
             [petId]
         )
         return rows
@@ -206,7 +208,7 @@ export default async function PetPage({
                                                     })}
                                                 </span>
                                                 <h3 className="text-base font-medium text-gray-900">
-                                                    {consultation.procedure}
+                                                    {consultation.procedure_name || 'Procedimiento eliminado'}
                                                 </h3>
                                             </div>
                                             <NavButton

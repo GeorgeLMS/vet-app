@@ -19,7 +19,7 @@ async function getConsultation(id: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT c.id, c.pet_id, c.consultation_date, c.procedure, c.notes, p.name as pet_name
+            `SELECT c.id, c.pet_id, c.consultation_date, c.procedure_id, c.notes, p.name as pet_name
              FROM consultations c
              JOIN pets p ON c.pet_id = p.id
              WHERE c.id = $1`,
@@ -30,12 +30,11 @@ async function getConsultation(id: string) {
         client.release()
     }
 }
-
 async function getProcedures() {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id, name FROM procedures ORDER BY name`
+            `SELECT id, name FROM procedures ORDER BY display_order`
         )
         return rows
     } finally {

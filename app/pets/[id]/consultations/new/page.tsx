@@ -37,7 +37,7 @@ async function getProcedures() {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id, name FROM procedures ORDER BY name`
+            `SELECT id, name FROM procedures ORDER BY display_order`
         )
         return rows
     } finally {
