@@ -55,7 +55,7 @@ async function getPetConsultations(petId: string) {
         const { rows } = await client.query(
             `SELECT
                 c.id,
-                c.consultation_date,
+                TO_CHAR(c.consultation_date, 'DD Mon YYYY') as consultation_date,
                 c.procedure_id,
                 c.notes,
                 p.name as procedure_name
@@ -200,12 +200,7 @@ export default async function PetPage({
                                         <div className="flex justify-between items-start mb-2">
                                             <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                                                 <span className="text-xs font-medium text-blue-600">
-                                                    {new Date(consultation.consultation_date + 'T00:00:00').toLocaleDateString('es-MX', {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                        year: 'numeric',
-                                                        timeZone: 'America/Tijuana'
-                                                    })}
+                                                    {consultation.consultation_date}
                                                 </span>
                                                 <h3 className="text-base font-medium text-gray-900">
                                                     {consultation.procedure_name || 'Procedimiento eliminado'}
