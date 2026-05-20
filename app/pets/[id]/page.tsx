@@ -6,8 +6,11 @@ import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
-import { Pencil, Plus } from "lucide-react"
+import NavButtonWithText from "@/components/NavButtonWithText"
+
+import { Pencil, Plus, FileText, FolderOpen } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
+import PetFiles from "@/components/PetFiles"
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +23,22 @@ pool.on('connect', (client) => {
     client.query(`SET timezone = 'America/Tijuana'`)
 })
 
+async function getClinicalHistories(petId: string) {
+    const client = await pool.connect()
+    try {
+        const { rows } = await client.query(
+            `SELECT id, TO_CHAR(fecha, 'DD Mon YYYY') as fecha
+             FROM clinical_histories
+             WHERE pet_id = $1
+             ORDER BY fecha DESC`,
+            [petId]
+        )
+        return rows
+    } finally {
+        client.release()
+    }
+}
+
 async function getPet(id: string) {
     const client = await pool.connect()
     try {
@@ -28,14 +47,17 @@ async function getPet(id: string) {
         p.id,
         p.name,
         p.breed,
-        p.birth_date,
+        p.gender,
+        TO_CHAR(p.birth_date, 'DD Mon YYYY') as birth_date,
+        EXTRACT(YEAR FROM AGE(p.birth_date))::int as age_years,
         p.weight,
         p.notes,
         s.name_es as species,
         pc.name_es as color,
         pc.hex as color_hex,
         c.id as client_id,
-        c.name as client_name
+        c.name as client_name,
+        c.phone as client_phone
       FROM pets p
       LEFT JOIN species s ON p.species_id = s.id
       LEFT JOIN pet_colors pc ON pc.id = p.color_id
@@ -44,6 +66,19 @@ async function getPet(id: string) {
             [id]
         )
         return rows[0]
+    } finally {
+        client.release()
+    }
+}
+
+async function getPetFiles(petId: string) {
+    const client = await pool.connect()
+    try {
+        const { rows } = await client.query(
+            `SELECT * FROM pet_files WHERE pet_id = $1 ORDER BY uploaded_at DESC`,
+            [petId]
+        )
+        return rows
     } finally {
         client.release()
     }
@@ -71,6 +106,23 @@ async function getPetConsultations(petId: string) {
     }
 }
 
+async function getClinicalHistory(petId: string) {
+    const client = await pool.connect()
+    try {
+        const { rows } = await client.query(
+            `SELECT id, TO_CHAR(fecha, 'DD Mon YYYY') as fecha
+             FROM clinical_histories
+             WHERE pet_id = $1
+             ORDER BY fecha DESC
+             LIMIT 1`,
+            [petId]
+        )
+        return rows[0] || null
+    } finally {
+        client.release()
+    }
+}
+
 export default async function PetPage({
     params,
     searchParams
@@ -87,10 +139,12 @@ export default async function PetPage({
     const pet = await getPet(id)
     if (!pet) notFound()
 
-    const consultations = await getPetConsultations(id)
 
-    const backHref = from === 'checkins' ? '/checkins' : '/clients'
-    const backLabel = from === 'checkins' ? 'Volver a Ingresos' : 'Volver a Clientes'
+    const consultations = await getPetConsultations(id)
+    const clinicalHistories = await getClinicalHistories(id)
+    const files = await getPetFiles(id)
+    //const backHref = from === 'checkins' ? '/checkins' : '/clients'
+    //const backLabel = from === 'checkins' ? 'Volver a Ingresos' : 'Volver a Clientes'
 
     return (
         <main className="min-h-screen bg-gray-100 p-6">
@@ -98,11 +152,20 @@ export default async function PetPage({
                 <div className="mb-2">
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">{pet.name}</h1>
                     <div className="flex items-center justify-between mb-2">
-                        <NavBar />
+                        <div className="flex items-center gap-2">
+                            {/* <Link
+                                href={backHref}
+                                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+                            >
+                                <ArrowLeft className="mr-1 h-4 w-4" />
+                                {backLabel}
+                            </Link> */}
+                            <NavBar />
+                        </div>
                     </div>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-2">
                     {/* Detalles de la Mascota */}
                     <div className="rounded-lg bg-white p-6 shadow">
                         <div className="mb-4 flex justify-between items-center">
@@ -119,6 +182,7 @@ export default async function PetPage({
                                         className="text-blue-600 hover:text-blue-800 hover:underline"
                                     >
                                         {pet.client_name}
+                                        {pet.client_phone ? " - " + pet.client_phone : ""}
                                     </Link>
                                 </dd>
                             </div>
@@ -126,7 +190,7 @@ export default async function PetPage({
                             <div>
                                 <dt className="text-sm font-medium text-gray-500">Raza</dt>
                                 <dd className="text-sm text-gray-900 flex items-center gap-2">
-                                    <SpeciesIcon species={pet.species} className="w-4 h-4" />
+                                    <SpeciesIcon species={pet.species} gender={pet.gender} showGenderIcon={true} className="w-4 h-4" />
                                     <span>{pet.breed && ` ${pet.breed}`}</span>
                                     {pet.color && (
                                         <>
@@ -148,12 +212,8 @@ export default async function PetPage({
                                 <div>
                                     <dt className="text-sm font-medium text-gray-500">Fecha de Nacimiento</dt>
                                     <dd className="text-sm text-gray-900">
-                                        {pet.birth_date ? new Date(pet.birth_date).toLocaleDateString('es-MX', {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric',
-                                            timeZone: 'America/Tijuana'
-                                        }) : "-"}
+                                        {pet.birth_date ? pet.birth_date : "-"}
+                                        {pet.age_years ? " (" + pet.age_years + " años)" : "-"}
                                     </dd>
                                 </div>
                                 <div>
@@ -167,19 +227,35 @@ export default async function PetPage({
                                 <dd className="text-sm text-gray-900">{pet.notes || "-"}</dd>
                             </div>
                         </dl>
+
+                        {/* ICONS MOVED HERE - BOTTOM LEFT OF DETALLES PANEL */}
+                        <div className="mt-2 pt-4 border-t border-gray-200 flex items-center gap-3">
+                            <NavButtonWithText
+                                href={`/pets/${id}/clinical-history`}
+                                icon={<FileText className="h-4 w-4" />}
+                                label="Historial Clínico"
+                                count={clinicalHistories.length}
+                            />
+                            <NavButtonWithText
+                                href={`/pets/${id}/files`}
+                                icon={<FileText className="h-4 w-4" />}
+                                label="Archivos"
+                                count={files.length}
+                            />
+                        </div>
                     </div>
 
+
+
                     {/* Sección de Consultas */}
-                    <div className="space-y-3">
-                        {/* Header Card */}
-                        <div className="rounded-lg bg-white p-4 shadow flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">
+                    <div className="space-y-2">
+                        <div className="rounded-lg bg-white p-3 shadow flex justify-between items-center">
+                            <h2 className="text-lg font-semibold text-gray-900">
                                 Consultas ({consultations.length})
                             </h2>
                             <NavButton href={`/pets/${id}/consultations/new${from ? `?from=${from}` : ''}`} icon={<Plus size={18} />} label="Agregar Consulta" />
                         </div>
 
-                        {/* Empty State */}
                         {consultations.length === 0 ? (
                             <div className="rounded-lg bg-white p-12 text-center shadow">
                                 <div className="text-gray-400 mb-2">
@@ -190,7 +266,6 @@ export default async function PetPage({
                                 <p className="text-gray-500">No hay consultas registradas para esta mascota.</p>
                             </div>
                         ) : (
-                            /* Consultation Cards */
                             <>
                                 {consultations.map((consultation) => (
                                     <div

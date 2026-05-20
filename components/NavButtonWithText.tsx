@@ -3,10 +3,12 @@
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 
-type NavButtonProps = {
+type NavButtonWithTextProps = {
     href: string
     icon: React.ReactNode
     label: string
+    count?: number // optional count like (2)
+    variant?: 'default' | 'ghost' // style variants
 }
 
 const Spinner = () => (
@@ -16,7 +18,13 @@ const Spinner = () => (
     </svg>
 )
 
-export default function NavButton({ href, icon, label }: NavButtonProps) {
+export default function NavButtonWithText({
+    href,
+    icon,
+    label,
+    count,
+    variant = 'default'
+}: NavButtonWithTextProps) {
     const router = useRouter()
     const pathname = usePathname()
     const [loading, setLoading] = useState(false)
@@ -25,6 +33,12 @@ export default function NavButton({ href, icon, label }: NavButtonProps) {
         setLoading(false)
     }, [pathname])
 
+    const baseStyles = "inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors"
+    const variants = {
+        default: "border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300",
+        ghost: "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+    }
+
     return (
         <button
             onClick={() => {
@@ -32,10 +46,10 @@ export default function NavButton({ href, icon, label }: NavButtonProps) {
                 setLoading(true)
                 router.push(href)
             }}
-            className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
-            aria-label={label}
+            className={`${baseStyles} ${variants[variant]}`}
         >
             {loading ? <Spinner /> : icon}
+            <span>{label}{count !== undefined && ` (${count})`}</span>
         </button>
     )
 }

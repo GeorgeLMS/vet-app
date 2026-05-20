@@ -24,7 +24,7 @@ export function SpeciesIcon({
         if (g === 'macho' || g === 'male' || g === 'm') {
             colorClass = "text-blue-600"
         } else if (g === 'hembra' || g === 'female' || g === 'f') {
-            colorClass = "text-pink-600"
+            colorClass = "text-pink-400"
         }
     }
 
@@ -84,7 +84,7 @@ function GenderSymbol({ gender, size }: { gender: string; size: number }) {
         return <FaMars className="text-blue-600" size={size} />
     }
     if (g === 'hembra' || g === 'female' || g === 'f') {
-        return <FaVenus className="text-pink-600" size={size} />
+        return <FaVenus className="text-pink-400" size={size} />
     }
     return null
 }

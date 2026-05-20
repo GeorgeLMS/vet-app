@@ -3,6 +3,7 @@
 import { ArrowLeft, Home } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { Users, PawPrint } from "lucide-react"
 import NavButton from "@/components/NavButton"
 const btnClass = "flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
 
@@ -27,6 +28,9 @@ export default function NavBar() {
                 {backLoading ? <Spinner /> : <ArrowLeft size={18} />}
             </button>
             <NavButton href="/dashboard" icon={<Home size={18} />} label="Dashboard" />
+            <NavButton href="/pets" icon={<PawPrint size={18} />} label="mascotas" />
+            <NavButton href="/clients" icon={<Users size={18} />} label="clientes" />
+
 
         </div>
     )

@@ -37,6 +37,7 @@ async function getClientPets(clientId: string) {
             `SELECT
     p.id,
     p.name,
+    p.gender,
     p.breed,
     s.name as species,
     MAX(con.consultation_date) AS last_consultation

@@ -8,6 +8,7 @@ type Pet = {
     name: string
     breed: string | null
     species: string | null
+    gender: string | null
     last_consultation: string | Date | null
 }
 
@@ -40,7 +41,7 @@ export function ClientPetTable({ pets }: { pets: Pet[] }) {
                                 href={`/pets/${pet.id}`}
                                 className="flex items-center gap-2 px-4 py-3 text-gray-900"
                             >
-                                <SpeciesIcon species={pet.species} />
+                                <SpeciesIcon species={pet.species} gender={pet.gender} showGenderIcon={true} />
                                 <div>
                                     <div className="text-sm font-medium text-blue-600 group-hover:text-blue-800 group-hover:underline">
                                         {pet.name}
