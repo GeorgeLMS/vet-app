@@ -5,14 +5,8 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { Users, PawPrint, ClipboardList, CheckCircle, Clock, AlertCircle } from "lucide-react"
 import { signOut } from "@/auth"
 
-export const dynamic = 'force-dynamic'
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
+
+import pool from "@/pool"
 
 async function getDashboardData() {
     const client = await pool.connect()

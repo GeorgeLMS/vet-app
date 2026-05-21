@@ -8,20 +8,12 @@ import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import NavButtonWithText from "@/components/NavButtonWithText"
 
-import { Pencil, Plus, FileText, FolderOpen } from "lucide-react"
+import { Pencil, Plus, FileText, FolderOpen, Syringe } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
 import PetFiles from "@/components/PetFiles"
 
-export const dynamic = 'force-dynamic'
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
+import pool from "@/pool"
 
 async function getClinicalHistories(petId: string) {
     const client = await pool.connect()
@@ -106,22 +98,22 @@ async function getPetConsultations(petId: string) {
     }
 }
 
-async function getClinicalHistory(petId: string) {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT id, TO_CHAR(fecha, 'DD Mon YYYY') as fecha
-             FROM clinical_histories
-             WHERE pet_id = $1
-             ORDER BY fecha DESC
-             LIMIT 1`,
-            [petId]
-        )
-        return rows[0] || null
-    } finally {
-        client.release()
-    }
-}
+// async function getClinicalHistory(petId: string) {
+//     const client = await pool.connect()
+//     try {
+//         const { rows } = await client.query(
+//             `SELECT id, TO_CHAR(fecha, 'DD Mon YYYY') as fecha
+//              FROM clinical_histories
+//              WHERE pet_id = $1
+//              ORDER BY fecha DESC
+//              LIMIT 1`,
+//             [petId]
+//         )
+//         return rows[0] || null
+//     } finally {
+//         client.release()
+//     }
+// }
 
 export default async function PetPage({
     params,
@@ -241,6 +233,12 @@ export default async function PetPage({
                                 icon={<FileText className="h-4 w-4" />}
                                 label="Archivos"
                                 count={files.length}
+                            />
+                            <NavButtonWithText
+                                href={`/pets/${id}/vaccinations`}
+                                icon={<Syringe className="h-4 w-4" />}
+                                label="Vacunas"
+
                             />
                         </div>
                     </div>

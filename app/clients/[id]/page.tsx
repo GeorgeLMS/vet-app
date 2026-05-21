@@ -1,21 +1,17 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { Pool } from "pg"
-import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft, Plus, PlusCircle, PlusIcon, PlusSquare } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import { Pencil } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
 import { ClientPetTable } from "./client-pet-table"
+import pool from "@/pool"
 
 import { notFound } from "next/navigation"
-export const dynamic = 'force-dynamic'
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
+
+
 
 async function getClient(id: string) {
     const client = await pool.connect()

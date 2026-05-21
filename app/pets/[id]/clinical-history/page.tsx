@@ -6,11 +6,8 @@ import { Plus, Eye, Pencil } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import NavButtonWithText from "@/components/NavButtonWithText"
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
 
 async function getPet(id: string) {
     const client = await pool.connect()

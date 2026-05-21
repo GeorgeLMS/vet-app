@@ -6,15 +6,8 @@ import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import PetTable from "./pet-table" // <-- changed from client-table
 
-export const dynamic = 'force-dynamic'
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
+import pool from "@/pool"
 
 async function getPets() {
     const client = await pool.connect()

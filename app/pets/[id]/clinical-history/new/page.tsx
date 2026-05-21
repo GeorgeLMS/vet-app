@@ -2,11 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { ClinicalHistoryForm } from "../clinical-history-form"
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
+import pool from "@/pool"
 
 async function getPet(id: string) {
     const client = await pool.connect()

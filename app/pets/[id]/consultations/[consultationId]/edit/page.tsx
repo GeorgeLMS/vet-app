@@ -3,17 +3,8 @@ import { redirect, notFound } from "next/navigation"
 import { Pool } from "pg"
 import { EditConsultationForm } from "./page-form"
 import NavBar from "@/components/NavBar"
+import pool from "@/pool"
 
-export const dynamic = 'force-dynamic'
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
 
 async function getConsultation(id: string) {
     const client = await pool.connect()

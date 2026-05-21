@@ -1,11 +1,7 @@
 import { auth } from "@/auth"
-import { Pool } from "pg"
 import { v2 as cloudinary } from "cloudinary"
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

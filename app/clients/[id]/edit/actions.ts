@@ -1,13 +1,11 @@
 "use server"
 
-import { Pool } from "pg"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
+import pool from "@/pool"
+
+
 
 export type FormState = {
     errors?: {

@@ -2,12 +2,8 @@ import { Pool } from "pg"
 import PetForm from "./pet-form"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-export const dynamic = 'force-dynamic'
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
 
 async function getSpecies() {
     const client = await pool.connect()

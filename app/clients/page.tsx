@@ -1,17 +1,14 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { Pool } from "pg"
 import { Plus } from "lucide-react"
 import NavButton from "@/components/NavButton"
 import NavBar from "@/components/NavBar"
 import ClientTable from "./client-table"
+import pool from "@/pool"
 
-export const dynamic = 'force-dynamic'
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
+
+
 
 async function getClients() {
     const client = await pool.connect()

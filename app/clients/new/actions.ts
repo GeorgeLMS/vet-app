@@ -2,15 +2,9 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
 
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
 
 type FormState = {
     errors?: {

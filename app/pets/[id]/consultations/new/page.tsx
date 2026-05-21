@@ -7,18 +7,9 @@ import { notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { ConsultationForm } from "./page-form"
 import NavBar from "@/components/NavBar"
+import pool from "@/pool"
 
-export const dynamic = 'force-dynamic'
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-
-// Set timezone for all connections
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
 
 async function getPet(id: string) {
     const client = await pool.connect()

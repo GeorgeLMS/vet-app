@@ -1,20 +1,12 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { Pool } from "pg"
-import { LoadingLink as Link } from "@/components/LoadingLink"
-import { ArrowLeft } from "lucide-react"
 import { CheckinClient } from "./checkin-client"
 import NavBar from "@/components/NavBar"
+import pool from "@/pool"
 
-export const dynamic = 'force-dynamic'
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
+
+
 
 async function getTodayCheckins() {
     const client = await pool.connect()

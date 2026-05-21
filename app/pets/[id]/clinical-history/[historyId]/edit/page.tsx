@@ -4,15 +4,8 @@ import { Pool } from "pg"
 import { ClinicalHistoryForm } from "../../clinical-history-form"
 import { notFound } from "next/navigation"
 
-export const dynamic = 'force-dynamic'
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
 async function getHistory(petId: string, historyId: string) {
     const client = await pool.connect()
     try {

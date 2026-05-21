@@ -3,11 +3,8 @@
 import { Pool } from "pg"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
 
 export type FormState = {
     errors?: {

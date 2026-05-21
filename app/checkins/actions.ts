@@ -1,16 +1,11 @@
 "use server"
 
-import { Pool } from "pg"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import pool from "@/pool"
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
-pool.on('connect', (client) => {
-    client.query(`SET timezone = 'America/Tijuana'`)
-})
+
+
 
 export async function checkIn(petId: number, broughtBy: string, notes: string) {
     const client = await pool.connect()

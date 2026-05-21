@@ -1,12 +1,9 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { Pool } from "pg"
+//import { Pool } from "pg"
 import bcrypt from "bcryptjs"
 import { authConfig } from "./auth.config"
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-})
+import pool from "@/pool"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     ...authConfig, // This pulls in pages, callbacks, session

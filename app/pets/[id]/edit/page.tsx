@@ -6,13 +6,8 @@ import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 import { EditPetForm } from "./edit-form"
 import NavBar from "@/components/NavBar"
+import pool from "@/pool"
 
-export const dynamic = 'force-dynamic'
-
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: true } : false,
-})
 
 async function getPet(id: string) {
     const client = await pool.connect()

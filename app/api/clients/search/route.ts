@@ -1,9 +1,6 @@
 import { auth } from "@/auth"
-import { Pool } from "pg"
 import { NextRequest } from "next/server"
-export const dynamic = 'force-dynamic'
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+import pool from "@/pool"
 
 export async function GET(req: NextRequest) {
     const session = await auth()
