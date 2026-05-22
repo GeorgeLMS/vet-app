@@ -9,6 +9,8 @@ import { GenderIcon } from "@/components/GenderIcon" // <-- add this
 type Pet = {
     id: string
     name: string
+    age_pet: string | null
+    age_unit: string | null
     breed: string | null
     notes: string | null
     species: string | null
@@ -89,6 +91,7 @@ export default function PetTable({ pets }: { pets: Pet[] }) {
                                                 <p className="text-xs text-gray-500">
                                                     {pet.breed || pet.species || 'Desconocido'}
                                                 </p>
+                                                <p className="text-xs text-gray-500">{pet.age_pet} {pet.age_unit}</p>
                                             </div>
                                         </div>
                                     </td>

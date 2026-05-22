@@ -2,13 +2,13 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, FolderArchive } from "lucide-react"
 import { notFound } from "next/navigation"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import NavButtonWithText from "@/components/NavButtonWithText"
 
-import { Pencil, Plus, FileText, FolderOpen, Syringe } from "lucide-react"
+import { Pencil, Plus, FileText, FolderOpen, Syringe, ClipboardPlus } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
 import PetFiles from "@/components/PetFiles"
 
@@ -41,7 +41,23 @@ async function getPet(id: string) {
         p.breed,
         p.gender,
         TO_CHAR(p.birth_date, 'DD Mon YYYY') as birth_date,
-        EXTRACT(YEAR FROM AGE(p.birth_date))::int as age_years,
+     
+
+CASE
+    WHEN AGE(p.birth_date) < INTERVAL '1 year'
+    THEN EXTRACT(MONTH FROM AGE(p.birth_date))::int
+    ELSE EXTRACT(YEAR FROM AGE(p.birth_date))::int
+END as age_pet,
+CASE
+    WHEN AGE(p.birth_date) < INTERVAL '1 year' AND EXTRACT(MONTH FROM AGE(p.birth_date)) = 1
+    THEN 'mes'
+    WHEN AGE(p.birth_date) < INTERVAL '1 year'
+    THEN 'meses'
+    WHEN EXTRACT(YEAR FROM AGE(p.birth_date)) = 1
+    THEN 'año'
+    ELSE 'años'
+END as age_unit,
+
         p.weight,
         p.notes,
         s.name_es as species,
@@ -171,8 +187,7 @@ export default async function PetPage({
                                 <dd className="text-sm">
                                     <Link
                                         href={`/clients/${pet.client_id}`}
-                                        className="text-blue-600 hover:text-blue-800 hover:underline"
-                                    >
+                                        className="text-blue-600 hover:text-blue-800 hover:underline">
                                         {pet.client_name}
                                         {pet.client_phone ? " - " + pet.client_phone : ""}
                                     </Link>
@@ -205,7 +220,7 @@ export default async function PetPage({
                                     <dt className="text-sm font-medium text-gray-500">Fecha de Nacimiento</dt>
                                     <dd className="text-sm text-gray-900">
                                         {pet.birth_date ? pet.birth_date : "-"}
-                                        {pet.age_years ? " (" + pet.age_years + " años)" : "-"}
+                                        {pet.age_pet ? ` (${pet.age_pet} ${pet.age_unit})` : "-"}
                                     </dd>
                                 </div>
                                 <div>
@@ -222,24 +237,33 @@ export default async function PetPage({
 
                         {/* ICONS MOVED HERE - BOTTOM LEFT OF DETALLES PANEL */}
                         <div className="mt-2 pt-4 border-t border-gray-200 flex items-center gap-3">
-                            <NavButtonWithText
-                                href={`/pets/${id}/clinical-history`}
-                                icon={<FileText className="h-4 w-4" />}
-                                label="Historial Clínico"
-                                count={clinicalHistories.length}
-                            />
-                            <NavButtonWithText
-                                href={`/pets/${id}/files`}
-                                icon={<FileText className="h-4 w-4" />}
-                                label="Archivos"
-                                count={files.length}
-                            />
-                            <NavButtonWithText
-                                href={`/pets/${id}/vaccinations`}
-                                icon={<Syringe className="h-4 w-4" />}
-                                label="Vacunas"
+                            <div className="flex flex-col items-center gap-1">
+                                <NavButton
+                                    href={`/pets/${id}/clinical-history`}
+                                    icon={<ClipboardPlus size={30} />}
+                                    size={60}
+                                    label="Historial Clínico" />
+                                <span className="text-xs text-gray-500">Historial</span>
+                            </div>
 
-                            />
+                            <div className="flex flex-col items-center gap-1">
+                                <NavButton
+                                    href={`/pets/${id}/files`}
+                                    icon={<FolderOpen size={30} />}
+                                    size={60}
+                                    label="Archivos" />
+                                <span className="text-xs text-gray-500">Archivos</span>
+                            </div>
+
+                            <div className="flex flex-col items-center gap-1">
+                                <NavButton
+                                    href={`/pets/${id}/vaccinations`}
+                                    icon={<Syringe size={30} />}
+                                    size={60}
+                                    label="Vacunas" />
+                                <span className="text-xs text-gray-500">Vacunas</span>
+                            </div>
+
                         </div>
                     </div>
 

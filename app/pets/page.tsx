@@ -22,6 +22,22 @@ async function getPets() {
                 c.id as client_id,
                 c.name as client_name,
                 p.gender,
+CASE
+    WHEN p.birth_date IS NULL THEN NULL
+    WHEN AGE(p.birth_date) < INTERVAL '1 year'
+    THEN EXTRACT(MONTH FROM AGE(p.birth_date))::int
+    ELSE EXTRACT(YEAR FROM AGE(p.birth_date))::int
+END as age_pet,
+CASE
+    WHEN p.birth_date IS NULL THEN NULL
+    WHEN AGE(p.birth_date) < INTERVAL '1 year' AND EXTRACT(MONTH FROM AGE(p.birth_date)) = 1
+    THEN 'mes'
+    WHEN AGE(p.birth_date) < INTERVAL '1 year'
+    THEN 'meses'
+    WHEN EXTRACT(YEAR FROM AGE(p.birth_date)) = 1
+    THEN 'año'
+    ELSE 'años'
+END as age_unit,
                 MAX(con.consultation_date) as last_consultation_date
             FROM pets p
             LEFT JOIN species s ON p.species_id = s.id

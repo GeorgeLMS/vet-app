@@ -7,6 +7,7 @@ import pool from "@/pool"
 import { notFound } from "next/navigation"
 import { Pencil } from "lucide-react"
 import DeleteVaccinationButton from "./delete-button"
+import VaccinationRowMenu from "./VaccinationRowMenu"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -30,16 +31,23 @@ async function getVaccinations(petId: string) {
         vt.name as vaccine_name,
         TO_CHAR(v.application_date, 'DD Mon YYYY') as application_date,
         TO_CHAR(v.next_vaccination_date, 'DD Mon YYYY') as next_vaccination_date,
-CASE
-    WHEN AGE(v.application_date, p.birth_date) < INTERVAL '1 year'
-    THEN EXTRACT(MONTH FROM AGE(v.application_date, p.birth_date))::int
-    ELSE EXTRACT(YEAR FROM AGE(v.application_date, p.birth_date))::int
-END as age_at_vaccination,
-CASE
-    WHEN AGE(v.application_date, p.birth_date) < INTERVAL '1 year'
-    THEN 'meses'
-    ELSE 'años'
-END as age_unit    FROM vaccinations v
+        CASE
+            WHEN AGE(v.application_date, p.birth_date) < INTERVAL '1 year'
+            THEN EXTRACT(MONTH FROM AGE(v.application_date, p.birth_date))::int
+            ELSE EXTRACT(YEAR FROM AGE(v.application_date, p.birth_date))::int
+        END as age_at_vaccination,
+        CASE
+            WHEN AGE(v.application_date, p.birth_date) < INTERVAL '1 year' AND EXTRACT(MONTH FROM AGE(v.application_date, p.birth_date)) = 1
+            THEN 'mes'
+            WHEN AGE(v.application_date, p.birth_date) < INTERVAL '1 year'
+            THEN 'meses'
+            WHEN EXTRACT(YEAR FROM AGE(v.application_date, p.birth_date)) = 1
+            THEN 'año'
+            ELSE 'años'
+        END as age_unit
+
+
+FROM vaccinations v
     JOIN vaccine_types vt ON v.vaccine_type_id = vt.id
     JOIN pets p ON v.pet_id = p.id
     WHERE v.pet_id = $1
@@ -81,36 +89,34 @@ export default async function VaccinationsPage({
                     </div>
                 </div>
 
-                <div className="rounded-lg bg-white shadow overflow-hidden">
+                <div className="rounded-lg bg-white shadow overflow-visible">
                     {vaccinations.length === 0 ? (
                         <div className="p-12 text-center">
                             <p className="text-gray-400">No hay vacunas registradas.</p>
                         </div>
                     ) : (
                         <table className="w-full text-sm">
-                            {/* <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
-                                <tr>
-                                    <th className="px-4 py-3 text-left">Edad</th>
-                                    <th className="px-4 py-3 text-left">Vacuna</th>
-                                    <th className="px-4 py-3 text-left">Aplicación</th>
-                                    <th className="px-4 py-3 text-left">Próxima</th>
-                                    <th className="px-4 py-3"></th>
-                                </tr>
-                            </thead> */}
                             <tbody className="divide-y divide-gray-100">
                                 {vaccinations.map((v) => (
                                     <tr key={v.id} className="hover:bg-gray-50">
                                         <td className="px-4 py-3">
                                             <div className="font-medium text-gray-900">{v.vaccine_name}</div>
                                             <div className="text-sm text-gray-500 mt-0.5">
-                                                {v.age_at_vaccination !== null && `Aplicada la edad de ${v.age_at_vaccination} ${v.age_unit}`}
+                                                {v.age_at_vaccination !== null && `Edad: ${v.age_at_vaccination} ${v.age_unit}`}
                                             </div>
                                             <div className="text-sm text-gray-500 mt-0.5">
-                                                {`Applicada: ${v.application_date}`}
+                                                {`Aplicada: ${v.application_date}`}
                                                 {v.next_vaccination_date && ` · Próxima: ${v.next_vaccination_date}`}
                                             </div>
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-2 py-3 w-8">
+                                            <VaccinationRowMenu
+                                                editHref={`/pets/${id}/vaccinations/${v.id}/edit`}
+                                                id={v.id}
+                                                petId={id}
+                                            />
+                                        </td>
+                                        {/* <td className="px-4 py-3">
                                             <div className="flex justify-end gap-2">
                                                 <NavButton
                                                     href={`/pets/${id}/vaccinations/${v.id}/edit`}
@@ -119,7 +125,7 @@ export default async function VaccinationsPage({
                                                 />
                                                 <DeleteVaccinationButton id={v.id} petId={id} />
                                             </div>
-                                        </td>
+                                        </td> */}
                                     </tr>
                                 ))}
                             </tbody>
