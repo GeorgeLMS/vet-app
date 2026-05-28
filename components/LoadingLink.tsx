@@ -1,5 +1,4 @@
 'use client'
-
 import Link, { LinkProps } from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
@@ -9,9 +8,10 @@ type LoadingLinkProps = LinkProps &
     Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> & {
         children: React.ReactNode
         className?: string
+        hideTextOnLoad?: boolean // <- add this
     }
 
-export function LoadingLink({ children, className, ...props }: LoadingLinkProps) {
+export function LoadingLink({ children, className, hideTextOnLoad = false, ...props }: LoadingLinkProps) {
     const [pending, setPending] = useState(false)
     const pathname = usePathname()
 
@@ -58,7 +58,7 @@ export function LoadingLink({ children, className, ...props }: LoadingLinkProps)
                     />
                 </svg>
             )}
-            {pending ? 'Loading...' : children}
+            {pending && hideTextOnLoad ? null : children}
         </Link>
     )
 }

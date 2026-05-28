@@ -5,7 +5,7 @@ import { checkIn, markSeen, deleteCheckin } from "./actions"
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { MoreVertical } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon" // <-- use the shared one
-
+import { formatDate, formatTime, formatAge } from "@/utils"
 type Checkin = {
     id: number
     pet_id: number
@@ -27,6 +27,8 @@ type Checkin = {
 type SearchResult = {
     pet_id: number
     pet_name: string
+    pet_birth_date: string | null
+    pet_weight: string | null
     breed: string | null
     color: string | null
     color_hex: string | null
@@ -41,15 +43,15 @@ type SearchResult = {
 function ColorDisplay({ name, hex, className = "" }: { name: string | null; hex: string | null; className?: string }) {
     if (!name) return null
     return (
-        <div className={`flex items-center gap-1.5 ${className}`}>
+        <span className={`inline-flex items-center gap-1.5 ${className}`}>
             {hex && (
-                <div
-                    className="w-3 h-3 rounded border border-gray-300 flex-shrink-0"
+                <span
+                    className="w-3 h-3 rounded border border-gray-300 flex-shrink-0 inline-block"
                     style={{ backgroundColor: hex }}
                 />
             )}
             <span>{name}</span>
-        </div>
+        </span>
     )
 }
 
@@ -105,22 +107,9 @@ export function CheckinClient({
         setLoading(false)
     }
 
-    function formatTime(ts: string) {
-        return new Date(ts).toLocaleTimeString('es-MX', {
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: 'America/Tijuana'
-        })
-    }
 
-    function formatDate(ts: string) {
-        return new Date(ts).toLocaleDateString('es-MX', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            timeZone: 'America/Tijuana'
-        })
-    }
+
+
 
     // Delete this local SpeciesIcon - we're using the shared one now
 
@@ -159,7 +148,7 @@ export function CheckinClient({
                                         <div className="text-right flex-shrink-0 w-28">
                                             {r.last_consultation_at && (
                                                 <div className="text-xs text-gray-500 whitespace-nowrap">
-                                                    Última: {formatDate(r.last_consultation_at)}
+                                                    U: {formatDate(r.last_consultation_at)}
                                                 </div>
                                             )}
                                             {r.pet_notes && (
@@ -209,16 +198,21 @@ export function CheckinClient({
                                         <span className="truncate">{selectedPet.pet_name}</span>
                                     </div>
                                     {selectedPet.breed && (
-                                        <div className="text-sm text-gray-500 ml-7 truncate">{selectedPet.breed}</div>
+                                        <div className="text-sm text-gray-500 truncate">{selectedPet.breed} </div>
                                     )}
-                                    <ColorDisplay name={selectedPet.color} hex={selectedPet.color_hex} className="text-sm text-gray-500 ml-7" />
-                                    <div className="text-sm text-gray-400 ml-7 truncate">{selectedPet.client_name}</div>
+
+                                    <ColorDisplay name={selectedPet.color} hex={selectedPet.color_hex} className="text-sm text-gray-500 " />
+                                    <p className="text-sm text-gray-500">
+
+                                        {formatAge(selectedPet.pet_birth_date)}{selectedPet.pet_weight ? ` · ${selectedPet.pet_weight} kg` : ' · —'}</p>
+
+                                    <div className="text-sm text-gray-400  truncate">{selectedPet.client_name}</div>
                                 </div>
 
                                 <div className="text-right flex-shrink-0 w-28">
                                     {selectedPet.last_consultation_at && (
                                         <div className="text-xs text-gray-500 whitespace-nowrap">
-                                            Última: {formatDate(selectedPet.last_consultation_at)}
+                                            U: {formatDate(selectedPet.last_consultation_at)}
                                         </div>
                                     )}
                                     {selectedPet.pet_notes && (

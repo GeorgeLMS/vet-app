@@ -53,13 +53,7 @@ async function getDashboardData() {
         client.release()
     }
 }
-function formatTime(dateStr: string) {
-    return new Date(dateStr).toLocaleTimeString('es-MX', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'America/Tijuana'
-    })
-}
+
 
 export default async function DashboardPage() {
     const session = await auth()

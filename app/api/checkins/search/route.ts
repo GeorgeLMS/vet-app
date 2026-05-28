@@ -20,6 +20,10 @@ export async function GET(req: NextRequest) {
             `SELECT 
                 p.id as pet_id,
                 p.name as pet_name,
+    p.name as pet_name,
+    p.birth_date as pet_birth_date,
+    p.weight as pet_weight,
+
                 p.breed,
                 p.gender,
                 p.notes as pet_notes,

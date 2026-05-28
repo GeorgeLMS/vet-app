@@ -19,7 +19,7 @@ async function getClinicalHistories(petId: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id, TO_CHAR(fecha, 'DD Mon YYYY') as fecha
+            `SELECT id, TO_CHAR(fecha, 'DD Mon YY') as fecha
              FROM clinical_histories
              WHERE pet_id = $1
              ORDER BY fecha DESC`,
@@ -40,7 +40,7 @@ async function getPet(id: string) {
         p.name,
         p.breed,
         p.gender,
-        TO_CHAR(p.birth_date, 'DD Mon YYYY') as birth_date,
+        TO_CHAR(p.birth_date, 'DD Mon YY') as birth_date,
      
 
 CASE
@@ -98,7 +98,7 @@ async function getPetConsultations(petId: string) {
         const { rows } = await client.query(
             `SELECT
                 c.id,
-                TO_CHAR(c.consultation_date, 'DD Mon YYYY') as consultation_date,
+                TO_CHAR(c.consultation_date, 'DD Mon YY') as consultation_date,
                 c.procedure_id,
                 c.notes,
                 p.name as procedure_name
@@ -114,22 +114,7 @@ async function getPetConsultations(petId: string) {
     }
 }
 
-// async function getClinicalHistory(petId: string) {
-//     const client = await pool.connect()
-//     try {
-//         const { rows } = await client.query(
-//             `SELECT id, TO_CHAR(fecha, 'DD Mon YYYY') as fecha
-//              FROM clinical_histories
-//              WHERE pet_id = $1
-//              ORDER BY fecha DESC
-//              LIMIT 1`,
-//             [petId]
-//         )
-//         return rows[0] || null
-//     } finally {
-//         client.release()
-//     }
-// }
+
 
 export default async function PetPage({
     params,

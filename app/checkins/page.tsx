@@ -20,6 +20,8 @@ async function getTodayCheckins() {
     c.brought_by,
     c.notes,
     p.name as pet_name,
+    p.birth_date as pet_birth_date,
+    p.weight as pet_weight,
     p.breed,
     p.gender,
     pc.name_es as color,

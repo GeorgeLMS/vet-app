@@ -29,8 +29,8 @@ async function getVaccinations(petId: string) {
             `SELECT
         v.id,
         vt.name as vaccine_name,
-        TO_CHAR(v.application_date, 'DD Mon YYYY') as application_date,
-        TO_CHAR(v.next_vaccination_date, 'DD Mon YYYY') as next_vaccination_date,
+        TO_CHAR(v.application_date, 'DD Mon YY') as application_date,
+        TO_CHAR(v.next_vaccination_date, 'DD Mon YY') as next_vaccination_date,
         CASE
             WHEN AGE(v.application_date, p.birth_date) < INTERVAL '1 year'
             THEN EXTRACT(MONTH FROM AGE(v.application_date, p.birth_date))::int
