@@ -19,7 +19,7 @@ export function formatDate(val: unknown): string {
         .toLocaleDateString('es-MX', {
             day: 'numeric',
             month: 'short',
-            year: '2-digit',
+            year: 'numeric',
         })
 }
 

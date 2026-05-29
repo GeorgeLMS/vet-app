@@ -70,7 +70,7 @@ export default function PetCard({
             )}
             <div className="rounded-lg bg-white shadow">
                 {/* Collapsed header - always visible */}
-                <div className="flex items-start gap-3 p-4 cursor-pointer bg-blue-50/40 hover:bg-blue-50 active:bg-blue-100 transition-colors"
+                <div className="flex items-start gap-3 p-4 cursor-pointer bg-blue-50/50 hover:bg-blue-100/60 active:bg-blue-100 transition-colors"
                     onClick={() => setExpanded(!expanded)}
                 >
                     <SpeciesIcon species={pet.species} gender={pet.gender} showGenderIcon={true} />
@@ -81,7 +81,7 @@ export default function PetCard({
                                 <Link
                                     href={`/pets/${pet.id}`}
                                     onClick={(e) => e.stopPropagation()}
-                                    className="!inline text-base font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                                    className="!inline text-base text-blue-700 hover:text-blue-900 hover:underline"
                                 >
                                     {pet.name}
                                 </Link>
@@ -103,12 +103,12 @@ export default function PetCard({
 
                     <ChevronDown
                         size={20}
-                        className={`text-blue-500 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}`}
+                        className={`text-blue-600 transition-transform duration-150 ${expanded ? 'rotate-180' : ''}`}
                     />
                 </div>
                 {/* Expanded details */}
                 {expanded && (
-                    <div className="px-4 pb-4 border-t border-gray-100 animate-in slide-in-from-top-2 duration-150">
+                    <div className="px-4 pb-4 bg-white border-t-1 border-blue-100 animate-in slide-in-from-top-2 duration-150">
                         <div className="pt-3 space-y-2 text-sm">
                             <div className="flex items-center gap-4 text-gray-700">
                                 <span>{formatAge(pet.birth_date)}</span>
