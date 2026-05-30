@@ -7,6 +7,7 @@ import pool from "@/pool"
 export type FormState = {
     errors?: {
         consultation_date?: string
+        next_visit_date?: string
         procedure_id?: string
         notes?: string
         general?: string
@@ -14,9 +15,10 @@ export type FormState = {
     data?: {
         id?: string
         consultation_date?: string
+        next_visit_date?: string | null
         procedure_id?: string
         procedure_name?: string
-        notes?: string
+        notes?: string | null
     }
 }
 
@@ -29,10 +31,16 @@ export async function createConsultation(
     if (!session) throw new Error("Unauthorized")
 
     const consultationDate = formData.get("consultation_date")?.toString() ?? ""
+    const nextVisitDate = formData.get("next_visit_date")?.toString() || null
     const procedureId = formData.get("procedure_id")?.toString() ?? ""
-    const notes = formData.get("notes")?.toString().trim() ?? ""
+    const notes = formData.get("notes")?.toString().trim() || null
 
-    const data = { consultation_date: consultationDate, procedure_id: procedureId, notes }
+    const data: FormState["data"] = {
+        consultation_date: consultationDate,
+        next_visit_date: nextVisitDate,
+        procedure_id: procedureId,
+        notes
+    }
     const errors: FormState["errors"] = {}
 
     if (!consultationDate) {
@@ -45,6 +53,21 @@ export async function createConsultation(
             const year = date.getFullYear()
             if (year < 2000 || year > 2100) {
                 errors.consultation_date = "La fecha debe estar entre 2000 y 2100"
+            }
+        }
+    }
+
+    if (nextVisitDate) {
+        const nextDate = new Date(nextVisitDate)
+        if (isNaN(nextDate.getTime())) {
+            errors.next_visit_date = "Fecha de próxima visita inválida"
+        } else {
+            const year = nextDate.getFullYear()
+            if (year < 2000 || year > 2100) {
+                errors.next_visit_date = "La fecha debe estar entre 2000 y 2100"
+            }
+            if (consultationDate && nextVisitDate < consultationDate) {
+                errors.next_visit_date = "La próxima visita no puede ser antes de la consulta actual"
             }
         }
     }
@@ -65,19 +88,20 @@ export async function createConsultation(
     try {
         const { rows } = await client.query(
             `WITH inserted AS (
-                INSERT INTO consultations (pet_id, consultation_date, procedure_id, notes)
-                VALUES ($1, $2, $3, $4)
-                RETURNING id, consultation_date, procedure_id, notes
+                INSERT INTO consultations (pet_id, consultation_date, next_visit_date, procedure_id, notes)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id, consultation_date, next_visit_date, procedure_id, notes
             )
             SELECT
                 i.id,
-                to_char(i.consultation_date, 'YYYY-MM-DD') as consultation_date, 
+                to_char(i.consultation_date, 'YYYY-MM-DD') as consultation_date,
+                to_char(i.next_visit_date, 'YYYY-MM-DD') as next_visit_date,
                 i.procedure_id,
                 p.name as procedure_name,
                 i.notes
             FROM inserted i
             LEFT JOIN procedures p ON i.procedure_id = p.id`,
-            [petId, consultationDate, procedureId, notes || null]
+            [petId, consultationDate, nextVisitDate, procedureId, notes]
         )
 
         revalidatePath(`/pets/${petId}/consultations`)
@@ -103,10 +127,16 @@ export async function updateConsultation(
     if (!session) throw new Error("Unauthorized")
 
     const consultationDate = formData.get("consultation_date")?.toString() ?? ""
+    const nextVisitDate = formData.get("next_visit_date")?.toString() || null
     const procedureId = formData.get("procedure_id")?.toString() ?? ""
-    const notes = formData.get("notes")?.toString().trim() ?? ""
+    const notes = formData.get("notes")?.toString().trim() || null
 
-    const data = { consultation_date: consultationDate, procedure_id: procedureId, notes }
+    const data: FormState["data"] = {
+        consultation_date: consultationDate,
+        next_visit_date: nextVisitDate,
+        procedure_id: procedureId,
+        notes
+    }
     const errors: FormState["errors"] = {}
 
     if (!consultationDate) {
@@ -119,6 +149,21 @@ export async function updateConsultation(
             const year = date.getFullYear()
             if (year < 2000 || year > 2100) {
                 errors.consultation_date = "La fecha debe estar entre 2000 y 2100"
+            }
+        }
+    }
+
+    if (nextVisitDate) {
+        const nextDate = new Date(nextVisitDate)
+        if (isNaN(nextDate.getTime())) {
+            errors.next_visit_date = "Fecha de próxima visita inválida"
+        } else {
+            const year = nextDate.getFullYear()
+            if (year < 2000 || year > 2100) {
+                errors.next_visit_date = "La fecha debe estar entre 2000 y 2100"
+            }
+            if (consultationDate && nextVisitDate < consultationDate) {
+                errors.next_visit_date = "La próxima visita no puede ser antes de la consulta actual"
             }
         }
     }
@@ -140,19 +185,20 @@ export async function updateConsultation(
         const { rows } = await client.query(
             `WITH updated AS (
                 UPDATE consultations
-                SET consultation_date = $1, procedure_id = $2, notes = $3
-                WHERE id = $4
-                RETURNING id, consultation_date, procedure_id, notes
+                SET consultation_date = $1, next_visit_date = $2, procedure_id = $3, notes = $4
+                WHERE id = $5
+                RETURNING id, consultation_date, next_visit_date, procedure_id, notes
             )
             SELECT
                 u.id,
-                to_char(u.consultation_date, 'YYYY-MM-DD') as consultation_date, 
+                to_char(u.consultation_date, 'YYYY-MM-DD') as consultation_date,
+                to_char(u.next_visit_date, 'YYYY-MM-DD') as next_visit_date,
                 u.procedure_id,
                 p.name as procedure_name,
                 u.notes
             FROM updated u
             LEFT JOIN procedures p ON u.procedure_id = p.id`,
-            [consultationDate, procedureId, notes || null, consultationId]
+            [consultationDate, nextVisitDate, procedureId, notes, consultationId]
         )
 
         revalidatePath(`/pets/${petId}/consultations`)

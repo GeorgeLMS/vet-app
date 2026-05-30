@@ -19,37 +19,39 @@ async function getPet(id: string) {
 }
 
 async function getPetConsultations(petId: string) {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT
+    //const client = await pool.connect()
+    // try {
+    const { rows } = await pool.query(
+        `SELECT
                 c.id,
                 to_char(c.consultation_date, 'YYYY-MM-DD') as consultation_date,
                 c.procedure_id,
                 c.notes,
-                p.name as procedure_name
+                p.name as procedure_name,
+                to_char(c.next_visit_date, 'YYYY-MM-DD') as next_visit_date
+
             FROM consultations c
             LEFT JOIN procedures p ON c.procedure_id = p.id
             WHERE c.pet_id = $1
             ORDER BY c.consultation_date DESC`,
-            [petId]
-        )
-        return rows
-    } finally {
-        client.release()
-    }
+        [petId]
+    )
+    return rows
+    //} finally {
+    //    client.release()
+    //}
 }
 
 async function getProcedures() {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT id, name FROM procedures ORDER BY display_order`
-        )
-        return rows
-    } finally {
-        client.release()
-    }
+    //const client = await pool.connect()
+    //try {
+    const { rows } = await pool.query(
+        `SELECT id, name FROM procedures ORDER BY display_order`
+    )
+    return rows
+    //} finally {
+    //    client.release()
+    //}
 }
 
 export default async function ConsultationsPage({

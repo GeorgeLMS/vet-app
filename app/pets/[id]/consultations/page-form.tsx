@@ -13,7 +13,7 @@ export function ConsultationForm({
 }: {
     petId: string
     procedures: { id: string; name: string }[]
-    consultation?: { id: string; consultation_date: string; procedure_id: string; notes: string | null }
+    consultation?: { id: string; consultation_date: string; next_visit_date: string | null; procedure_id: string; notes: string | null }
     onSuccess?: (c: any) => void
     onCancel?: () => void
 }) {
@@ -34,7 +34,8 @@ export function ConsultationForm({
         boundAction,
         {
             data: {
-                consultation_date: consultation?.consultation_date ?? "", // empty for new, string for edit
+                consultation_date: consultation?.consultation_date ?? "",
+                next_visit_date: consultation?.next_visit_date ?? "", // <-- ADD THIS
                 procedure_id: consultation?.procedure_id ?? "",
                 notes: consultation?.notes ?? "",
             }
@@ -64,6 +65,8 @@ export function ConsultationForm({
                     <p className="mt-1 text-sm text-red-600">{state.errors.consultation_date}</p>
                 )}
             </div>
+
+
 
             <div>
                 <label htmlFor="procedure_id" className="block text-sm font-medium text-gray-700">
@@ -95,7 +98,7 @@ export function ConsultationForm({
                     id="notes"
                     name="notes"
                     rows={4}
-                    defaultValue={state.data?.notes}
+                    defaultValue={state.data?.notes ?? ''}
                     className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.notes ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
                     placeholder="Notas adicionales sobre esta consulta..."
                 />
@@ -104,6 +107,22 @@ export function ConsultationForm({
                 )}
             </div>
 
+            {/* ADD THIS BLOCK */}
+            <div>
+                <label htmlFor="next_visit_date" className="block text-sm font-medium text-gray-700">
+                    Próxima Visita
+                </label>
+                <input
+                    type="date"
+                    id="next_visit_date"
+                    name="next_visit_date"
+                    defaultValue={state.data?.next_visit_date ?? ''}
+                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.next_visit_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                />
+                {state?.errors?.next_visit_date && (
+                    <p className="mt-1 text-sm text-red-600">{state.errors.next_visit_date}</p>
+                )}
+            </div>
             <div className="flex gap-3 pt-4">
                 <SubmitButton>{isEdit ? 'Actualizar Consulta' : 'Guardar Consulta'}</SubmitButton>
                 {onCancel && (

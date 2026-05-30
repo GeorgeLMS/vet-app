@@ -2,9 +2,8 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { LoadingLink as Link } from "@/components/LoadingLink"
-import { Users, PawPrint, ClipboardList, CheckCircle, Clock, AlertCircle } from "lucide-react"
+import { Users, PawPrint, ClipboardList, CheckCircle, Clock, AlertCircle, Calendar } from "lucide-react"
 import { signOut } from "@/auth"
-
 
 import pool from "@/pool"
 
@@ -53,7 +52,6 @@ async function getDashboardData() {
         client.release()
     }
 }
-
 
 export default async function DashboardPage() {
     const session = await auth()
@@ -148,7 +146,7 @@ export default async function DashboardPage() {
                 {/* Bottom - Quick Links */}
                 <div className="bg-white rounded-lg shadow p-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Enlaces Rápidos</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <Link
                             href="/checkins"
                             className="flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 px-6 rounded-lg transition"
@@ -170,7 +168,13 @@ export default async function DashboardPage() {
                             <Users size={20} />
                             Clientes
                         </Link>
-
+                        <Link
+                            href="/schedule"
+                            className="flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-4 px-6 rounded-lg transition"
+                        >
+                            <Calendar size={20} />
+                            Agenda
+                        </Link>
                     </div>
                 </div>
             </div>

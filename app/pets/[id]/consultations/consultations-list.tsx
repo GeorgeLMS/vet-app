@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Plus, Pencil, Trash2, FilePlus2, SquarePen, FileSignature, PlusSquare } from "lucide-react"
+import { Plus, Trash2, FilePlus2, SquarePen, Calendar, CalendarClock } from "lucide-react"
 import { ConsultationForm } from "./page-form"
 import { deleteConsultation } from "./actions"
 import ConfirmDialog from "@/components/confirm-dialog"
@@ -19,6 +19,7 @@ const Spinner = () => (
 type Consultation = {
     id: string
     consultation_date: string
+    next_visit_date: string | null // <-- ADD THIS LINE
     procedure_id: string
     procedure_name: string | null
     notes: string | null
@@ -194,6 +195,28 @@ function ConsultationCard({
                                         {consultation.notes}
                                     </p>
                                 )}
+
+                                {/* {consultation.next_visit_date && (
+                                    <div className="inline-flex items-center gap-1.5 text-sm text-slate-700  bg-blue-50 px-2 py-0.5 rounded leading-relaxed">
+                                        <CalendarClock size={14} className="shrink-0 text-slate-500" />
+                                        <span>Próxima visita: {formatDate(consultation.next_visit_date)}</span>
+                                    </div>
+                                )} */}
+                                {/* {consultation.next_visit_date && (
+                                    <div className="flex items-center gap-1.5 text-sm text-gray-700 pl-2 border-l-2 border-amber-400 leading-relaxed">
+                                        <CalendarClock size={14} className="shrink-0 text-amber-600" />
+                                        <span className="text-sm">Próxima visita: {formatDate(consultation.next_visit_date)}</span>
+                                    </div>
+                                )} */}
+                                {consultation.next_visit_date && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 leading-relaxed">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+                                        <CalendarClock size={14} className="shrink-0 text-gray-400" />
+                                        <span>Próxima visita: <span className="text-sm text-gray-600">{formatDate(consultation.next_visit_date)}</span></span>
+                                    </div>
+                                )}
+
+                                {/* <span className="text-xs font-medium bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full"></span> */}
                             </div>
 
                             <div className="flex items-center gap-2 flex-shrink-0">
@@ -232,6 +255,7 @@ function ConsultationCard({
                             consultation={{
                                 id: consultation.id,
                                 consultation_date: consultation.consultation_date,
+                                next_visit_date: consultation.next_visit_date, // <-- ADD THIS
                                 procedure_id: consultation.procedure_id,
                                 notes: consultation.notes
                             }}
