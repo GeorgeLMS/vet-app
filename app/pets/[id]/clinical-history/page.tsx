@@ -30,7 +30,7 @@ async function getClinicalHistories(petId: string) {
     try {
         const { rows } = await client.query(
             `SELECT id,
-                    TO_CHAR(fecha, 'DD Mon YY') as fecha_formatted,
+                    TO_CHAR(fecha, 'YYYY-MM-DD') as fecha_formatted,
                     fecha,
                     motivo_consulta,
                     created_at

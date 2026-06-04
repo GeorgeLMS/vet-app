@@ -14,6 +14,7 @@ import PetFiles from "@/components/PetFiles"
 
 
 import pool from "@/pool"
+import { formatDate } from "@/utils"
 
 async function getClinicalHistories(petId: string) {
     const client = await pool.connect()
@@ -31,7 +32,12 @@ async function getClinicalHistories(petId: string) {
     }
 }
 
-async function getPet(id: string) {
+export async function getPet(id: string) {
+    const session = await auth()
+    if (!session) redirect('/')
+
+    const tz = session.user.timezone || 'America/Tijuana'
+
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
@@ -40,24 +46,8 @@ async function getPet(id: string) {
         p.name,
         p.breed,
         p.gender,
-        TO_CHAR(p.birth_date, 'DD Mon YY') as birth_date,
-     
-
-CASE
-    WHEN AGE(p.birth_date) < INTERVAL '1 year'
-    THEN EXTRACT(MONTH FROM AGE(p.birth_date))::int
-    ELSE EXTRACT(YEAR FROM AGE(p.birth_date))::int
-END as age_pet,
-CASE
-    WHEN AGE(p.birth_date) < INTERVAL '1 year' AND EXTRACT(MONTH FROM AGE(p.birth_date)) = 1
-    THEN 'mes'
-    WHEN AGE(p.birth_date) < INTERVAL '1 year'
-    THEN 'meses'
-    WHEN EXTRACT(YEAR FROM AGE(p.birth_date)) = 1
-    THEN 'año'
-    ELSE 'años'
-END as age_unit,
-
+        TO_CHAR(p.birth_date, 'YYYY-MM-DD') as birth_date,
+        age_display(p.birth_date, $2) as age_pet,
         p.weight,
         p.notes,
         s.name_es as species,
@@ -71,7 +61,7 @@ END as age_unit,
       LEFT JOIN pet_colors pc ON pc.id = p.color_id
       LEFT JOIN clients c ON p.client_id = c.id
       WHERE p.id = $1`,
-            [id]
+            [id, tz]
         )
         return rows[0]
     } finally {
@@ -200,23 +190,34 @@ export default async function PetPage({
                                 </dd>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="flex gap-8">
                                 <div>
-                                    <dt className="text-sm font-medium text-gray-500">Fecha de Nacimiento</dt>
-                                    <dd className="text-sm text-gray-900">
-                                        {pet.birth_date ? pet.birth_date : "-"}
-                                        {pet.age_pet ? ` (${pet.age_pet} ${pet.age_unit})` : "-"}
-                                    </dd>
+                                    <div className="text-xs font-medium text-gray-500">Fecha de Nacimiento</div>
+                                    <div className="text-sm text-gray-900 mt-0.5">
+                                        <span className="text-xs text-gray-900">{formatDate(pet.birth_date)}</span>
+                                        {pet.age_pet ? ` (${pet.age_pet})` : ""}
+                                    </div>
                                 </div>
                                 <div>
-                                    <dt className="text-sm font-medium text-gray-500">Peso</dt>
-                                    <dd className="text-sm text-gray-900">{pet.weight ? `${pet.weight} kg` : "-"}</dd>
+                                    <div className="text-xs font-medium text-gray-500">Peso</div>
+                                    <div className="text-sm text-gray-900 mt-0.5">{pet.weight ? `${pet.weight} kg` : "-"}</div>
+                                </div>
+                                <div>
+                                    <div className="text-xs font-medium text-gray-500">ID</div>
+                                    <div className="text-sm text-gray-700 font-mono mt-0.5">#{pet.id}</div>
                                 </div>
                             </div>
-
                             <div>
                                 <dt className="text-sm font-medium text-gray-500">Notas</dt>
-                                <dd className="text-sm text-gray-900">{pet.notes || "-"}</dd>
+                                <dd className="text-sm text-gray-900">
+                                    {pet.notes ? (
+                                        <div className="mt-1 pl-3 border-l-2 border-gray-300 bg-gray-50 py-2 pr-2 rounded-r">
+                                            <p className="text-sm text-gray-600 italic">
+                                                {pet.notes}
+                                            </p>
+                                        </div>
+                                    ) : "-"}
+                                </dd>
                             </div>
                         </dl>
 

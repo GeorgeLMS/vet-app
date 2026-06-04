@@ -1,12 +1,30 @@
-import NextAuth from "next-auth"
+import NextAuth, { type DefaultSession } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-//import { Pool } from "pg"
 import bcrypt from "bcryptjs"
 import { authConfig } from "./auth.config"
 import pool from "@/pool"
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-    ...authConfig, // This pulls in pages, callbacks, session
+// Type augmentation goes here
+declare module "next-auth" {
+    interface Session {
+        user: {
+            timezone?: string
+        } & DefaultSession["user"]
+    }
+    interface User {
+        timezone?: string
+    }
+}
+
+// NextAuth v5: it's "next-auth" not "next-auth/jwt"
+declare module "next-auth" {
+    interface JWT {
+        timezone?: string
+    }
+}
+
+export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
+    ...authConfig, // This pulls in pages, providers, session
     providers: [
         Credentials({
             name: "Credentials",
@@ -23,8 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const client = await pool.connect()
                 try {
                     const { rows } = await client.query(
-                        `SELECT id, username, password_hash FROM users WHERE LOWER(username) = LOWER($1)
-`,
+                        `SELECT id, username, password_hash, timezone FROM users WHERE LOWER(username) = $1`,
                         [username]
                     )
 
@@ -34,11 +51,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     const isValid = await bcrypt.compare(password, user.password_hash)
                     if (!isValid) return null
 
-                    return { id: user.id.toString(), name: user.username }
+                    return {
+                        id: user.id.toString(),
+                        name: user.username,
+                        timezone: user.timezone ?? 'UTC'
+                    }
                 } finally {
                     client.release()
                 }
             },
         }),
     ],
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.timezone = user.timezone
+            }
+            return token
+        },
+        async session({ session, token }) {
+            if (token.timezone) {
+                session.user.timezone = token.timezone as string
+            }
+            return session
+        }
+        // If authConfig has callbacks, merge them manually:
+        //...authConfig.callbacks,
+    }
 })

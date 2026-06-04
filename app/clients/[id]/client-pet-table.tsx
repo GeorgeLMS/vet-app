@@ -2,6 +2,7 @@
 
 import { LoadingLink as Link } from "@/components/LoadingLink"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
+import { formatDate } from "@/utils"
 
 type Pet = {
     id: string | number
@@ -9,7 +10,7 @@ type Pet = {
     breed: string | null
     species: string | null
     gender: string | null
-    last_consultation: string | Date | null
+    last_consultation: string | null
 }
 
 export function ClientPetTable({ pets }: { pets: Pet[] }) {
@@ -58,11 +59,7 @@ export function ClientPetTable({ pets }: { pets: Pet[] }) {
                                 className="block whitespace-nowrap px-4 py-3 text-sm text-gray-500"
                             >
                                 {pet.last_consultation
-                                    ? new Date(pet.last_consultation).toLocaleDateString('es-MX', {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        year: 'numeric',
-                                    })
+                                    ? formatDate(pet.last_consultation)
                                     : "Nunca"}
                             </Link>
                         </td>

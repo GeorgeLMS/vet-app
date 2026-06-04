@@ -10,15 +10,11 @@ const Spinner = () => (
     </svg>
 )
 
-export default function VaccinationRowMenu({
-    id,
-    petId,
+export default function DewormingRowMenu({
     onEdit,
     onDelete,
     isPending,
 }: {
-    id: number
-    petId: string
     onEdit: () => void
     onDelete: () => void
     isPending: boolean
@@ -32,7 +28,7 @@ export default function VaccinationRowMenu({
                     onClick={onEdit}
                     disabled={isPending}
                     className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
-                    aria-label="Editar vacuna"
+                    aria-label="Editar"
                 >
                     <Edit size={16} />
                 </button>
@@ -40,7 +36,7 @@ export default function VaccinationRowMenu({
                     onClick={() => setConfirming(true)}
                     disabled={isPending}
                     className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
-                    aria-label="Eliminar vacuna"
+                    aria-label="Eliminar"
                 >
                     {isPending ? <Spinner /> : <Trash2 size={16} />}
                 </button>
@@ -48,8 +44,8 @@ export default function VaccinationRowMenu({
 
             {confirming && (
                 <ConfirmDialog
-                    title="Eliminar vacuna"
-                    message="¿Estás seguro que deseas eliminar esta vacuna? Esta acción no se puede deshacer."
+                    title="Eliminar desparasitación"
+                    message="¿Estás seguro que deseas eliminar este registro? Esta acción no se puede deshacer."
                     confirmText="Eliminar"
                     danger
                     onConfirm={() => { setConfirming(false); onDelete() }}

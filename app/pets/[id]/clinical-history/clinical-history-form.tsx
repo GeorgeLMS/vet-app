@@ -9,7 +9,8 @@ type Pet = {
     species: string
     breed: string | null
     birth_date: string | null
-    sex: string | null
+    age: string | null
+    gender: string | null
     weight: number | null
     owner_name: string | null
     owner_phone: string | null
@@ -232,9 +233,6 @@ export function ClinicalHistoryForm({
         startTransition(() => formAction(formData))
     }
 
-    const age = pet.birth_date
-        ? Math.floor((new Date().getTime() - new Date(pet.birth_date).getTime()) / (1000 * 60 * 60 * 24 * 365))
-        : null
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -285,12 +283,12 @@ export function ClinicalHistoryForm({
                     </div>
                     <div>
                         <p className="text-xs text-gray-500">Sexo</p>
-                        <p className="font-medium">{pet.sex || "-"}</p>
+                        <p className="font-medium">{pet.gender || "-"}</p>
                     </div>
                     <div>
                         <p className="text-xs text-gray-500">Edad / Peso</p>
                         <p className="font-medium">
-                            {age ? `${age} años` : "-"} {pet.weight ? `· ${pet.weight} kg` : ""}
+                            {pet.age ? pet.age : "-"} {pet.weight ? `· ${pet.weight} kg` : ""}
                         </p>
                     </div>
                 </div>

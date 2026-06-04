@@ -36,7 +36,7 @@ async function getClientPets(clientId: string) {
     p.gender,
     p.breed,
     s.name as species,
-    MAX(con.consultation_date) AS last_consultation
+    TO_CHAR(MAX(con.consultation_date), 'YYYY-MM-DD') AS last_consultation
 FROM pets p
 LEFT JOIN species s ON p.species_id = s.id
 LEFT JOIN consultations con ON con.pet_id = p.id

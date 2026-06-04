@@ -30,7 +30,7 @@ export function EditConsultationForm({
         boundAction,
         {
             data: {
-                consultation_date: new Date(consultation.consultation_date).toISOString().split("T")[0],
+                consultation_date: consultation.consultation_date,
                 procedure_id: consultation.procedure_id,
                 notes: consultation.notes || "",
             }

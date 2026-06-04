@@ -3,44 +3,59 @@ import { redirect } from "next/navigation"
 import { CheckinClient } from "./checkin-client"
 import NavBar from "@/components/NavBar"
 import pool from "@/pool"
-
-
-
-
-
+import { formatToday } from "@/utils"
+//import { getUserTimezone } from "@/utils"
 async function getTodayCheckins() {
+    const session = await auth()
+    if (!session) redirect('/')
+
+    const tz = session.user.timezone || 'America/Tijuana'
+
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT
+            `
+WITH vars AS (
+    SELECT (NOW() AT TIME ZONE $1)::date as today
+)
+SELECT
     c.id,
     c.pet_id,
-    c.checked_in_at,
-    c.seen_at,
+    TO_CHAR(c.checked_in_at AT TIME ZONE $1, 'HH12:MI AM') as checked_in_at_time,
+    TO_CHAR(c.seen_at AT TIME ZONE $1, 'HH12:MI AM') as seen_at_time,
+    EXTRACT(EPOCH FROM c.seen_at AT TIME ZONE $1) * 1000 as seen_at_ms,
     c.brought_by,
     c.notes,
     p.name as pet_name,
-    p.birth_date as pet_birth_date,
+    p.notes as pet_notes,
+    TO_CHAR(p.birth_date, 'YYYY-MM-DD') as pet_birth_date,
     p.weight as pet_weight,
     p.breed,
     p.gender,
+    age_display(p.birth_date, $1) as pet_age,
     pc.name_es as color,
     pc.hex as color_hex,
+    cl.id as client_id,
     cl.name as client_name,
     cl.phone,
     s.name_es as species,
     EXISTS(
         SELECT 1 FROM consultations con
         WHERE con.pet_id = c.pet_id
-        AND (con.consultation_date::date = CURRENT_DATE)
+        AND con.consultation_date >= (vars.today::timestamptz AT TIME ZONE $1)
+        AND con.consultation_date < ((vars.today + 1)::timestamptz AT TIME ZONE $1)
     ) as has_consultation_today
 FROM checkins c
+CROSS JOIN vars
 JOIN pets p ON c.pet_id = p.id
 JOIN clients cl ON p.client_id = cl.id
 LEFT JOIN species s ON p.species_id = s.id
 LEFT JOIN pet_colors pc ON pc.id = p.color_id
-WHERE (c.checked_in_at::date  = CURRENT_DATE)
-ORDER BY c.checked_in_at ASC`
+WHERE c.checked_in_at >= vars.today
+  AND c.checked_in_at < vars.today + INTERVAL '1 day'
+ORDER BY c.checked_in_at ASC
+`,
+            [tz]
         )
         return rows
     } finally {
@@ -52,15 +67,17 @@ export default async function CheckinsPage() {
     const session = await auth()
     if (!session) redirect("/")
 
+    const tz = session.user.timezone || 'America/Tijuana'
+
     const checkins = await getTodayCheckins()
 
     const waiting = checkins.filter(c => !c.seen_at)
 
     const seen = checkins
-        .filter(c => c.seen_at)
+        .filter(c => c.seen_at_ms !== null)
         .sort((a, b) => {
             if (a.has_consultation_today === b.has_consultation_today) {
-                return new Date(b.seen_at!).getTime() - new Date(a.seen_at!).getTime()
+                return b.seen_at_ms - a.seen_at_ms
             }
             return a.has_consultation_today ? 1 : -1
         })
@@ -68,21 +85,12 @@ export default async function CheckinsPage() {
     return (
         <main className="min-h-screen bg-gray-100 p-4">
             <div className="mx-auto max-w-2xl">
-                <div className="flex items-center justify-between">
-                    <div className="mb-2">
-                        <h1 className="mt-2 text-3xl font-bold text-gray-900">Ingresos de Hoy</h1>
-                        <div className="flex items-center justify-between mb-2">
-                            <NavBar />
-                        </div>
-                    </div>
-                    <span className="text-sm font-bold text-gray-500">
-                        {new Date().toLocaleDateString('es-MX', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            timeZone: 'America/Tijuana'
-                        })}
-                    </span>
+                <div className="mb-4">
+                    <h1 className="text-2xl font-semibold text-gray-900">Ingresos de Hoy</h1>
+                    <p className="text-sm text-gray-500 mt-0.5 mb-2">
+                        {formatToday(tz)}
+                    </p>
+                    <NavBar />
                 </div>
                 <CheckinClient waiting={waiting} seen={seen} />
             </div>

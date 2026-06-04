@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { Plus, Trash2, FilePlus2, SquarePen, Calendar, CalendarClock } from "lucide-react"
 import { ConsultationForm } from "./page-form"
 import { deleteConsultation } from "./actions"
-import ConfirmDialog from "@/components/confirm-dialog"
+import ConfirmDialog from "@/components/ConfirmDialog"
 import { formatDate } from "@/utils"
 import { ActionButton } from '@/components/ActionButton'
 import { SlideDown } from "@/components/SlideDown"

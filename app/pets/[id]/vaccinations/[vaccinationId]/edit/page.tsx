@@ -23,8 +23,8 @@ async function getVaccination(vaccinationId: string) {
             `SELECT
                 id,
                 vaccine_type_id,
-                TO_CHAR(application_date, 'DD Mon YY') as application_date,
-                TO_CHAR(next_vaccination_date, 'DD Mon YY') as next_vaccination_date
+                TO_CHAR(application_date, 'YYYY-MM-DD') as application_date,
+                TO_CHAR(next_vaccination_date, 'YYYY-MM-DD') as next_vaccination_date
             FROM vaccinations WHERE id = $1`,
             [vaccinationId]
         )

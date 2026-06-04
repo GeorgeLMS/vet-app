@@ -2,6 +2,7 @@ export type Pet = {
     id: number
     name: string
     birth_date: string | null
+    age: string | null
     weight: string | null
     breed: string | null
     notes: string | null
@@ -11,6 +12,7 @@ export type Pet = {
     gender: string | null
     client_id: number
     client_name: string
+    client_phone: string
     last_consultation_date: string | null
 }
 

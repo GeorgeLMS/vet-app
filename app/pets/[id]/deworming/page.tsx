@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { notFound } from "next/navigation"
 import pool from "@/pool"
-import VaccinationsClient from "./VaccinationsClient"
+import DewormingClient from "./DewormingClient"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -16,7 +16,7 @@ async function getPet(id: string) {
     }
 }
 
-export default async function VaccinationsPage({
+export default async function DewormingPage({
     params
 }: {
     params: Promise<{ id: string }>
@@ -28,5 +28,5 @@ export default async function VaccinationsPage({
     const pet = await getPet(id)
     if (!pet) notFound()
 
-    return <VaccinationsClient petId={id} petName={pet.name} />
+    return <DewormingClient petId={id} petName={pet.name} />
 }

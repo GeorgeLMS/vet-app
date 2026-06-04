@@ -6,16 +6,21 @@ import NavBar from "@/components/NavBar"
 import pool from "@/pool"
 
 
-async function getConsultation(id: string) {
+async function getConsultation(id: string, tz: string) {
     const client = await pool.connect()
     try {
-        const { rows } = await client.query(
-            `SELECT c.id, c.pet_id, c.consultation_date, c.procedure_id, c.notes, p.name as pet_name
-             FROM consultations c
-             JOIN pets p ON c.pet_id = p.id
-             WHERE c.id = $1`,
-            [id]
-        )
+        const { rows } = await client.query(`
+            SELECT
+                c.id,
+                c.pet_id,
+                TO_CHAR(c.consultation_date AT TIME ZONE $2, 'YYYY-MM-DD') as consultation_date,
+                c.procedure_id,
+                c.notes,
+                p.name as pet_name
+            FROM consultations c
+            JOIN pets p ON c.pet_id = p.id
+            WHERE c.id = $1
+        `, [id, tz])
         return rows[0]
     } finally {
         client.release()
@@ -41,8 +46,9 @@ export default async function EditConsultationPage({
     const session = await auth()
     if (!session) redirect("/")
 
+    const tz = session.user.timezone || 'America/Tijuana'
     const { id, consultationId } = await params
-    const consultation = await getConsultation(consultationId)
+    const consultation = await getConsultation(consultationId, tz)
     if (!consultation) notFound()
 
     const procedures = await getProcedures()

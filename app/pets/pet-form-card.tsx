@@ -27,7 +27,7 @@ export default function PetFormCard({ // <- Renamed from PetFormRow
         species_id: pet?.species_id?.toString() || '',
         color_id: pet?.color_id?.toString() || '',
         breed: pet?.breed || '',
-        birth_date: pet?.birth_date ? new Date(pet.birth_date).toISOString().split('T')[0] : '',
+        birth_date: pet?.birth_date ? pet.birth_date : '',
         weight: pet?.weight || '',
         notes: pet?.notes || '',
         gender: pet?.gender || '',
@@ -249,7 +249,6 @@ export default function PetFormCard({ // <- Renamed from PetFormRow
                             type="date"
                             value={formData.birth_date}
                             onChange={e => setFormData({ ...formData, birth_date: e.target.value })}
-                            max={new Date().toISOString().split('T')[0]}
                             className={`${inputClass} border-gray-300`}
                         />
                     </div>
