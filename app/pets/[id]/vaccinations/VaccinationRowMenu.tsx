@@ -31,7 +31,7 @@ export default function VaccinationRowMenu({
                 <button
                     onClick={onEdit}
                     disabled={isPending}
-                    className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200  text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
                     aria-label="Editar vacuna"
                 >
                     <Edit size={16} />
@@ -39,7 +39,7 @@ export default function VaccinationRowMenu({
                 <button
                     onClick={() => setConfirming(true)}
                     disabled={isPending}
-                    className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
+                    className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200  text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
                     aria-label="Eliminar vacuna"
                 >
                     {isPending ? <Spinner /> : <Trash2 size={16} />}

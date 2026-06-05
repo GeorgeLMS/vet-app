@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { notFound } from "next/navigation"
 import NavBar from "@/components/NavBar"
-import { PetConsultationsCard } from "./pet-consultations-card"
+import { ConsultationsList } from "./consultations/consultations-list"
 import { PetDetailsCard } from "./pet-details-card"
 import pool from "@/pool"
 
@@ -161,11 +161,12 @@ export default async function PetPage({
 
                     {/* Consultations */}
                     <div>
-                        <PetConsultationsCard
+                        <ConsultationsList
                             petId={id}
                             initialConsultations={consultations}
                             procedures={procedures}
                         />
+
                     </div>
 
                 </div>

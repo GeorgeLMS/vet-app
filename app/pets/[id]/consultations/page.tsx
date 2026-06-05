@@ -78,18 +78,18 @@ export default async function ConsultationsPage({
                     <h1 className="text-2xl font-bold text-gray-900">
                         {pet.name}
                     </h1>
-                    <p className="text-base text-gray-600 mt-0.5">Historial de consultas</p>
-
                     <div className="mt-3">
                         <NavBar />
                     </div>
                 </div>
 
-                <ConsultationsList
-                    petId={id}
-                    initialConsultations={consultations}
-                    procedures={procedures}
-                />
+                <div className="mt-4">
+                    <ConsultationsList
+                        petId={id}
+                        initialConsultations={consultations}
+                        procedures={procedures}
+                    />
+                </div>
             </div>
         </main>
     )

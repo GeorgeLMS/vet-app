@@ -1,13 +1,13 @@
 'use client'
 import { useState, useTransition } from "react"
-import { Edit, Trash2, Bug, ClipboardPlus, FolderOpen, Syringe, FileText } from "lucide-react"
+import { Edit, Trash2, Bug, ClipboardPlus, FolderOpen, Syringe, FileText, ChevronDown } from "lucide-react"
 import { LoadingLink as Link } from "@/components/LoadingLink"
-import { formatDate } from "@/utils"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { deletePet } from "./actions"
 import { Pet, Species, PetColor } from "./types"
 import PetFormCard from "./pet-form-card"
 import PetInfoBlock from "@/components/PetInfoBlock"
+import PetQuickActions from "@/components/PerQuickActions"
 
 const Spinner = () => (
     <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -17,12 +17,7 @@ const Spinner = () => (
 )
 
 export default function PetCard({
-    pet,
-    species,
-    colors,
-    isEditing,
-    onEdit,
-    onCancel
+    pet, species, colors, isEditing, onEdit, onCancel
 }: {
     pet: Pet
     species: Species[]
@@ -32,26 +27,18 @@ export default function PetCard({
     onCancel: () => void
 }) {
     const [showConfirm, setShowConfirm] = useState(false)
+    const [showActions, setShowActions] = useState(false)
     const [isPending, startTransition] = useTransition()
+
     if (isEditing) {
-        return (
-            <PetFormCard
-                pet={pet}
-                species={species}
-                colors={colors}
-                onCancel={onCancel}
-                onSuccess={onCancel}
-            />
-        )
+        return <PetFormCard pet={pet} species={species} colors={colors} onCancel={onCancel} onSuccess={onCancel} />
     }
 
     const petColor = colors.find(c => c.id === pet.color_id)
 
     async function handleDelete() {
         setShowConfirm(false)
-        startTransition(async () => {
-            await deletePet(pet.id)
-        })
+        startTransition(async () => { await deletePet(pet.id) })
     }
 
     return (
@@ -66,9 +53,9 @@ export default function PetCard({
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div className="rounded-lg bg-white shadow">
+            <div className="rounded-lg bg-white shadow relative">
                 {/* Header */}
-                <div className="flex items-start gap-3 p-4 bg-white">
+                <div className="flex items-start gap-3 p-2 bg-white">
                     <div className="flex-1 min-w-0">
                         <PetInfoBlock
                             petId={pet.id}
@@ -89,55 +76,41 @@ export default function PetCard({
                         />
                     </div>
                 </div>
-                {/* Actions */}
-                <div className="px-4 pb-4 bg-white  border-blue-100">
-                    <div className="flex items-center justify-between mt-1">
-                        {/* Left: Quick actions — segmented group */}
-                        <div className="flex items-center">
-                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                                {[
-                                    { href: `/pets/${pet.id}/clinical-history`, icon: <ClipboardPlus size={15} />, label: "Historial Clínico" },
-                                    { href: `/pets/${pet.id}/files`, icon: <FolderOpen size={15} />, label: "Archivos" },
-                                    { href: `/pets/${pet.id}/vaccinations`, icon: <Syringe size={15} />, label: "Vacunas" },
-                                    { href: `/pets/${pet.id}/deworming`, icon: <Bug size={15} />, label: "Desparasitación" },
-                                    { href: `/pets/${pet.id}/consultations`, icon: <FileText size={15} />, label: "Consultas" },
-                                ].map(({ href, icon, label }, i, arr) => (
-                                    <Link
-                                        key={href}
-                                        href={href}
-                                        onClick={(e) => e.stopPropagation()}
-                                        className={`flex items-center justify-center w-9 h-9 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors ${i < arr.length - 1 ? "border-r border-gray-200" : ""}`}
-                                        aria-label={label}
-                                        title={label}
-                                        hideTextOnLoad
-                                    >
-                                        {icon}
-                                    </Link>
-                                ))}
+
+                {showActions && (
+                    <div className="px-4 pb-4">
+                        <div className="flex items-center justify-between">
+                            <PetQuickActions petId={pet.id} />
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                                    disabled={isPending}
+                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200  text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
+                                    aria-label="Editar mascota"
+                                >
+                                    <Edit size={16} />
+                                </button>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
+                                    disabled={isPending}
+                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200  text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
+                                    aria-label="Eliminar mascota"
+                                >
+                                    {isPending ? <Spinner /> : <Trash2 size={16} />}
+                                </button>
                             </div>
                         </div>
-
-                        {/* Right: Edit / Delete */}
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                                disabled={isPending}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
-                                aria-label="Editar mascota"
-                            >
-                                <Edit size={16} />
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
-                                disabled={isPending}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
-                                aria-label="Eliminar mascota"
-                            >
-                                {isPending ? <Spinner /> : <Trash2 size={16} />}
-                            </button>
-                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* Floating chevron */}
+                <button
+                    onClick={(e) => { e.stopPropagation(); setShowActions(v => !v); }}
+                    className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-gray-800 hover:border-gray-500 shadow-sm transition-colors"
+                    aria-label={showActions ? "Ocultar acciones" : "Mostrar acciones"}
+                >
+                    <ChevronDown size={13} className={`transition-transform duration-200 ${showActions ? "rotate-180" : ""}`} />
+                </button>
             </div>
         </>
     )
