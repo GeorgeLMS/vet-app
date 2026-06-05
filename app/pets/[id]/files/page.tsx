@@ -4,6 +4,7 @@ import { Pool } from "pg"
 import Link from "next/link"
 import { Plus, ArrowLeft, Eye, Pencil } from "lucide-react"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import NavButton from "@/components/NavButton"
 import NavButtonWithText from "@/components/NavButtonWithText"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
@@ -59,7 +60,7 @@ export default async function FilesListPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-2xl font-bold text-gray-900">{pet.name}</h1>
+                    <PageTitle>{pet.name}</PageTitle>
                     {/* <p className="text-gray-600 mt-1">
                         {pet.owner_id ? (
                             <Link

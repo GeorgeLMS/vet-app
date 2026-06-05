@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { CheckinClient } from "./checkin-client"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 import { formatToday } from "@/utils"
 //import { getUserTimezone } from "@/utils"
@@ -86,7 +87,7 @@ export default async function CheckinsPage() {
         <main className="min-h-screen bg-gray-100 p-4">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-4">
-                    <h1 className="text-2xl font-semibold text-gray-900">Ingresos de Hoy</h1>
+                    <PageTitle>Ingresos de Hoy</PageTitle>
                     <p className="text-sm text-gray-500 mt-0.5 mb-2">
                         {formatToday(tz)}
                     </p>

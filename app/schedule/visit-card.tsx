@@ -1,7 +1,7 @@
 'use client'
 import { useState } from "react"
 import { ChevronDown, CalendarClock } from "lucide-react"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
 import { formatDate } from "@/utils"
 import { Visit } from "./types"

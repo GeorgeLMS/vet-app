@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import { useTopLoader } from "nextjs-toploader"
 
 type NavButtonProps = {
     href: string
@@ -22,6 +23,7 @@ export default function NavButton({ href, icon, label, size = 32 }: NavButtonPro
     const router = useRouter()
     const pathname = usePathname()
     const [loading, setLoading] = useState(false)
+    const topLoader = useTopLoader()
 
     useEffect(() => {
         setLoading(false)
@@ -32,6 +34,7 @@ export default function NavButton({ href, icon, label, size = 32 }: NavButtonPro
             onClick={() => {
                 if (pathname === href) return
                 setLoading(true)
+                topLoader.start()
                 router.push(href)
             }}
             style={{ width: size, height: size }}

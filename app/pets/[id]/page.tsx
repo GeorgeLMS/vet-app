@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { notFound } from "next/navigation"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import { ConsultationsList } from "./consultations/consultations-list"
 import { PetDetailsCard } from "./pet-details-card"
 import pool from "@/pool"
@@ -140,7 +141,7 @@ export default async function PetPage({
                     <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-0.5">
                         Ficha de la Mascota
                     </p>
-                    <h1 className="text-2xl font-semibold text-gray-700">{pet.name}</h1>
+                    <PageTitle>{pet.name}</PageTitle>
                     <div className="flex items-center justify-between mb-2 mt-1">
                         <div className="flex items-center gap-2">
                             <NavBar />

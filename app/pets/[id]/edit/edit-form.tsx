@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react"
 import { updatePet, type FormState } from "./actions"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import { SubmitButton } from "@/components/SubmitButton"
 import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
 import PetGenderRadio from "@/components/PetGenderRadio"

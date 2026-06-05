@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTopLoader } from "nextjs-toploader"
 
 type LoadingRowProps = {
     href: string
@@ -18,9 +19,11 @@ export function LoadingRow({
 }: LoadingRowProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const topLoader = useTopLoader()
 
     function handleClick() {
         setLoading(true)
+        topLoader.start()
         router.push(href)
     }
 

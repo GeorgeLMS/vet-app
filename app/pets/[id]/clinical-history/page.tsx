@@ -4,6 +4,7 @@ import { Pool } from "pg"
 import Link from "next/link"
 import { Plus, Eye, Pencil } from "lucide-react"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import NavButton from "@/components/NavButton"
 import NavButtonWithText from "@/components/NavButtonWithText"
 import pool from "@/pool"
@@ -63,7 +64,7 @@ export default async function ClinicalHistoryListPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-2xl font-bold text-gray-900">Historiales Clínicos</h1>
+                    <PageTitle>Historiales Clínicos</PageTitle>
                     <p className="text-gray-600 mt-1">
                         <Link
                             href={`/pets/${pet.id}`}

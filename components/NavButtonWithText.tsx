@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import { useTopLoader } from "nextjs-toploader"
 
 type NavButtonWithTextProps = {
     href: string
@@ -28,6 +29,7 @@ export default function NavButtonWithText({
     const router = useRouter()
     const pathname = usePathname()
     const [loading, setLoading] = useState(false)
+    const topLoader = useTopLoader()
 
     useEffect(() => {
         setLoading(false)
@@ -44,6 +46,7 @@ export default function NavButtonWithText({
             onClick={() => {
                 if (pathname === href) return
                 setLoading(true)
+                topLoader.start()
                 router.push(href)
             }}
             className={`${baseStyles} ${variants[variant]}`}

@@ -7,6 +7,7 @@ import { Pencil, ArrowLeft } from "lucide-react"
 import { ClinicalHistoryForm } from "./../clinical-history-form"
 
 import pool from "@/pool"
+import PageTitle from "@/components/PageTitle"
 
 
 async function getHistory(petId: string, historyId: string) {
@@ -157,9 +158,7 @@ export default async function ViewClinicalHistoryPage({
                         >
                             <ArrowLeft size={24} />
                         </Link>
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Historia Clínica - {pet.name}
-                        </h1>
+                        <PageTitle>Historia Clínica - {pet.name}</PageTitle>
                     </div>
                     <Link
                         href={`/pets/${id}/clinical-history/${historyId}/edit`}

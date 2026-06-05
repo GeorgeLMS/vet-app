@@ -32,6 +32,11 @@ export function formatPhone(raw: string | null | undefined): string {
     if (!raw) return ''
     const digits = raw.replace(/\D/g, '')
     if (digits.length === 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+    // US numbers with country code: +1 or 1 prefix
+    if (digits.length === 11 && digits.startsWith('1')) {
+        const local = digits.slice(1)
+        return `(${local.slice(0, 3)}) ${local.slice(3, 6)}-${local.slice(6)}`
+    }
     return raw
 }
 

@@ -1,53 +1,50 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { ArrowLeft, Plus, PlusCircle, PlusIcon, PlusSquare } from "lucide-react"
+import { Plus } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import { Pencil } from "lucide-react"
-import { SpeciesIcon } from "@/components/SpeciesIcon"
-import { ClientPetTable } from "./client-pet-table"
 import pool from "@/pool"
-
 import { notFound } from "next/navigation"
+import PetInfoBlock from "@/components/PetInfoBlock"
+import PageTitle from "@/components/PageTitle"
 
-
-
-
-async function getClient(id: string) {
-    const client = await pool.connect()
+async function getClientData(id: string, tz: string) {
+    const conn = await pool.connect()
     try {
-        const { rows } = await client.query(
-            `SELECT id, name, email, phone, address FROM clients WHERE id = $1`,
-            [id]
-        )
-        return rows[0]
-    } finally {
-        client.release()
-    }
-}
-
-async function getClientPets(clientId: string) {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT
+        const [clientResult, petsResult] = await Promise.all([
+            conn.query(
+                `SELECT id, name, email, phone, address FROM clients WHERE id = $1`,
+                [id]
+            ),
+            conn.query(
+                `SELECT
     p.id,
     p.name,
     p.gender,
     p.breed,
-    s.name as species,
-    TO_CHAR(MAX(con.consultation_date), 'YYYY-MM-DD') AS last_consultation
+    p.notes,
+    p.weight,
+    p.color_id,
+    TO_CHAR(p.birth_date, 'YYYY-MM-DD') as birth_date,
+    age_display(p.birth_date, $2) as age,
+    s.name_es as species,
+    pc.name_es as color_name,
+    pc.hex as color_hex,
+    TO_CHAR(MAX(con.consultation_date), 'YYYY-MM-DD') AS last_consultation_date
 FROM pets p
 LEFT JOIN species s ON p.species_id = s.id
+LEFT JOIN pet_colors pc ON p.color_id = pc.id
 LEFT JOIN consultations con ON con.pet_id = p.id
 WHERE p.client_id = $1
-GROUP BY p.id, p.name, p.breed, s.name
-ORDER BY last_consultation DESC NULLS LAST, p.name ASC`,
-            [clientId]
-        )
-        return rows
+GROUP BY p.id, p.name, p.gender, p.breed, p.notes, p.weight, p.color_id, p.birth_date, s.name_es, pc.name_es, pc.hex
+ORDER BY last_consultation_date DESC NULLS LAST, p.name ASC`,
+                [id, tz]
+            ),
+        ])
+        return { client: clientResult.rows[0], pets: petsResult.rows }
     } finally {
-        client.release()
+        conn.release()
     }
 }
 
@@ -59,17 +56,16 @@ export default async function ClientPage({
     const session = await auth()
     if (!session) redirect("/")
 
+    const tz = session.user.timezone || 'America/Tijuana'
     const { id } = await params
-    const client = await getClient(id)
+    const { client, pets } = await getClientData(id, tz)
     if (!client) notFound()
-
-    const pets = await getClientPets(id)
 
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">{client.name}</h1>
+                    <PageTitle>{client.name}</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>
@@ -97,14 +93,43 @@ export default async function ClientPage({
                         </dl>
                     </div>
 
-                    <div className="rounded-lg bg-white shadow">
-                        <div className="border-b px-6 py-4 flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <h2 className="text-lg font-semibold text-gray-900">
                                 Mascotas ({pets.length})
                             </h2>
                             <NavButton href={`/pets/new?clientId=${id}`} icon={<Plus size={18} />} label="Agregar Mascota" />
                         </div>
-                        <ClientPetTable pets={pets} />
+
+                        {pets.length === 0 ? (
+                            <div className="rounded-lg bg-white shadow px-6 py-8 text-center text-gray-500">
+                                No hay mascotas registradas para este cliente.
+                            </div>
+                        ) : (
+                            <div className="grid gap-2">
+                                {pets.map((pet) => (
+                                    <div key={pet.id} className="rounded-lg bg-white shadow p-2">
+                                        <PetInfoBlock
+                                            petId={pet.id}
+                                            name={pet.name}
+                                            species={pet.species}
+                                            gender={pet.gender}
+                                            breed={pet.breed}
+                                            colorName={pet.color_name}
+                                            colorHex={pet.color_hex}
+                                            clientId={client.id}
+                                            clientName={client.name}
+                                            clientPhone={client.phone}
+                                            birthDate={pet.birth_date}
+                                            age={pet.age}
+                                            weight={pet.weight}
+                                            lastConsultationDate={pet.last_consultation_date}
+                                            notes={pet.notes}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

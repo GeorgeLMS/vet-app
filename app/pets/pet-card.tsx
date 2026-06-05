@@ -1,7 +1,6 @@
 'use client'
 import { useState, useTransition } from "react"
-import { Edit, Trash2, Bug, ClipboardPlus, FolderOpen, Syringe, FileText, ChevronDown } from "lucide-react"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import { Edit, Trash2, ChevronRight } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { deletePet } from "./actions"
 import { Pet, Species, PetColor } from "./types"
@@ -53,9 +52,9 @@ export default function PetCard({
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div className="rounded-lg bg-white shadow relative">
+            <div className="rounded-lg bg-white shadow relative cursor-pointer" onClick={() => setShowActions(v => !v)}>
                 {/* Header */}
-                <div className="flex items-start gap-3 p-2 bg-white">
+                <div className="flex items-center gap-3 p-2 bg-white">
                     <div className="flex-1 min-w-0">
                         <PetInfoBlock
                             petId={pet.id}
@@ -75,9 +74,16 @@ export default function PetCard({
                             notes={pet.notes}
                         />
                     </div>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowActions(v => !v); }}
+                        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label={showActions ? "Ocultar acciones" : "Mostrar acciones"}
+                    >
+                        <ChevronRight size={18} className={`transition-transform duration-200 ${showActions ? "rotate-90" : ""}`} />
+                    </button>
                 </div>
 
-                {showActions && (
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showActions ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}>
                     <div className="px-4 pb-4">
                         <div className="flex items-center justify-between">
                             <PetQuickActions petId={pet.id} />
@@ -85,7 +91,7 @@ export default function PetCard({
                                 <button
                                     onClick={(e) => { e.stopPropagation(); onEdit(); }}
                                     disabled={isPending}
-                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200  text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
+                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
                                     aria-label="Editar mascota"
                                 >
                                     <Edit size={16} />
@@ -93,7 +99,7 @@ export default function PetCard({
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
                                     disabled={isPending}
-                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200  text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
+                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
                                     aria-label="Eliminar mascota"
                                 >
                                     {isPending ? <Spinner /> : <Trash2 size={16} />}
@@ -101,16 +107,8 @@ export default function PetCard({
                             </div>
                         </div>
                     </div>
-                )}
+                </div>
 
-                {/* Floating chevron */}
-                <button
-                    onClick={(e) => { e.stopPropagation(); setShowActions(v => !v); }}
-                    className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-600 hover:text-gray-800 hover:border-gray-500 shadow-sm transition-colors"
-                    aria-label={showActions ? "Ocultar acciones" : "Mostrar acciones"}
-                >
-                    <ChevronDown size={13} className={`transition-transform duration-200 ${showActions ? "rotate-180" : ""}`} />
-                </button>
             </div>
         </>
     )

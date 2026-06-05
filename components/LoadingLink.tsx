@@ -2,6 +2,7 @@
 import Link, { LinkProps } from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { useTopLoader } from 'nextjs-toploader'
 import { AnchorHTMLAttributes } from 'react'
 
 type LoadingLinkProps = LinkProps &
@@ -14,6 +15,7 @@ type LoadingLinkProps = LinkProps &
 export function LoadingLink({ children, className, hideTextOnLoad = false, ...props }: LoadingLinkProps) {
     const [pending, setPending] = useState(false)
     const pathname = usePathname()
+    const topLoader = useTopLoader()
 
     useEffect(() => {
         setPending(false)
@@ -28,6 +30,7 @@ export function LoadingLink({ children, className, hideTextOnLoad = false, ...pr
                 if (href === pathname) return
 
                 setPending(true)
+                topLoader.start()
                 props.onClick?.(e)
             }}
             className={

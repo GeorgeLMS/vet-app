@@ -1,6 +1,6 @@
 "use client"
 import { useActionState } from "react"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import { SubmitButton } from "@/components/SubmitButton"
 import { updateVaccination } from "./actions"
 

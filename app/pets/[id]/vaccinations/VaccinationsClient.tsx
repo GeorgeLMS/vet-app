@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { Plus } from "lucide-react"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import { formatDate } from "@/utils"
 import { getVaccinationsData, deleteVaccination } from "./actions"
 import VaccinationForm from "./VaccinationForm"
@@ -77,7 +78,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-4">
-                    <h1 className="mt-2 text-2xl font-bold text-gray-900">{petName} — Vacunas</h1>
+                    <PageTitle>{petName} — Vacunas</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                         <button

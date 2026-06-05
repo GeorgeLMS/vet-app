@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { SquarePen, FileText, FolderOpen, Syringe, ClipboardPlus, Bug } from "lucide-react"
-import { LoadingLink as Link } from "@/components/LoadingLink"
 import { EditPetForm } from "./edit/edit-form"
 import PetInfoBlock from "@/components/PetInfoBlock"
 import type { PetColor } from "@/components/PetColorSelect"

@@ -1,5 +1,6 @@
+'use client'
 import { SpeciesIcon } from "@/components/SpeciesIcon"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import { formatDate, formatPhone } from "@/utils"
 
 type PetInfoBlockProps = {
@@ -45,11 +46,13 @@ export default function PetInfoBlock({
     lastConsultationDate,
     notes,
 }: PetInfoBlockProps) {
+    const validAge = age && age !== '—' && age !== '-' ? age : null
+
     return (
         <div className="flex items-start gap-3">
             {/* Left column: icon + id badge */}
             <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                <SpeciesIcon species={species} gender={gender} showGenderIcon={true} size={20} />
+                <SpeciesIcon species={species} gender={gender} showGenderIcon={false} size={20} />
                 <span className="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
                     #{petId}
                 </span>
@@ -63,7 +66,7 @@ export default function PetInfoBlock({
                         <Link
                             href={`/pets/${petId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[15px] font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                            className="!inline text-[13px] font-semibold text-gray-600 hover:underline font-[family-name:var(--font-outfit)]"
                         >
                             {name}
                         </Link>
@@ -74,23 +77,25 @@ export default function PetInfoBlock({
                             </>
                         )}
                     </div>
-                    <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0" style={{color: '#6b84a8', backgroundColor: '#f0f4fa'}}>
-                        {lastConsultationDate ? `U: ${formatDate(lastConsultationDate)}` : "Sin consultas"}
-                    </span>
+                    {lastConsultationDate && (
+                        <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
+                            {`U: ${formatDate(lastConsultationDate)}`}
+                        </span>
+                    )}
                 </div>
 
                 {/* Client + phone */}
-                <div className="flex items-baseline gap-1.5 mt-0.5 text-sm text-gray-700 min-w-0">
+                <div className="flex items-baseline gap-1.5 mt-0.5 min-w-0">
                     {clientId ? (
                         <Link
                             href={`/clients/${clientId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="!inline text-blue-600 hover:text-blue-800 hover:underline truncate"
+                            className="!inline text-[13px] font-semibold text-gray-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
                         >
                             {clientName}
                         </Link>
                     ) : (
-                        <span className="truncate">{clientName}</span>
+                        <span className="truncate text-[12px] font-medium text-gray-900 font-[family-name:var(--font-outfit)]">{clientName}</span>
                     )}
                     {clientPhone && (
                         <>
@@ -101,24 +106,24 @@ export default function PetInfoBlock({
                 </div>
 
                 {/* Birth date / age / weight / color */}
-                {(birthDate || age || weight || colorName) && (
+                {(birthDate || validAge || weight || colorName) && (
                     <div className="flex items-center gap-1.5 flex-wrap mt-1 text-xs text-gray-700">
                         {birthDate && (
                             <span>
                                 {formatDate(birthDate)}
-                                {age && <span> ({age})</span>}
+                                {validAge && <span> ({validAge})</span>}
                             </span>
                         )}
-                        {!birthDate && age && <span>{age}</span>}
+                        {!birthDate && validAge && <span>{validAge}</span>}
                         {weight && (
                             <>
-                                <span className="w-0.5 h-0.5 rounded-full bg-gray-500 inline-block flex-shrink-0" />
+                                {(birthDate || validAge) && <span className="w-0.5 h-0.5 rounded-full bg-gray-500 inline-block flex-shrink-0" />}
                                 <span>{weight} kg</span>
                             </>
                         )}
                         {colorName && (
                             <>
-                                <span className="w-0.5 h-0.5 rounded-full bg-gray-500 inline-block flex-shrink-0" />
+                                {(birthDate || validAge || weight) && <span className="w-0.5 h-0.5 rounded-full bg-gray-500 inline-block flex-shrink-0" />}
                                 <span className="flex items-center gap-1">
                                     {colorHex && (
                                         <span

@@ -2,6 +2,7 @@ import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
 
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 import { ConsultationsList } from "./consultations-list"
 
@@ -75,9 +76,7 @@ export default async function ConsultationsPage({
             <div className="mx-auto max-w-2xl">
                 {/* Page header */}
                 <div >
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        {pet.name}
-                    </h1>
+                    <PageTitle>{pet.name}</PageTitle>
                     <div className="mt-3">
                         <NavBar />
                     </div>

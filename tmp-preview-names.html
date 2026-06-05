@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pet Name Style Options</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #f3f4f6; padding: 32px; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .grid-labels { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <h1 class="text-xl font-bold text-gray-800 mb-1">Pet Name &amp; Client Name — 10 Style Options</h1>
+  <p class="text-sm text-gray-500 mb-8">Hover over names to see the hover state. Pet name is the larger one; client name is below it.</p>
+
+  <div class="grid grid-cols-2 gap-6 max-w-5xl">
+
+    <!-- OPTION 1 -->
+    <div>
+      <p class="grid-labels">1 — Smaller + still semibold dark</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[13px] font-semibold text-gray-900 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[12px] font-medium text-gray-900 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[13px] font-semibold text-gray-900</p>
+    </div>
+
+    <!-- OPTION 2 -->
+    <div>
+      <p class="grid-labels">2 — Medium weight, softer gray</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] font-medium text-gray-700 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] font-medium text-gray-600 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] font-medium text-gray-700</p>
+    </div>
+
+    <!-- OPTION 3 -->
+    <div>
+      <p class="grid-labels">3 — No bold at all, normal weight</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] text-gray-800 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] text-gray-600 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] text-gray-800 (no font-weight)</p>
+    </div>
+
+    <!-- OPTION 4 -->
+    <div>
+      <p class="grid-labels">4 — Slate blue tint, medium weight</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] font-medium text-slate-600 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] font-medium text-slate-500 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] font-medium text-slate-600</p>
+    </div>
+
+    <!-- OPTION 5 -->
+    <div>
+      <p class="grid-labels">5 — Semibold, muted indigo</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] font-semibold text-indigo-700 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] font-medium text-indigo-500 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] font-semibold text-indigo-700</p>
+    </div>
+
+    <!-- OPTION 6 -->
+    <div>
+      <p class="grid-labels">6 — Semibold, light gray (barely there)</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] font-semibold text-gray-500 hover:text-gray-800 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] font-medium text-gray-400 hover:text-gray-700 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] font-semibold text-gray-500 hover:text-gray-800</p>
+    </div>
+
+    <!-- OPTION 7 -->
+    <div>
+      <p class="grid-labels">7 — Smaller, medium weight, gray-800</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[13px] font-medium text-gray-800 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[12px] text-gray-600 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[13px] font-medium text-gray-800</p>
+    </div>
+
+    <!-- OPTION 8 -->
+    <div>
+      <p class="grid-labels">8 — Teal accent, medium weight</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] font-medium text-teal-700 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] font-medium text-teal-600 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] font-medium text-teal-700</p>
+    </div>
+
+    <!-- OPTION 9 -->
+    <div>
+      <p class="grid-labels">9 — Normal size, no bold, slate-700</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[15px] text-slate-700 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[13px] text-slate-500 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[15px] text-slate-700 (no font-weight)</p>
+    </div>
+
+    <!-- OPTION 10 -->
+    <div>
+      <p class="grid-labels">10 — Smaller semibold, slate-600, client normal</p>
+      <div class="rounded-lg bg-white shadow p-3 flex gap-3">
+        <div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-lg">🐕</div>
+          <span class="text-[11px] font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">#12</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <a href="#" onclick="return false" class="text-[13px] font-semibold text-slate-600 hover:underline">Firulais</a>
+              <span class="w-1 h-1 rounded-full bg-gray-400 inline-block"></span>
+              <span class="text-sm text-gray-600">Labrador</span>
+            </div>
+            <span class="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style="color:#6b84a8;background:#f0f4fa">U: 12/05/26</span>
+          </div>
+          <div class="mt-0.5 text-sm text-gray-700">
+            <a href="#" onclick="return false" class="text-[12px] text-gray-500 hover:underline">Jorge Mandujano</a>
+            <span class="mx-1 text-gray-400">·</span>
+            <span class="text-xs text-gray-500">555-1234</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">3 años · 28 kg · Dorado</div>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-1">text-[13px] font-semibold text-slate-600 / text-gray-500</p>
+    </div>
+
+  </div>
+</body>
+</html>

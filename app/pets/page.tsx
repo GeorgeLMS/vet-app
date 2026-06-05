@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import PetTable from "./pet-table"
 import pool from "@/pool"
 
@@ -63,7 +64,7 @@ export default async function PetsPage() {
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-2xl font-bold text-gray-900">Mascotas</h1>
+                    <PageTitle>Mascotas</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>

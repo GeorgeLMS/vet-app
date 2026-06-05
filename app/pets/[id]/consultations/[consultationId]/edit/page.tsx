@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation"
 import { Pool } from "pg"
 import { EditConsultationForm } from "./page-form"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 
 
@@ -57,9 +58,7 @@ export default async function EditConsultationPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">
-                        Editar Consulta - {consultation.pet_name}
-                    </h1>
+                    <PageTitle>Editar Consulta - {consultation.pet_name}</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>

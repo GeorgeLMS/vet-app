@@ -7,6 +7,7 @@ import { notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { ConsultationForm } from "./page-form"
 import NavBar from "@/components/NavBar"
+import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 
 
@@ -54,9 +55,7 @@ export default async function NewConsultationPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">
-                        Nueva Consulta para {pet.name}
-                    </h1>
+                    <PageTitle>Nueva Consulta para {pet.name}</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>

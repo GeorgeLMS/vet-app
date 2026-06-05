@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { ClinicalHistoryForm } from "../clinical-history-form"
 import pool from "@/pool"
+import PageTitle from "@/components/PageTitle"
 
 async function getPet(id: string, tz: string) {
     const client = await pool.connect()
@@ -46,9 +47,7 @@ export default async function NewClinicalHistoryPage({ params }: { params: Promi
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">
-                    Nueva Historia Clínica - {pet.name}
-                </h1>
+                <PageTitle>Nueva Historia Clínica - {pet.name}</PageTitle>
                 <div className="rounded-lg bg-white p-6 shadow">
                     <ClinicalHistoryForm pet={pet} />
                 </div>

@@ -1,9 +1,20 @@
 'use client'
 
 import { useState, useMemo } from "react"
-import { LoadingLink as Link } from "@/components/LoadingLink"
-import { Search, Phone } from "lucide-react"
-import { formatDate } from "@/utils"
+import Link from "next/link"
+import { Search } from "lucide-react"
+import { formatDate, formatPhone } from "@/utils"
+import { SpeciesIcon } from "@/components/SpeciesIcon"
+
+type Pet = {
+    id: number
+    name: string
+    species: string | null
+    breed: string | null
+    gender: string | null
+    weight: string | null
+    age: string | null
+}
 
 type Client = {
     id: string
@@ -12,6 +23,7 @@ type Client = {
     email: string | null
     address: string | null
     last_consultation: string | null
+    pets: Pet[] | null
 }
 
 export default function ClientTable({ clients }: { clients: Client[] }) {
@@ -19,7 +31,6 @@ export default function ClientTable({ clients }: { clients: Client[] }) {
 
     const filteredClients = useMemo(() => {
         if (!search.trim()) return clients
-
         const query = search.toLowerCase()
         return clients.filter(client =>
             client.name.toLowerCase().includes(query) ||
@@ -49,32 +60,48 @@ export default function ClientTable({ clients }: { clients: Client[] }) {
                     {search ? 'No se encontraron clientes con esa búsqueda.' : 'No se encontraron clientes. Agrega uno para comenzar.'}
                 </div>
             ) : (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-0.5 sm:grid-cols-2 lg:grid-cols-3 bg-gray-200 rounded-lg overflow-hidden shadow">
                     {filteredClients.map((client) => (
-                        <div key={client.id} className="rounded-lg bg-white p-4 shadow">
-                            <Link
-                                href={`/clients/${client.id}`}
-                                className="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium"
-                            >
-                                {client.name}
-                            </Link>
-
-                            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                                {client.phone ? (
-                                    <div className="flex items-center gap-1">
-                                        <Phone size={12} />
-                                        <span>{client.phone}</span>
-                                    </div>
-                                ) : (
-                                    <span>-</span>
+                        <div key={client.id} className="bg-white p-4">
+                            {/* Name + phone | U: date top-right */}
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-baseline gap-1.5 flex-wrap min-w-0">
+                                    <Link
+                                        href={`/clients/${client.id}`}
+                                        className="font-[family-name:var(--font-outfit)] text-[14px] font-semibold text-gray-600 hover:underline"
+                                    >
+                                        {client.name}
+                                    </Link>
+                                    {client.phone && (
+                                        <>
+                                            <span className="w-0.5 h-0.5 rounded-full bg-gray-500 inline-block flex-shrink-0 self-center" />
+                                            <span className="text-xs text-gray-500">{formatPhone(client.phone)}</span>
+                                        </>
+                                    )}
+                                </div>
+                                {client.last_consultation && (
+                                    <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
+                                        U: {formatDate(client.last_consultation)}
+                                    </span>
                                 )}
-
-                                <span>
-                                    U: {client.last_consultation
-                                        ? formatDate(client.last_consultation)
-                                        : "Nunca"}
-                                </span>
                             </div>
+
+                            {(client.pets?.length ?? 0) > 0 && (
+                                <div className="border-t border-gray-200 mt-2 pt-2 space-y-1">
+                                    {client.pets!.map((pet) => {
+                                        const validAge = pet.age && pet.age !== '—' && pet.age !== '-' ? pet.age : null
+                                        return (
+                                            <div key={pet.id} className="flex items-center gap-1.5 text-xs text-gray-600">
+                                                <SpeciesIcon species={pet.species} gender={pet.gender} size={16} className="w-4 h-4" />
+                                                <span className="font-medium">{pet.name}</span>
+                                                {pet.breed && <><span className="w-0.5 h-0.5 rounded-full bg-gray-400 inline-block flex-shrink-0" /><span className="text-gray-400">{pet.breed}</span></>}
+                                                {validAge && <><span className="w-0.5 h-0.5 rounded-full bg-gray-400 inline-block flex-shrink-0" /><span className="text-gray-400">{validAge}</span></>}
+                                                {pet.weight && <><span className="w-0.5 h-0.5 rounded-full bg-gray-400 inline-block flex-shrink-0" /><span className="text-gray-400">{pet.weight} kg</span></>}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

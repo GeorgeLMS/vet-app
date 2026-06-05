@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import pool from "@/pool"
 import { LoadingRow } from "@/components/LoadingRow"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
+import PageTitle from "@/components/PageTitle"
 import NavBar from "@/components/NavBar"
 
 type ConsultationRow = {
@@ -74,7 +75,7 @@ export default async function ReportsPage({
 
                 {/* Header */}
                 <div className="mb-2">
-                    <h1 className="text-xl font-semibold text-gray-600 mb-2">Consultas por fecha</h1>
+                    <PageTitle>Consultas por fecha</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>

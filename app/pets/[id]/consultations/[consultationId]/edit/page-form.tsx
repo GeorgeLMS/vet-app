@@ -3,7 +3,7 @@
 import { useActionState } from "react"
 import { useSearchParams } from "next/navigation"
 import { updateConsultation, type FormState } from "./actions"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import { SubmitButton } from "@/components/SubmitButton"
 
 type Consultation = {

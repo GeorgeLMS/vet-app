@@ -5,6 +5,7 @@ import { ClinicalHistoryForm } from "../../clinical-history-form"
 import { notFound } from "next/navigation"
 
 import pool from "@/pool"
+import PageTitle from "@/components/PageTitle"
 
 async function getHistory(petId: string, historyId: string) {
     const client = await pool.connect()
@@ -52,9 +53,7 @@ export default async function EditClinicalHistoryPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">
-                    Editar Historia Clínica - {pet.name}
-                </h1>
+                <PageTitle>Editar Historia Clínica - {pet.name}</PageTitle>
                 <div className="rounded-lg bg-white p-6 shadow">
                     <ClinicalHistoryForm pet={pet} initialData={history} mode="edit" />
                 </div>

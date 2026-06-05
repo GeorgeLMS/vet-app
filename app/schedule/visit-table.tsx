@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { ChevronDown } from "lucide-react"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import VisitCard from "./visit-card"
 import { Visit } from "./types"
 

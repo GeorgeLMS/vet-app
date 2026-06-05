@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { checkIn, markSeen, deleteCheckin } from "./actions"
-import { LoadingLink as Link } from "@/components/LoadingLink"
+import Link from "next/link"
 import { MoreVertical, Clock, PlusCircle, CheckCircle } from "lucide-react"
 import { SpeciesIcon } from "@/components/SpeciesIcon" // <-- use the shared one
 import PetInfoBlock from "@/components/PetInfoBlock"
