@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { LoadingLink } from "@/components/LoadingLink"
-import { Users, PawPrint, ClipboardList, Calendar, Clock, CheckCircle, AlertCircle, BarChart2 } from "lucide-react"
+import { Users, PawPrint, ClipboardList, Calendar, Clock, CheckCircle, AlertCircle, BarChart2, Settings } from "lucide-react"
 import { signOut } from "@/auth"
 import pool from "@/pool"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
@@ -94,16 +94,14 @@ export default async function DashboardPage() {
                     <div>
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <PawPrint className="w-3.5 h-3.5 text-blue-600" strokeWidth={2.5} />
-                            <span className="text-[11px] font-bold tracking-[0.2em] uppercase text-blue-600">
+                            <span className="text- font-bold tracking-[0.2em] uppercase text-blue-600">
                                 Los Cachorros
                             </span>
                         </div>
                         <h1 className="text-lg font-medium text-gray-700 ">
                             {formatToday(tz)}
                         </h1>
-                        {/* <h1 className="text-xl font-semibold text-gray-800">
-                            {formatToday(tz)}
-                        </h1> */}
+
                     </div>
                     <form
                         action={async () => {
@@ -129,24 +127,17 @@ export default async function DashboardPage() {
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150"
                     >
-                        {/* <LoadingLink
-                            href="/checkins"
-                            className="flex items-center gap-3 bg-white hover:bg-gray-50
-                                   active:bg-gray-100 rounded-xl px-4 py-4
-                                   border border-gray-200 shadow-sm transition-colors duration-150"
-                        > */}
+
                         <ClipboardList className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Ingresos de Hoy
                         </span>
-                        {/* </LoadingLink> */}
                     </LoadingRow>
                     <LoadingRow
                         href="/pets"
                         className="flex items-center gap-3 bg-white hover:bg-gray-50
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150">
-
 
                         <PawPrint className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
@@ -160,7 +151,6 @@ export default async function DashboardPage() {
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150">
 
-
                         <Users className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Clientes
@@ -172,7 +162,6 @@ export default async function DashboardPage() {
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150">
 
-
                         <Calendar className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Agenda
@@ -181,23 +170,37 @@ export default async function DashboardPage() {
                     </LoadingRow>
                 </div >
 
-                {/* ── Reports Link ── */}
-                <LoadingRow
-                    href="/reports"
-                    className="flex items-center gap-2 mb-4 px-1 py-1"
-                >
-                    <BarChart2 className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
-                    <span className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                        Reportes
-                    </span>
-                </LoadingRow>
+                {/* ── Secondary Links ── */}
+                <div className="flex items-center gap-2 mb-2 px-1">
+                    <LoadingLink
+                        href="/reports"
+                        className="inline-flex items-center gap-1.5 py-1"
+                    >
+                        <BarChart2 className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
+                        <span className="text-xs font-medium text-blue-600 hover:text-blue-700">
+                            Reportes
+                        </span>
+                    </LoadingLink>
+
+                    <span className="w-0.5 h-0.5 rounded-full bg-gray-400 flex-shrink-0" />
+
+                    <LoadingLink
+                        href="/administration"
+                        className="inline-flex items-center gap-1.5 py-1"
+                    >
+                        <Settings className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
+                        <span className="text-xs font-medium text-blue-600 hover:text-blue-700">
+                            Administración
+                        </span>
+                    </LoadingLink>
+                </div>
 
                 {/* ── En Espera ── */}
-                < div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3" >
+                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3">
                     <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Clock className="w-3.5 h-3.5 text-blue-400" strokeWidth={2} />
-                            <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-500">
+                            <p className="text- font-bold tracking-[0.15em] uppercase text-gray-500">
                                 En espera
                             </p>
                         </div>
@@ -208,96 +211,92 @@ export default async function DashboardPage() {
                         )}
                     </div>
 
-                    {
-                        waiting.length === 0 ? (
-                            <p className="px-4 py-5 text-sm text-center text-gray-400">
-                                Nadie esperando
-                            </p>
-                        ) : (
-                            <div className="divide-y divide-gray-100">
-                                {waiting.map((c, i) => (
-                                    <LoadingRow
-                                        key={c.id}
-                                        href={`/pets/${c.pet_id}`}
-                                        className="px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors duration-100"
-                                    >
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                            <span className="text-xs text-gray-300 font-mono w-4 shrink-0">
-                                                {i + 1}.
-                                            </span>
-                                            <SpeciesIcon species={c.species} gender={c.gender} size={18} showGenderIcon={false} />
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-semibold text-gray-900 truncate">
-                                                    {c.pet_name}
-                                                </p>
-                                                <p className="text-xs text-gray-400 truncate">
-                                                    {c.client_name}
-                                                    {c.notes ? ` · ${c.notes}` : ""}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <span className="text-xs text-gray-400 shrink-0 ml-2">
-                                            {c.checked_in_at_time}
+                    {waiting.length === 0 ? (
+                        <p className="px-4 py-5 text-sm text-center text-gray-400">
+                            Nadie esperando
+                        </p>
+                    ) : (
+                        <div className="divide-y divide-gray-100">
+                            {waiting.map((c, i) => (
+                                <LoadingRow
+                                    key={c.id}
+                                    href={`/pets/${c.pet_id}`}
+                                    className="px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors duration-100"
+                                >
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <span className="text-xs text-gray-300 font-mono w-4 shrink-0">
+                                            {i + 1}.
                                         </span>
-                                    </LoadingRow>
-                                ))}
-                            </div>
-                        )
-                    }
-                </div >
+                                        <SpeciesIcon species={c.species} gender={c.gender} size={18} showGenderIcon={false} />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold text-gray-900 truncate">
+                                                {c.pet_name}
+                                            </p>
+                                            <p className="text-xs text-gray-400 truncate">
+                                                {c.client_name}
+                                                {c.notes ? ` · ${c.notes}` : ""}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs text-gray-400 shrink-0 ml-2">
+                                        {c.checked_in_at_time}
+                                    </span>
+                                </LoadingRow>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
                 {/* ── Vistos Hoy ── */}
-                {
-                    seen.length > 0 && (
-                        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
-                            <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-3.5 h-3.5 text-green-400" strokeWidth={2} />
-                                    <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-500">
-                                        Vistos hoy
-                                    </p>
-                                </div>
-                                <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                                    {seen.length}
-                                </span>
+                {seen.length > 0 && (
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
+                        <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <CheckCircle className="w-3.5 h-3.5 text-green-400" strokeWidth={2} />
+                                <p className="text- font-bold tracking-[0.15em] uppercase text-gray-500">
+                                    Vistos hoy
+                                </p>
                             </div>
-                            <div className="divide-y divide-gray-100">
-                                {seen.map(c => (
-                                    <LoadingRow
-                                        key={c.id}
-                                        href={`/pets/${c.pet_id}`}
-                                        className={`px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors duration-100 ${c.has_consultation_today ? 'opacity-50' : ''}`}
-                                    >
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                            <SpeciesIcon species={c.species} gender={c.gender} size={18} showGenderIcon={false} />
-                                            <div className="min-w-0">
-                                                <p className={`text-sm font-semibold truncate ${c.has_consultation_today ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-                                                    {c.pet_name}
-                                                </p>
-                                                <p className="text-xs text-gray-400 truncate">
-                                                    {c.client_name}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-2 shrink-0 ml-2">
-                                            {!c.has_consultation_today && (
-                                                <div className="flex items-center gap-1">
-                                                    <AlertCircle className="w-3 h-3 text-amber-400" strokeWidth={2} />
-                                                    <span className="text-xs text-amber-500">Consulta no registrada</span>
-                                                </div>
-                                            )}
-                                            <span className="text-xs text-gray-400">
-                                                {c.seen_at_time}
-                                            </span>
-                                        </div>
-                                    </LoadingRow>
-                                ))}
-                            </div>
+                            <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                {seen.length}
+                            </span>
                         </div>
-                    )
-                }
+                        <div className="divide-y divide-gray-100">
+                            {seen.map(c => (
+                                <LoadingRow
+                                    key={c.id}
+                                    href={`/pets/${c.pet_id}`}
+                                    className={`px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors duration-100 ${c.has_consultation_today ? 'opacity-50' : ''}`}
+                                >
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <SpeciesIcon species={c.species} gender={c.gender} size={18} showGenderIcon={false} />
+                                        <div className="min-w-0">
+                                            <p className={`text-sm font-semibold truncate ${c.has_consultation_today ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                                                {c.pet_name}
+                                            </p>
+                                            <p className="text-xs text-gray-400 truncate">
+                                                {c.client_name}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0 ml-2">
+                                        {!c.has_consultation_today && (
+                                            <div className="flex items-center gap-1">
+                                                <AlertCircle className="w-3 h-3 text-amber-400" strokeWidth={2} />
+                                                <span className="text-xs text-amber-500">Consulta no registrada</span>
+                                            </div>
+                                        )}
+                                        <span className="text-xs text-gray-400">
+                                            {c.seen_at_time}
+                                        </span>
+                                    </div>
+                                </LoadingRow>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-            </div >
-        </main >
+            </div>
+        </main>
     )
 }
