@@ -90,7 +90,7 @@ export default function PetInfoBlock({
                         <Link
                             href={`/clients/${clientId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[14px] font-semibold text-blue-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
+                            className="!inline text-[14px] font-semibold text-lime-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
                         >
                             {clientName}
                         </Link>
