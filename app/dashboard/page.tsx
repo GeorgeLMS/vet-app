@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { LoadingLink } from "@/components/LoadingLink"
-import { Users, PawPrint, ClipboardList, Calendar, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import { Users, PawPrint, ClipboardList, Calendar, Clock, CheckCircle, AlertCircle, BarChart2 } from "lucide-react"
 import { signOut } from "@/auth"
 import pool from "@/pool"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
@@ -180,6 +180,17 @@ export default async function DashboardPage() {
 
                     </LoadingRow>
                 </div >
+
+                {/* ── Reports Link ── */}
+                <LoadingRow
+                    href="/reports"
+                    className="flex items-center gap-2 mb-4 px-1 py-1"
+                >
+                    <BarChart2 className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
+                    <span className="text-xs font-medium text-blue-600 hover:text-blue-700">
+                        Reportes
+                    </span>
+                </LoadingRow>
 
                 {/* ── En Espera ── */}
                 < div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3" >

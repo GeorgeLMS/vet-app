@@ -54,7 +54,7 @@ export default function PetTable({
             )}
 
             {/* Pet cards - all screen sizes */}
-            <div className="space-y-3">
+            <div className="space-y-0.5">
                 {filteredPets.length === 0 ? (
                     <div className="rounded-lg bg-white p-8 text-center text-gray-500 shadow">
                         {searchQuery ? 'No se encontraron mascotas' : 'No hay mascotas registradas'}

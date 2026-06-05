@@ -12,6 +12,7 @@ export function EditPetForm({
     pet,
     species,
     colors,
+    onCancel,
 }: {
     petId: string
     pet: {
@@ -22,10 +23,11 @@ export function EditPetForm({
         birth_date: string | null
         weight: number | null
         notes: string | null
-        gender: string | null  // <-- add this
+        gender: string | null
     }
     species: { id: number; name_es: string }[]
     colors: PetColor[]
+    onCancel?: () => void
 }) {
     const boundAction = updatePet.bind(null, petId)
     const [state, action] = useActionState<FormState, FormData>(
@@ -150,12 +152,22 @@ export function EditPetForm({
 
             <div className="flex gap-3 pt-4">
                 <SubmitButton>Guardar Cambios</SubmitButton>
-                <Link
-                    href={`/pets/${petId}`}
-                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
-                >
-                    Cancelar
-                </Link>
+                {onCancel ? (
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
+                    >
+                        Cancelar
+                    </button>
+                ) : (
+                    <Link
+                        href={`/pets/${petId}`}
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
+                    >
+                        Cancelar
+                    </Link>
+                )}
             </div>
         </form>
     )

@@ -1,20 +1,11 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { Pool } from "pg"
-import { LoadingLink as Link } from "@/components/LoadingLink"
-import { ArrowLeft, FolderArchive } from "lucide-react"
 import { notFound } from "next/navigation"
 import NavBar from "@/components/NavBar"
-import NavButton from "@/components/NavButton"
-import NavButtonWithText from "@/components/NavButtonWithText"
-
-import { Pencil, Plus, FileText, FolderOpen, Syringe, ClipboardPlus } from "lucide-react"
-import { SpeciesIcon } from "@/components/SpeciesIcon"
-import PetFiles from "@/components/PetFiles"
-
-
+import { PetConsultationsCard } from "./pet-consultations-card"
+import { PetDetailsCard } from "./pet-details-card"
 import pool from "@/pool"
-import { formatDate } from "@/utils"
+
 
 async function getClinicalHistories(petId: string) {
     const client = await pool.connect()
@@ -46,6 +37,8 @@ export async function getPet(id: string) {
         p.name,
         p.breed,
         p.gender,
+        p.species_id,
+        p.color_id,
         TO_CHAR(p.birth_date, 'YYYY-MM-DD') as birth_date,
         age_display(p.birth_date, $2) as age_pet,
         p.weight,
@@ -82,230 +75,99 @@ async function getPetFiles(petId: string) {
     }
 }
 
-async function getPetConsultations(petId: string) {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT
-                c.id,
-                TO_CHAR(c.consultation_date, 'DD Mon YY') as consultation_date,
-                c.procedure_id,
-                c.notes,
-                p.name as procedure_name
-            FROM consultations c
-            LEFT JOIN procedures p ON c.procedure_id = p.id
-            WHERE c.pet_id = $1
-            ORDER BY c.consultation_date DESC`,
-            [petId]
-        )
-        return rows
-    } finally {
-        client.release()
-    }
+async function getPetConsultations(petId: string, tz: string) {
+    const { rows } = await pool.query(
+        `SELECT
+            c.id,
+            TO_CHAR(c.consultation_date AT TIME ZONE $2, 'YYYY-MM-DD') as consultation_date,
+            TO_CHAR(c.next_visit_date AT TIME ZONE $2, 'YYYY-MM-DD') as next_visit_date,
+            c.procedure_id,
+            c.notes,
+            p.name as procedure_name
+        FROM consultations c
+        LEFT JOIN procedures p ON c.procedure_id = p.id
+        WHERE c.pet_id = $1
+        ORDER BY c.consultation_date DESC`,
+        [petId, tz]
+    )
+    return rows
 }
 
+async function getProcedures() {
+    const { rows } = await pool.query(`SELECT id, name FROM procedures ORDER BY display_order`)
+    return rows
+}
 
+async function getSpecies() {
+    const { rows } = await pool.query(`SELECT id, name_es FROM species ORDER BY name`)
+    return rows
+}
+
+async function getPetColors() {
+    const { rows } = await pool.query(`SELECT id, name_es, hex FROM pet_colors ORDER BY display_order, name_es`)
+    return rows
+}
 
 export default async function PetPage({
     params,
-    searchParams
 }: {
     params: Promise<{ id: string }>
-    searchParams: Promise<{ from?: string }>
 }) {
     const session = await auth()
     if (!session) redirect("/")
+    const tz = session.user.timezone || 'America/Tijuana'
 
     const { id } = await params
-    const { from } = await searchParams
 
     const pet = await getPet(id)
     if (!pet) notFound()
 
-
-    const consultations = await getPetConsultations(id)
-    const clinicalHistories = await getClinicalHistories(id)
-    const files = await getPetFiles(id)
-    //const backHref = from === 'checkins' ? '/checkins' : '/clients'
-    //const backLabel = from === 'checkins' ? 'Volver a Ingresos' : 'Volver a Clientes'
+    const [consultations, procedures, clinicalHistories, files, species, colors] = await Promise.all([
+        getPetConsultations(id, tz),
+        getProcedures(),
+        getClinicalHistories(id),
+        getPetFiles(id),
+        getSpecies(),
+        getPetColors(),
+    ])
 
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
+
+                {/* Header */}
                 <div className="mb-2">
-                    <h1 className="mt-2 text-3xl font-bold text-gray-900">{pet.name}</h1>
-                    <div className="flex items-center justify-between mb-2">
+                    <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-0.5">
+                        Ficha de la Mascota
+                    </p>
+                    <h1 className="text-2xl font-semibold text-gray-700">{pet.name}</h1>
+                    <div className="flex items-center justify-between mb-2 mt-1">
                         <div className="flex items-center gap-2">
-                            {/* <Link
-                                href={backHref}
-                                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
-                            >
-                                <ArrowLeft className="mr-1 h-4 w-4" />
-                                {backLabel}
-                            </Link> */}
                             <NavBar />
                         </div>
                     </div>
                 </div>
 
                 <div className="grid gap-2">
-                    {/* Detalles de la Mascota */}
-                    <div className="rounded-lg bg-white p-6 shadow">
-                        <div className="mb-4 flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">Detalles de la Mascota</h2>
-                            <NavButton href={`/pets/${pet.id}/edit`} icon={<Pencil size={18} />} label="Editar mascota" />
-                        </div>
 
-                        <dl className="space-y-2">
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Dueño</dt>
-                                <dd className="text-sm">
-                                    <Link
-                                        href={`/clients/${pet.client_id}`}
-                                        className="text-blue-600 hover:text-blue-800 hover:underline">
-                                        {pet.client_name}
-                                        {pet.client_phone ? " - " + pet.client_phone : ""}
-                                    </Link>
-                                </dd>
-                            </div>
+                    {/* Pet Details */}
+                    <PetDetailsCard
+                        pet={pet}
+                        petId={id}
+                        species={species}
+                        colors={colors}
+                        lastConsultationDate={consultations[0]?.consultation_date ?? null}
+                    />
 
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Raza</dt>
-                                <dd className="text-sm text-gray-900 flex items-center gap-2">
-                                    <SpeciesIcon species={pet.species} gender={pet.gender} showGenderIcon={true} className="w-4 h-4" />
-                                    <span>{pet.breed && ` ${pet.breed}`}</span>
-                                    {pet.color && (
-                                        <>
-                                            <span className="text-gray-400">·</span>
-                                            {pet.color_hex && (
-                                                <div
-                                                    className="w-3 h-3 rounded border border-gray-300 flex-shrink-0"
-                                                    style={{ backgroundColor: pet.color_hex }}
-                                                    title={pet.color}
-                                                />
-                                            )}
-                                            <span>{pet.color}</span>
-                                        </>
-                                    )}
-                                </dd>
-                            </div>
-
-                            <div className="flex gap-8">
-                                <div>
-                                    <div className="text-xs font-medium text-gray-500">Fecha de Nacimiento</div>
-                                    <div className="text-sm text-gray-900 mt-0.5">
-                                        <span className="text-xs text-gray-900">{formatDate(pet.birth_date)}</span>
-                                        {pet.age_pet ? ` (${pet.age_pet})` : ""}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-xs font-medium text-gray-500">Peso</div>
-                                    <div className="text-sm text-gray-900 mt-0.5">{pet.weight ? `${pet.weight} kg` : "-"}</div>
-                                </div>
-                                <div>
-                                    <div className="text-xs font-medium text-gray-500">ID</div>
-                                    <div className="text-sm text-gray-700 font-mono mt-0.5">#{pet.id}</div>
-                                </div>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Notas</dt>
-                                <dd className="text-sm text-gray-900">
-                                    {pet.notes ? (
-                                        <div className="mt-1 pl-3 border-l-2 border-gray-300 bg-gray-50 py-2 pr-2 rounded-r">
-                                            <p className="text-sm text-gray-600 italic">
-                                                {pet.notes}
-                                            </p>
-                                        </div>
-                                    ) : "-"}
-                                </dd>
-                            </div>
-                        </dl>
-
-                        {/* ICONS MOVED HERE - BOTTOM LEFT OF DETALLES PANEL */}
-                        <div className="mt-2 pt-4 border-t border-gray-200 flex items-center gap-3">
-                            <div className="flex flex-col items-center gap-1">
-                                <NavButton
-                                    href={`/pets/${id}/clinical-history`}
-                                    icon={<ClipboardPlus size={30} />}
-                                    size={60}
-                                    label="Historial Clínico" />
-                                <span className="text-xs text-gray-500">Historial</span>
-                            </div>
-
-                            <div className="flex flex-col items-center gap-1">
-                                <NavButton
-                                    href={`/pets/${id}/files`}
-                                    icon={<FolderOpen size={30} />}
-                                    size={60}
-                                    label="Archivos" />
-                                <span className="text-xs text-gray-500">Archivos</span>
-                            </div>
-
-                            <div className="flex flex-col items-center gap-1">
-                                <NavButton
-                                    href={`/pets/${id}/vaccinations`}
-                                    icon={<Syringe size={30} />}
-                                    size={60}
-                                    label="Vacunas" />
-                                <span className="text-xs text-gray-500">Vacunas</span>
-                            </div>
-
-                        </div>
+                    {/* Consultations */}
+                    <div>
+                        <PetConsultationsCard
+                            petId={id}
+                            initialConsultations={consultations}
+                            procedures={procedures}
+                        />
                     </div>
 
-
-
-                    {/* Sección de Consultas */}
-                    <div className="space-y-2">
-                        <div className="rounded-lg bg-white p-3 shadow flex justify-between items-center">
-                            <h2 className="text-lg font-semibold text-gray-900">
-                                Consultas ({consultations.length})
-                            </h2>
-                            <NavButton href={`/pets/${id}/consultations/new${from ? `?from=${from}` : ''}`} icon={<Plus size={18} />} label="Agregar Consulta" />
-                        </div>
-
-                        {consultations.length === 0 ? (
-                            <div className="rounded-lg bg-white p-12 text-center shadow">
-                                <div className="text-gray-400 mb-2">
-                                    <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
-                                </div>
-                                <p className="text-gray-500">No hay consultas registradas para esta mascota.</p>
-                            </div>
-                        ) : (
-                            <>
-                                {consultations.map((consultation) => (
-                                    <div
-                                        key={consultation.id}
-                                        className="rounded-lg bg-white p-4 shadow border-l-4 border-blue-500"
-                                    >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                                                <span className="text-xs font-medium text-blue-600">
-                                                    {consultation.consultation_date}
-                                                </span>
-                                                <h3 className="text-base font-medium text-gray-900">
-                                                    {consultation.procedure_name || 'Procedimiento eliminado'}
-                                                </h3>
-                                            </div>
-                                            <NavButton
-                                                href={`/pets/${id}/consultations/${consultation.id}/edit${from ? `?from=${from}` : ''}`}
-                                                icon={<Pencil size={18} />}
-                                                label="Editar consulta"
-                                            />
-                                        </div>
-
-                                        {consultation.notes && (
-                                            <p className="text-sm text-gray-600 whitespace-pre-wrap break-words leading-relaxed">
-                                                {consultation.notes}
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
-                            </>
-                        )}
-                    </div>
                 </div>
             </div>
         </main>

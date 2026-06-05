@@ -90,69 +90,37 @@ export default function PetCard({
                     </div>
                 </div>
                 {/* Actions */}
-                <div className="px-4 pb-4 bg-white border-t border-blue-100">
-                    <div className="flex items-center justify-between mt-4">
-                        {/* Left side: Quick action icons - same style as delete, different colors */}
-                        <div className="flex items-center gap-1.5">
-                            <Link
-                                href={`/pets/${pet.id}/clinical-history`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
-                                aria-label="Historial Clínico"
-                                title="Historial Clínico"
-                                hideTextOnLoad
-                            >
-                                <ClipboardPlus size={16} />
-                            </Link>
-                            <Link
-                                href={`/pets/${pet.id}/files`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100 hover:border-amber-300 transition-colors"
-                                aria-label="Archivos"
-                                title="Archivos"
-                                hideTextOnLoad
-                            >
-                                <FolderOpen size={16} />
-                            </Link>
-                            <Link
-                                href={`/pets/${pet.id}/vaccinations`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-purple-200 bg-purple-50 text-purple-600 hover:bg-purple-100 hover:border-purple-300 transition-colors"
-                                aria-label="Vacunas"
-                                title="Vacunas"
-                                hideTextOnLoad
-                            >
-                                <Syringe size={16} />
-                            </Link>
-                            <Link
-                                href={`/pets/${pet.id}/deworming`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-100 hover:border-orange-300 transition-colors"
-                                aria-label="Desparasitación"
-                                title="Desparasitación"
-                                hideTextOnLoad
-                            >
-                                <Bug size={16} />
-                            </Link>
-                            <Link
-                                href={`/pets/${pet.id}/consultations`}
-                                hideTextOnLoad
-                                onClick={(e) => e.stopPropagation()}
-                                className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
-                                aria-label="Consultas"
-                                title="Consultas"
-                            >
-                                <FileText size={16} />
-                            </Link>
+                <div className="px-4 pb-4 bg-white  border-blue-100">
+                    <div className="flex items-center justify-between mt-1">
+                        {/* Left: Quick actions — segmented group */}
+                        <div className="flex items-center">
+                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                                {[
+                                    { href: `/pets/${pet.id}/clinical-history`, icon: <ClipboardPlus size={15} />, label: "Historial Clínico" },
+                                    { href: `/pets/${pet.id}/files`, icon: <FolderOpen size={15} />, label: "Archivos" },
+                                    { href: `/pets/${pet.id}/vaccinations`, icon: <Syringe size={15} />, label: "Vacunas" },
+                                    { href: `/pets/${pet.id}/deworming`, icon: <Bug size={15} />, label: "Desparasitación" },
+                                    { href: `/pets/${pet.id}/consultations`, icon: <FileText size={15} />, label: "Consultas" },
+                                ].map(({ href, icon, label }, i, arr) => (
+                                    <Link
+                                        key={href}
+                                        href={href}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className={`flex items-center justify-center w-9 h-9 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors ${i < arr.length - 1 ? "border-r border-gray-200" : ""}`}
+                                        aria-label={label}
+                                        title={label}
+                                        hideTextOnLoad
+                                    >
+                                        {icon}
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Right side: Edit/Delete */}
+                        {/* Right: Edit / Delete */}
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    onEdit()
-                                }}
+                                onClick={(e) => { e.stopPropagation(); onEdit(); }}
                                 disabled={isPending}
                                 className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
                                 aria-label="Editar mascota"
@@ -160,10 +128,7 @@ export default function PetCard({
                                 <Edit size={16} />
                             </button>
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    setShowConfirm(true)
-                                }}
+                                onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
                                 disabled={isPending}
                                 className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
                                 aria-label="Eliminar mascota"
