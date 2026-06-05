@@ -38,7 +38,7 @@ export default function NavButton({ href, icon, label, size = 32 }: NavButtonPro
                 router.push(href)
             }}
             style={{ width: size, height: size }}
-            className="flex items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
+            className="flex items-center justify-center rounded-md border border-blue-200 bg-white text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
             aria-label={label}
         >
             {loading ? <Spinner /> : icon}

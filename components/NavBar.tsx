@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Users, PawPrint } from "lucide-react"
 import NavButton from "@/components/NavButton"
-const btnClass = "flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
+const btnClass = "flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 bg-white text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors"
 
 const Spinner = () => (
     <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -66,7 +66,7 @@ export default function PetInfoBlock({
                         <Link
                             href={`/pets/${petId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[13px] font-semibold text-gray-600 hover:underline font-[family-name:var(--font-outfit)]"
+                            className="!inline text-[16px] font-semibold text-blue-400 hover:underline font-[family-name:var(--font-outfit)]"
                         >
                             {name}
                         </Link>
@@ -90,7 +90,7 @@ export default function PetInfoBlock({
                         <Link
                             href={`/clients/${clientId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[13px] font-semibold text-gray-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
+                            className="!inline text-[14px] font-semibold text-blue-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
                         >
                             {clientName}
                         </Link>
