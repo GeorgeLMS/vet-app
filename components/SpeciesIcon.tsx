@@ -20,8 +20,8 @@ export function SpeciesIcon({
     let colorClass = "text-gray-500"
     if (gender) {
         const g = gender.toLowerCase().trim()
-        if (g === 'macho' || g === 'male' || g === 'm') colorClass = "text-blue-600"
-        else if (g === 'hembra' || g === 'female' || g === 'f') colorClass = "text-pink-400"
+        if (g === 'macho' || g === 'male' || g === 'm') colorClass = "text-blue-400"
+        else if (g === 'hembra' || g === 'female' || g === 'f') colorClass = "text-rose-300"
     }
 
     const normalized = species?.toLowerCase().trim()
