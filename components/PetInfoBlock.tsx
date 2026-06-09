@@ -19,6 +19,9 @@ type PetInfoBlockProps = {
     weight?: string | null
     lastConsultationDate?: string | null
     notes?: string | null
+    timeLabel?: string | null
+    timeLabelRed?: boolean
+    pendingConsultation?: boolean
 }
 
 function iconBgClass(gender: string | null) {
@@ -45,6 +48,9 @@ export default function PetInfoBlock({
     weight,
     lastConsultationDate,
     notes,
+    timeLabel,
+    timeLabelRed,
+    pendingConsultation,
 }: PetInfoBlockProps) {
     const validAge = age && age !== '—' && age !== '-' ? age : null
 
@@ -66,7 +72,7 @@ export default function PetInfoBlock({
                         <Link
                             href={`/pets/${petId}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[16px] font-semibold text-blue-400 hover:underline font-[family-name:var(--font-outfit)]"
+                            className="!inline text-[16px] font-semibold text-blue-400 hover:underline font-[family-name:var(--font-outfit)] leading-tight"
                         >
                             {name}
                         </Link>
@@ -77,31 +83,47 @@ export default function PetInfoBlock({
                             </>
                         )}
                     </div>
-                    {lastConsultationDate && (
-                        <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
-                            {`U: ${formatDate(lastConsultationDate)}`}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {timeLabel && (
+                            <span className={`inline-flex items-center gap-1 text-[11px] font-mono ${timeLabelRed ? 'text-red-600 font-semibold' : 'text-gray-500'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                {timeLabel}
+                            </span>
+                        )}
+                        {lastConsultationDate && (
+                            <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
+                                {`U: ${formatDate(lastConsultationDate)}`}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Client + phone */}
-                <div className="flex items-baseline gap-1.5 mt-0.5 min-w-0">
-                    {clientId ? (
-                        <Link
-                            href={`/clients/${clientId}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[14px] font-semibold text-lime-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
-                        >
-                            {clientName}
-                        </Link>
-                    ) : (
-                        <span className="truncate text-[12px] font-medium text-gray-900 font-[family-name:var(--font-outfit)]">{clientName}</span>
-                    )}
-                    {clientPhone && (
-                        <>
-                            <span className="w-0.5 h-0.5 rounded-full bg-gray-500 flex-shrink-0 self-center" />
-                            <span className="flex-shrink-0 text-xs">{formatPhone(clientPhone)}</span>
-                        </>
+                <div className="flex items-center justify-between gap-1.5 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                        {clientId ? (
+                            <Link
+                                href={`/clients/${clientId}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="!inline text-[14px] font-semibold text-lime-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
+                            >
+                                {clientName}
+                            </Link>
+                        ) : (
+                            <span className="truncate text-[12px] font-medium text-gray-900 font-[family-name:var(--font-outfit)]">{clientName}</span>
+                        )}
+                        {clientPhone && (
+                            <>
+                                <span className="w-0.5 h-0.5 rounded-full bg-gray-500 flex-shrink-0 self-center" />
+                                <span className="flex-shrink-0 text-xs">{formatPhone(clientPhone)}</span>
+                            </>
+                        )}
+                    </div>
+                    {pendingConsultation && (
+                        <span className="inline-flex items-center gap-0.5 text-[12px] font-semibold text-amber-500 flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Pendiente
+                        </span>
                     )}
                 </div>
 
@@ -139,11 +161,8 @@ export default function PetInfoBlock({
                 )}
 
 
-                {/* Notes */}
                 {notes && (
-                    <div className="mt-2 border-l-2 border-amber-200 bg-amber-50/50 py-1.5 px-2 rounded-r">
-                        <p className="text-xs text-gray-400 italic">{notes}</p>
-                    </div>
+                    <p className="text-xs italic text-gray-500 mt-1">{notes}</p>
                 )}
             </div>
         </div>

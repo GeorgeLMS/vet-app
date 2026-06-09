@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { Pool } from "pg"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Pencil, ArrowLeft } from "lucide-react"
+import { SquarePen, ArrowLeft } from "lucide-react"
 import { ClinicalHistoryForm } from "./../clinical-history-form"
 
 import pool from "@/pool"
@@ -164,7 +164,7 @@ export default async function ViewClinicalHistoryPage({
                         href={`/pets/${id}/clinical-history/${historyId}/edit`}
                         className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     >
-                        <Pencil size={18} />
+                        <SquarePen size={18} />
                         Editar
                     </Link>
                 </div>

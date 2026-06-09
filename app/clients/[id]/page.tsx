@@ -3,18 +3,19 @@ import { redirect } from "next/navigation"
 import { Plus } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
-import { Pencil } from "lucide-react"
+import { SquarePen } from "lucide-react"
 import pool from "@/pool"
 import { notFound } from "next/navigation"
-import PetInfoBlock from "@/components/PetInfoBlock"
 import PageTitle from "@/components/PageTitle"
+import ClientPetsSection from "./client-pets-section"
+import { formatPhone } from "@/utils"
 
 async function getClientData(id: string, tz: string) {
     const conn = await pool.connect()
     try {
         const [clientResult, petsResult] = await Promise.all([
             conn.query(
-                `SELECT id, name, email, phone, address FROM clients WHERE id = $1`,
+                `SELECT id, name, email, phone, address, notes FROM clients WHERE id = $1`,
                 [id]
             ),
             conn.query(
@@ -65,7 +66,7 @@ export default async function ClientPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-2">
-                    <PageTitle>{client.name}</PageTitle>
+                    <PageTitle>Detalles del Cliente</PageTitle>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>
@@ -73,24 +74,39 @@ export default async function ClientPage({
 
                 <div className="grid gap-2">
                     <div className="rounded-lg bg-white p-4 shadow">
-                        <div className="mb-2 flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">Detalles del Cliente</h2>
-                            <NavButton href={`/clients/${id}/edit`} icon={<Pencil size={18} />} label="Editar cliente" />
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <dd className="text-sm text-gray-900 flex items-center gap-1.5">
+                                    <span className="font-medium">{client.name}</span>
+                                    {client.phone && (
+                                        <>
+                                            <span className="w-1 h-1 rounded-full bg-gray-400 inline-block" />
+                                            <span className="text-gray-600">{formatPhone(client.phone)}</span>
+                                        </>
+                                    )}
+                                </dd>
+                            </div>
+                            <NavButton href={`/clients/${id}/edit`} icon={<SquarePen size={18} />} label="Editar cliente" />
                         </div>
-                        <dl className="space-y-2">
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Email</dt>
-                                <dd className="text-sm text-gray-900">{client.email || "-"}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Teléfono</dt>
-                                <dd className="text-sm text-gray-900">{client.phone || "-"}</dd>
-                            </div>
-                            <div>
-                                <dt className="text-sm font-medium text-gray-500">Dirección</dt>
-                                <dd className="text-sm text-gray-900">{client.address || "-"}</dd>
-                            </div>
-                        </dl>
+                        {(client.email || client.address || client.notes) && (
+                            <dl className="space-y-2 mt-3 pt-3 border-t border-gray-100">
+                                {client.email && (
+                                    <div>
+                                        <dt className="text-sm font-medium text-gray-500">Email</dt>
+                                        <dd className="text-sm text-gray-900">{client.email}</dd>
+                                    </div>
+                                )}
+                                {client.address && (
+                                    <div>
+                                        <dt className="text-sm font-medium text-gray-500">Dirección</dt>
+                                        <dd className="text-sm text-gray-900">{client.address}</dd>
+                                    </div>
+                                )}
+                                {client.notes && (
+                                    <dd className="text-sm italic text-gray-500">{client.notes}</dd>
+                                )}
+                            </dl>
+                        )}
                     </div>
 
                     <div>
@@ -101,35 +117,12 @@ export default async function ClientPage({
                             <NavButton href={`/pets/new?clientId=${id}`} icon={<Plus size={18} />} label="Agregar Mascota" />
                         </div>
 
-                        {pets.length === 0 ? (
-                            <div className="rounded-lg bg-white shadow px-6 py-8 text-center text-gray-500">
-                                No hay mascotas registradas para este cliente.
-                            </div>
-                        ) : (
-                            <div className="grid gap-2">
-                                {pets.map((pet) => (
-                                    <div key={pet.id} className="rounded-lg bg-white shadow p-2">
-                                        <PetInfoBlock
-                                            petId={pet.id}
-                                            name={pet.name}
-                                            species={pet.species}
-                                            gender={pet.gender}
-                                            breed={pet.breed}
-                                            colorName={pet.color_name}
-                                            colorHex={pet.color_hex}
-                                            clientId={client.id}
-                                            clientName={client.name}
-                                            clientPhone={client.phone}
-                                            birthDate={pet.birth_date}
-                                            age={pet.age}
-                                            weight={pet.weight}
-                                            lastConsultationDate={pet.last_consultation_date}
-                                            notes={pet.notes}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <ClientPetsSection
+                            pets={pets}
+                            clientId={client.id}
+                            clientName={client.name}
+                            clientPhone={client.phone}
+                        />
                     </div>
                 </div>
             </div>

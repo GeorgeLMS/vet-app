@@ -13,15 +13,15 @@ export async function POST(req: Request) {
 
     const formData = await req.formData()
     const file = formData.get("file") as File
-    const petId = formData.get("petId") as string
+    const historyId = formData.get("historyId") as string
 
-    if (!file || !petId) return Response.json({ error: "Missing file or petId" }, { status: 400 })
+    if (!file || !historyId) return Response.json({ error: "Missing file or historyId" }, { status: 400 })
 
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : ""
     const baseName = file.name.slice(0, file.name.lastIndexOf(".") || file.name.length).replace(/[^a-zA-Z0-9_-]/g, "_")
-    const publicId = `pets/${petId}/${Date.now()}_${baseName}${ext}`
+    const publicId = `clinical-history/${historyId}/${Date.now()}_${baseName}${ext}`
 
     const result = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(

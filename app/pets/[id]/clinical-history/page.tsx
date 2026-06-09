@@ -1,14 +1,10 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
-import { Pool } from "pg"
 import Link from "next/link"
-import { Plus, Eye, Pencil } from "lucide-react"
 import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
-import NavButton from "@/components/NavButton"
-import NavButtonWithText from "@/components/NavButtonWithText"
 import pool from "@/pool"
-
+import HistoryList from "./history-list"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -30,14 +26,23 @@ async function getClinicalHistories(petId: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT id,
-                    TO_CHAR(fecha, 'YYYY-MM-DD') as fecha_formatted,
-                    fecha,
-                    motivo_consulta,
-                    created_at
-             FROM clinical_histories
-             WHERE pet_id = $1
-             ORDER BY fecha DESC, created_at DESC`,
+            `SELECT
+                ch.id,
+                TO_CHAR(ch.fecha, 'DD/MM/YYYY') as fecha_formatted,
+                ch.motivo_consulta,
+                ch.created_at,
+                COALESCE(
+                    JSON_AGG(
+                        JSON_BUILD_OBJECT('id', f.id, 'url', f.url, 'public_id', f.public_id, 'file_name', f.file_name, 'uploaded_at', f.uploaded_at)
+                        ORDER BY f.uploaded_at ASC
+                    ) FILTER (WHERE f.id IS NOT NULL),
+                    '[]'
+                ) as files
+             FROM clinical_histories ch
+             LEFT JOIN clinical_history_files f ON f.history_id = ch.id
+             WHERE ch.pet_id = $1
+             GROUP BY ch.id, ch.fecha, ch.motivo_consulta, ch.created_at
+             ORDER BY ch.fecha DESC, ch.created_at DESC`,
             [petId]
         )
         return rows
@@ -86,76 +91,10 @@ export default async function ClinicalHistoryListPage({
                     </p>
                     <div className="flex items-center justify-between mt-2">
                         <NavBar />
-                        <NavButtonWithText
-                            href={`/pets/${id}/clinical-history/new`}
-                            icon={<Plus className="h-4 w-4" />}
-                            label="Nuevo Historial"
-                        />
                     </div>
                 </div>
 
-                <div className="rounded-lg bg-white shadow overflow-hidden">
-                    {histories.length === 0 ? (
-                        <div className="p-12 text-center">
-                            <p className="text-gray-500 mb-4">No hay historiales clínicos registrados</p>
-                            <NavButtonWithText
-                                href={`/pets/${id}/clinical-history/new`}
-                                icon={<Plus className="h-4 w-4" />}
-                                label="Crear primer historial"
-                            />
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Fecha
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Motivo de Consulta
-                                        </th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Acciones
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {histories.map((history) => (
-                                        <tr key={history.id} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {history.fecha_formatted}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-700">
-                                                <div className="max-w-md truncate">
-                                                    {history.motivo_consulta || "-"}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <div className="flex justify-end gap-2">
-                                                    <Link
-                                                        href={`/pets/${id}/clinical-history/${history.id}`}
-                                                        className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
-                                                    >
-                                                        <Eye size={16} />
-                                                        Ver
-                                                    </Link>
-                                                    <Link
-                                                        href={`/pets/${id}/clinical-history/${history.id}/edit`}
-                                                        className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-1"
-                                                    >
-                                                        <Pencil size={16} />
-                                                        Editar
-                                                    </Link>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
+                <HistoryList petId={id} histories={histories} />
             </div>
         </main>
     )

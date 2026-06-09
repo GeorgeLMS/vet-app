@@ -12,13 +12,13 @@ export async function POST(req: Request) {
     const session = await auth()
     if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { petId, url, public_id, file_name, resource_type } = await req.json()
+    const { historyId, url, public_id, file_name, resource_type } = await req.json()
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `INSERT INTO pet_files (pet_id, url, public_id, file_name, resource_type)
+            `INSERT INTO clinical_history_files (history_id, url, public_id, file_name, resource_type)
              VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-            [petId, url, public_id, file_name, resource_type || "raw"]
+            [historyId, url, public_id, file_name, resource_type || "raw"]
         )
         return Response.json(rows[0])
     } finally {
@@ -36,7 +36,7 @@ export async function DELETE(req: Request) {
 
     const client = await pool.connect()
     try {
-        await client.query(`DELETE FROM pet_files WHERE id = $1`, [id])
+        await client.query(`DELETE FROM clinical_history_files WHERE id = $1`, [id])
         return Response.json({ success: true })
     } finally {
         client.release()

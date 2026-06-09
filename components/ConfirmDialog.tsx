@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
+
 type Props = {
     title: string;
     message: string;
     confirmText?: string;
     danger?: boolean;
+    requireTyped?: string;
     onConfirm: () => void;
     onCancel: () => void;
 };
@@ -14,9 +17,13 @@ export default function ConfirmDialog({
     message,
     confirmText = 'Delete',
     danger = false,
+    requireTyped,
     onConfirm,
     onCancel
 }: Props) {
+    const [typed, setTyped] = useState('')
+    const canConfirm = !requireTyped || typed === requireTyped
+
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center"
@@ -52,6 +59,22 @@ export default function ConfirmDialog({
                     </p>
                 </div>
 
+                {requireTyped && (
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-medium pl-1" style={{ color: 'var(--text-secondary)' }}>
+                            Escriba <span className="font-bold text-red-600">{requireTyped}</span> para confirmar
+                        </label>
+                        <input
+                            type="text"
+                            value={typed}
+                            onChange={e => setTyped(e.target.value)}
+                            autoFocus
+                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                            placeholder={requireTyped}
+                        />
+                    </div>
+                )}
+
                 <div className="flex gap-2 pt-1">
                     <button
                         onClick={onCancel}
@@ -62,7 +85,8 @@ export default function ConfirmDialog({
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold cursor-pointer border-none text-white"
+                        disabled={!canConfirm}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-semibold cursor-pointer border-none text-white disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ backgroundColor: danger ? 'var(--danger)' : 'var(--primary)' }}
                     >
                         {confirmText}

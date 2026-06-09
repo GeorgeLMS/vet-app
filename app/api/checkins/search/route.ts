@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
                 p.breed,
                 p.gender,
                 p.notes as pet_notes,
+                c.id as client_id,
                 c.name as client_name,
                 c.phone,
                 pc.name_es as color,

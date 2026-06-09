@@ -72,7 +72,7 @@ export default async function CheckinsPage() {
 
     const checkins = await getTodayCheckins()
 
-    const waiting = checkins.filter(c => !c.seen_at)
+    const waiting = checkins.filter(c => c.seen_at_ms === null)
 
     const seen = checkins
         .filter(c => c.seen_at_ms !== null)

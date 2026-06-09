@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Upload, FileText, Trash2 } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 
-type PetFile = {
+type HistoryFile = {
     id: number
     url: string
     public_id: string
@@ -14,8 +14,8 @@ type PetFile = {
 }
 
 type Props = {
-    petId: string
-    initialFiles: PetFile[]
+    historyId: number
+    initialFiles: HistoryFile[]
 }
 
 const Spinner = () => (
@@ -25,11 +25,11 @@ const Spinner = () => (
     </svg>
 )
 
-export default function PetFiles({ petId, initialFiles }: Props) {
-    const [files, setFiles] = useState<PetFile[]>(initialFiles)
+export default function ClinicalHistoryFiles({ historyId, initialFiles }: Props) {
+    const [files, setFiles] = useState<HistoryFile[]>(initialFiles)
     const [uploading, setUploading] = useState(false)
     const [deleting, setDeleting] = useState<number | null>(null)
-    const [confirmFile, setConfirmFile] = useState<PetFile | null>(null)
+    const [confirmFile, setConfirmFile] = useState<HistoryFile | null>(null)
 
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
@@ -39,16 +39,16 @@ export default function PetFiles({ petId, initialFiles }: Props) {
         setUploading(true)
         const formData = new FormData()
         formData.append("file", file)
-        formData.append("petId", petId)
+        formData.append("historyId", String(historyId))
 
-        const res = await fetch("/api/upload", { method: "POST", body: formData })
+        const res = await fetch("/api/history-upload", { method: "POST", body: formData })
         const data = await res.json()
 
-        const saveRes = await fetch("/api/pet-files", {
+        const saveRes = await fetch("/api/history-files", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                petId,
+                historyId,
                 url: data.url,
                 public_id: data.public_id,
                 file_name: data.file_name,
@@ -60,10 +60,10 @@ export default function PetFiles({ petId, initialFiles }: Props) {
         setUploading(false)
     }
 
-    async function handleDelete(file: PetFile) {
+    async function handleDelete(file: HistoryFile) {
         setConfirmFile(null)
         setDeleting(file.id)
-        await fetch("/api/pet-files", {
+        await fetch("/api/history-files", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: file.id, public_id: file.public_id, resource_type: file.resource_type })
@@ -85,19 +85,19 @@ export default function PetFiles({ petId, initialFiles }: Props) {
                 />
             )}
 
-            <div className="rounded-lg bg-white p-4 shadow">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Archivos ({files.length})</h2>
-                    <label className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer">
-                        {uploading ? <Spinner /> : <Upload size={18} />}
+            <div className="border-t border-dashed border-gray-200 pt-3">
+                <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-medium text-gray-500">Archivos ({files.length})</span>
+                    <label className="flex items-center justify-center w-7 h-7 rounded-md border border-blue-200 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer">
+                        {uploading ? <Spinner /> : <Upload size={13} />}
                         <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
                     </label>
                 </div>
 
                 {files.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-4">No hay archivos subidos.</p>
+                    <p className="text-xs text-gray-400 py-1">Sin archivos adjuntos.</p>
                 ) : (
-                    <ul className="space-y-2">
+                    <ul className="space-y-1.5">
                         {files.map(file => (
                             <li key={file.id} className="flex items-center justify-between gap-2 text-sm">
                                 <a
@@ -106,16 +106,16 @@ export default function PetFiles({ petId, initialFiles }: Props) {
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-2 text-blue-600 hover:underline truncate"
                                 >
-                                    <FileText size={16} className="shrink-0" />
-                                    <span className="truncate">{file.file_name}</span>
+                                    <FileText size={14} className="shrink-0" />
+                                    <span className="truncate text-xs">{file.file_name}</span>
                                 </a>
                                 <button
-                                    onClick={() => handleDelete(file)}
+                                    onClick={() => setConfirmFile(file)}
                                     disabled={deleting === file.id}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 hover:border-red-300 p-1.5 rounded-md transition-colors shrink-0 disabled:opacity-50"
+                                    className="flex items-center justify-center w-7 h-7 rounded-md border border-red-200 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors shrink-0 disabled:opacity-50"
                                     aria-label="Eliminar archivo"
                                 >
-                                    {deleting === file.id ? <Spinner /> : <Trash2 size={16} />}
+                                    {deleting === file.id ? <Spinner /> : <Trash2 size={13} />}
                                 </button>
                             </li>
                         ))}
