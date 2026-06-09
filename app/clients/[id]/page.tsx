@@ -92,7 +92,7 @@ export default async function ClientPage({
                             <dl className="space-y-2 mt-3 pt-3 border-t border-gray-100">
                                 {client.email && (
                                     <div>
-                                        <dt className="text-sm font-medium text-gray-500">Email</dt>
+                                        <dt className="text-sm font-medium text-gray-500">Email:</dt>
                                         <dd className="text-sm text-gray-900">{client.email}</dd>
                                     </div>
                                 )}
