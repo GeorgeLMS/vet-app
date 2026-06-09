@@ -91,14 +91,14 @@ export default async function ClientPage({
                         {(client.email || client.address || client.notes) && (
                             <dl className="space-y-2 mt-3 pt-3 border-t border-gray-100">
                                 {client.email && (
-                                    <div>
+                                    <div className="flex items-baseline gap-1.5">
                                         <dt className="text-sm font-medium text-gray-500">Email:</dt>
                                         <dd className="text-sm text-gray-900">{client.email}</dd>
                                     </div>
                                 )}
                                 {client.address && (
-                                    <div>
-                                        <dt className="text-sm font-medium text-gray-500">Dirección</dt>
+                                    <div className="flex items-baseline gap-1.5">
+                                        <dt className="text-sm font-medium text-gray-500">Dirección:</dt>
                                         <dd className="text-sm text-gray-900">{client.address}</dd>
                                     </div>
                                 )}
