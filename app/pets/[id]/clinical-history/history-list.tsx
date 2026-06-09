@@ -11,6 +11,7 @@ type HistoryFile = {
     id: number
     url: string
     public_id: string
+    resource_type: string
     file_name: string
     uploaded_at: string
 }
