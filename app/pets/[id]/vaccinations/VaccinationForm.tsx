@@ -31,7 +31,7 @@ export default function VaccinationForm({ petId, vaccineTypes, vaccination, onSu
     }, [state.success])
 
     return (
-        <form action={formAction} className="space-y-4 rounded-lg bg-white p-5 shadow mb-2">
+        <form action={formAction} className="space-y-4">
             <input type="hidden" name="petId" value={petId} />
             {vaccination && <input type="hidden" name="vaccinationId" value={vaccination.id} />}
 
