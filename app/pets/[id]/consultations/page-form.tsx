@@ -19,22 +19,18 @@ function Field({
     children: React.ReactNode
 }) {
     return (
-        <div className="relative">
-            <span
-                className={`absolute -top-2.5 left-3 bg-white px-1 text-[13px] font-medium z-10 ${
-                    error ? "text-red-500" : "text-gray-700"
-                }`}
-            >
+        <div>
+            <label className={`block text-xs font-medium ${error ? "text-red-500" : "text-gray-900"}`}>
                 {label}
-            </span>
-            {children}
-            {error && <p className="mt-1 pl-1 text-xs text-red-500">{error}</p>}
+            </label>
+            <div className="mt-0.5">{children}</div>
+            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
         </div>
     )
 }
 
-function fieldClass(error?: string) {
-    return `w-full rounded-lg border px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:ring-1 appearance-none ${
+function fieldClass(error?: string, compact?: boolean) {
+    return `w-full rounded-md border px-3 ${compact ? "py-1" : "py-2"} text-sm text-gray-900 bg-white outline-none focus:ring-2 appearance-none ${
         error
             ? "border-red-400 focus:border-red-400 focus:ring-red-400"
             : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -79,7 +75,7 @@ export function ConsultationForm({
     const procError = state?.errors?.procedure_id && !procedureId ? state.errors.procedure_id : undefined
 
     return (
-        <form action={action} className="space-y-5">
+        <form action={action} className="space-y-2">
             {state?.errors?.general && (
                 <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                     {state.errors.general}
@@ -113,36 +109,39 @@ export function ConsultationForm({
             <Field label="Notas" error={state?.errors?.notes}>
                 <textarea
                     name="notes"
-                    rows={3}
+                    rows={2}
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
-                    className={fieldClass(state?.errors?.notes)}
+                    className={fieldClass(state?.errors?.notes, true)}
                     placeholder="Notas adicionales..."
                 />
             </Field>
 
-            <Field label="Próxima Visita" error={state?.errors?.next_visit_date}>
-                <input
-                    type="date"
-                    name="next_visit_date"
-                    value={nextVisitDate}
-                    onChange={e => setNextVisitDate(e.target.value)}
-                    className={fieldClass(state?.errors?.next_visit_date)}
-                />
-            </Field>
+            <div className="rounded-lg bg-gray-100 border border-gray-200 p-3 space-y-2">
+                <p className="text-xs font-bold tracking-[0.15em] uppercase text-gray-600">Próxima Visita</p>
+                <Field label="Fecha" error={state?.errors?.next_visit_date}>
+                    <input
+                        type="date"
+                        name="next_visit_date"
+                        value={nextVisitDate}
+                        onChange={e => setNextVisitDate(e.target.value)}
+                        className={fieldClass(state?.errors?.next_visit_date)}
+                    />
+                </Field>
 
-            <Field label="Próxima Visita Notas" error={state?.errors?.next_visit_notes}>
-                <textarea
-                    name="next_visit_notes"
-                    rows={3}
-                    value={nextVisitNotes}
-                    onChange={e => setNextVisitNotes(e.target.value)}
-                    className={fieldClass(state?.errors?.next_visit_notes)}
-                    placeholder="Notas para la próxima visita..."
-                />
-            </Field>
+                <Field label="Notas" error={state?.errors?.next_visit_notes}>
+                    <textarea
+                        name="next_visit_notes"
+                        rows={2}
+                        value={nextVisitNotes}
+                        onChange={e => setNextVisitNotes(e.target.value)}
+                        className={fieldClass(state?.errors?.next_visit_notes, true)}
+                        placeholder="Notas para la próxima visita..."
+                    />
+                </Field>
+            </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-1">
                 <SubmitButton>{isEdit ? "Actualizar Consulta" : "Guardar Consulta"}</SubmitButton>
                 {onCancel && (
                     <button

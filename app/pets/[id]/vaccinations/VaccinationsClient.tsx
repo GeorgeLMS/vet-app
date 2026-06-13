@@ -399,10 +399,10 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
             </div>
 
             <VaccinationSheet
-                key={sheetKey}
                 petId={petId}
                 petName={petName}
                 open={sheetOpen}
+                formKey={sheetKey}
                 onClose={() => { setSheetOpen(false); setSheetVaccination(undefined) }}
                 onSuccess={handleSheetSuccess}
                 vaccineTypes={vaccineTypes}
