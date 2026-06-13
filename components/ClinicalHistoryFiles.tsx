@@ -29,7 +29,24 @@ export default function ClinicalHistoryFiles({ historyId, initialFiles }: Props)
     const [files, setFiles] = useState<HistoryFile[]>(initialFiles)
     const [uploading, setUploading] = useState(false)
     const [deleting, setDeleting] = useState<number | null>(null)
+    const [downloading, setDownloading] = useState<number | null>(null)
     const [confirmFile, setConfirmFile] = useState<HistoryFile | null>(null)
+
+    async function handleDownload(file: HistoryFile) {
+        setDownloading(file.id)
+        try {
+            const res = await fetch(`/api/pet-files/download?public_id=${encodeURIComponent(file.public_id)}&name=${encodeURIComponent(file.file_name)}&resource_type=${file.resource_type}`)
+            const blob = await res.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = file.file_name
+            a.click()
+            URL.revokeObjectURL(url)
+        } finally {
+            setDownloading(null)
+        }
+    }
 
     async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
@@ -100,15 +117,14 @@ export default function ClinicalHistoryFiles({ historyId, initialFiles }: Props)
                     <ul className="space-y-1.5">
                         {files.map(file => (
                             <li key={file.id} className="flex items-center justify-between gap-2 text-sm">
-                                <a
-                                    href={`/api/pet-files/download?public_id=${encodeURIComponent(file.public_id)}&name=${encodeURIComponent(file.file_name)}&resource_type=${file.resource_type}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 text-blue-600 hover:underline truncate"
+                                <button
+                                    onClick={() => handleDownload(file)}
+                                    disabled={downloading === file.id}
+                                    className="flex items-center gap-2 text-blue-600 hover:underline truncate disabled:opacity-50"
                                 >
-                                    <FileText size={14} className="shrink-0" />
+                                    {downloading === file.id ? <Spinner /> : <FileText size={14} className="shrink-0" />}
                                     <span className="truncate text-xs">{file.file_name}</span>
-                                </a>
+                                </button>
                                 <button
                                     onClick={() => setConfirmFile(file)}
                                     disabled={deleting === file.id}
