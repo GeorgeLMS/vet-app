@@ -18,11 +18,14 @@ export async function GET(req: Request) {
 
     if (!public_id || !name) return Response.json({ error: "Missing params" }, { status: 400 })
 
-    // Get the secure_url from database for more reliable downloads
+    // Get the secure_url from database — check both pet_files and clinical_history_files
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT url FROM pet_files WHERE public_id = $1`,
+            `SELECT url FROM pet_files WHERE public_id = $1
+             UNION
+             SELECT url FROM clinical_history_files WHERE public_id = $1
+             LIMIT 1`,
             [public_id]
         )
 
