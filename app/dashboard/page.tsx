@@ -1,26 +1,29 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { LoadingLink } from "@/components/LoadingLink"
-import { Users, PawPrint, ClipboardList, Calendar, Clock, CheckCircle, AlertCircle, BarChart2, Settings } from "lucide-react"
+import { Users, PawPrint, ClipboardList, Calendar, BarChart2, Settings } from "lucide-react"
 import { signOut } from "@/auth"
 import pool from "@/pool"
-import { SpeciesIcon } from "@/components/SpeciesIcon"
 import { LoadingRow } from "@/components/LoadingRow"
 import { formatToday } from "@/utils"
+import { DashboardLists } from "./dashboard-lists"
 
 type Checkin = {
     id: number
     pet_id: number
-    checked_in_at: string
     checked_in_at_time: string
-    seen_at: string | null
     seen_at_time: string | null
     seen_at_ms: number | null
     notes: string | null
     pet_name: string
+    client_id: number
     client_name: string
+    phone: string | null
     species: string | null
     gender: string | null
+    breed: string | null
+    color: string | null
+    color_hex: string | null
     has_consultation_today: boolean
 }
 
@@ -34,17 +37,18 @@ async function getDashboardData(tz: string) {
             SELECT
                 c.id,
                 c.pet_id,
-               
-                TO_CHAR(c.checked_in_at AT TIME ZONE $1, 'YYYY-MM-DD"T"HH24:MI:SS') as checked_in_at,
-                TO_CHAR(c.seen_at AT TIME ZONE $1, 'YYYY-MM-DD"T"HH24:MI:SS') as seen_at,
-
                 TO_CHAR(c.checked_in_at AT TIME ZONE $1, 'HH12:MI AM') as checked_in_at_time,
+                TO_CHAR(c.seen_at AT TIME ZONE $1, 'HH12:MI AM') as seen_at_time,
                 EXTRACT(EPOCH FROM c.seen_at AT TIME ZONE $1) * 1000 as seen_at_ms,
-
                 c.notes,
                 p.name as pet_name,
                 p.gender,
+                p.breed,
+                pc.name_es as color,
+                pc.hex as color_hex,
+                cl.id as client_id,
                 cl.name as client_name,
+                cl.phone,
                 s.name_es as species,
                 EXISTS(
                     SELECT 1 FROM consultations con
@@ -57,6 +61,7 @@ async function getDashboardData(tz: string) {
             JOIN pets p ON c.pet_id = p.id
             JOIN clients cl ON p.client_id = cl.id
             LEFT JOIN species s ON p.species_id = s.id
+            LEFT JOIN pet_colors pc ON pc.id = p.color_id
             WHERE c.checked_in_at >= vars.today
               AND c.checked_in_at < vars.today + INTERVAL '1 day'
             ORDER BY c.checked_in_at ASC
@@ -74,13 +79,13 @@ export default async function DashboardPage() {
 
     const checkins = await getDashboardData(tz)
 
-    const waiting = checkins.filter(c => !c.seen_at)
+    const waiting = checkins.filter(c => c.seen_at_ms === null)
 
     const seen = checkins
         .filter((c): c is Checkin & { seen_at_ms: number } => c.seen_at_ms !== null)
         .sort((a, b) => {
             if (a.has_consultation_today === b.has_consultation_today) {
-                return b.seen_at_ms - a.seen_at_ms  // TS now knows these are numbers
+                return b.seen_at_ms - a.seen_at_ms
             }
             return a.has_consultation_today ? 1 : -1
         })
@@ -101,7 +106,6 @@ export default async function DashboardPage() {
                         <h1 className="text-lg font-medium text-gray-700 ">
                             {formatToday(tz)}
                         </h1>
-
                     </div>
                     <form
                         action={async () => {
@@ -127,7 +131,6 @@ export default async function DashboardPage() {
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150"
                     >
-
                         <ClipboardList className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Ingresos de Hoy
@@ -138,37 +141,32 @@ export default async function DashboardPage() {
                         className="flex items-center gap-3 bg-white hover:bg-gray-50
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150">
-
                         <PawPrint className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Mascotas
                         </span>
-
                     </LoadingRow>
                     <LoadingRow
                         href="/clients"
                         className="flex items-center gap-3 bg-white hover:bg-gray-50
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150">
-
                         <Users className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Clientes
                         </span>
                     </LoadingRow>
                     <LoadingRow
-                        href="/schedule"
+                        href="/schedulecalendar"
                         className="flex items-center gap-3 bg-white hover:bg-gray-50
                                    active:bg-gray-100 rounded-xl px-4 py-4
                                    border border-gray-200 shadow-sm transition-colors duration-150">
-
                         <Calendar className="w-5 h-5 text-blue-500 shrink-0" strokeWidth={2} />
                         <span className="text-sm font-medium text-gray-600 leading-tight">
                             Agenda
                         </span>
-
                     </LoadingRow>
-                </div >
+                </div>
 
                 {/* ── Secondary Links ── */}
                 <div className="flex items-center gap-2 mb-2 px-1">
@@ -193,108 +191,21 @@ export default async function DashboardPage() {
                             Administración
                         </span>
                     </LoadingLink>
+
+                    <span className="w-0.5 h-0.5 rounded-full bg-gray-400 flex-shrink-0" />
+
+                    <LoadingLink
+                        href="/schedule"
+                        className="inline-flex items-center gap-1.5 py-1"
+                    >
+                        <ClipboardList className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
+                        <span className="text-xs font-medium text-blue-600 hover:text-blue-700">
+                            Agenda Lista
+                        </span>
+                    </LoadingLink>
                 </div>
 
-                {/* ── En Espera ── */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-3">
-                    <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Clock className="w-3.5 h-3.5 text-blue-400" strokeWidth={2} />
-                            <p className="text- font-bold tracking-[0.15em] uppercase text-gray-500">
-                                En espera
-                            </p>
-                        </div>
-                        {waiting.length > 0 && (
-                            <span className="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                                {waiting.length}
-                            </span>
-                        )}
-                    </div>
-
-                    {waiting.length === 0 ? (
-                        <p className="px-4 py-5 text-sm text-center text-gray-400">
-                            Nadie esperando
-                        </p>
-                    ) : (
-                        <div className="divide-y divide-gray-100">
-                            {waiting.map((c, i) => (
-                                <LoadingRow
-                                    key={c.id}
-                                    href={`/pets/${c.pet_id}`}
-                                    className="px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors duration-100"
-                                >
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                        <span className="text-xs text-gray-300 font-mono w-4 shrink-0">
-                                            {i + 1}.
-                                        </span>
-                                        <SpeciesIcon species={c.species} gender={c.gender} size={18} showGenderIcon={false} />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 truncate">
-                                                {c.pet_name}
-                                            </p>
-                                            <p className="text-xs text-gray-400 truncate">
-                                                {c.client_name}
-                                                {c.notes ? ` · ${c.notes}` : ""}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs text-gray-400 shrink-0 ml-2">
-                                        {c.checked_in_at_time}
-                                    </span>
-                                </LoadingRow>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* ── Vistos Hoy ── */}
-                {seen.length > 0 && (
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4">
-                        <div className="px-4 py-2.5 border-b border-gray-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <CheckCircle className="w-3.5 h-3.5 text-green-400" strokeWidth={2} />
-                                <p className="text- font-bold tracking-[0.15em] uppercase text-gray-500">
-                                    Vistos hoy
-                                </p>
-                            </div>
-                            <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                                {seen.length}
-                            </span>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                            {seen.map(c => (
-                                <LoadingRow
-                                    key={c.id}
-                                    href={`/pets/${c.pet_id}`}
-                                    className={`px-4 py-3 flex items-center justify-between hover:bg-blue-50 transition-colors duration-100 ${c.has_consultation_today ? 'opacity-50' : ''}`}
-                                >
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                        <SpeciesIcon species={c.species} gender={c.gender} size={18} showGenderIcon={false} />
-                                        <div className="min-w-0">
-                                            <p className={`text-sm font-semibold truncate ${c.has_consultation_today ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-                                                {c.pet_name}
-                                            </p>
-                                            <p className="text-xs text-gray-400 truncate">
-                                                {c.client_name}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                                        {!c.has_consultation_today && (
-                                            <div className="flex items-center gap-1">
-                                                <AlertCircle className="w-3 h-3 text-amber-400" strokeWidth={2} />
-                                                <span className="text-xs text-amber-500">Consulta no registrada</span>
-                                            </div>
-                                        )}
-                                        <span className="text-xs text-gray-400">
-                                            {c.seen_at_time}
-                                        </span>
-                                    </div>
-                                </LoadingRow>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                <DashboardLists waiting={waiting} seen={seen} />
 
             </div>
         </main>

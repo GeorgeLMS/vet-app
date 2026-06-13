@@ -1,8 +1,45 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { createConsultation, updateConsultation, type FormState } from "./actions"
 import { SubmitButton } from "@/components/SubmitButton"
+
+function todayISO() {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+}
+
+function Field({
+    label,
+    error,
+    children,
+}: {
+    label: string
+    error?: string
+    children: React.ReactNode
+}) {
+    return (
+        <div className="relative">
+            <span
+                className={`absolute -top-2.5 left-3 bg-white px-1 text-[13px] font-medium z-10 ${
+                    error ? "text-red-500" : "text-gray-700"
+                }`}
+            >
+                {label}
+            </span>
+            {children}
+            {error && <p className="mt-1 pl-1 text-xs text-red-500">{error}</p>}
+        </div>
+    )
+}
+
+function fieldClass(error?: string) {
+    return `w-full rounded-lg border px-3 py-3 text-sm text-gray-900 bg-white outline-none focus:ring-1 appearance-none ${
+        error
+            ? "border-red-400 focus:border-red-400 focus:ring-red-400"
+            : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+    }`
+}
 
 export function ConsultationForm({
     petId,
@@ -19,6 +56,11 @@ export function ConsultationForm({
 }) {
     const isEdit = !!consultation
 
+    const [consultationDate, setConsultationDate] = useState(consultation?.consultation_date ?? todayISO())
+    const [nextVisitDate, setNextVisitDate] = useState(consultation?.next_visit_date ?? "")
+    const [procedureId, setProcedureId] = useState(consultation?.procedure_id ?? "")
+    const [notes, setNotes] = useState(consultation?.notes ?? "")
+
     const boundAction = async (prev: FormState, formData: FormData) => {
         const result = isEdit
             ? await updateConsultation(consultation.id, petId, prev, formData)
@@ -30,106 +72,71 @@ export function ConsultationForm({
         return result
     }
 
-    const [state, action] = useActionState<FormState, FormData>(
-        boundAction,
-        {
-            data: {
-                consultation_date: consultation?.consultation_date ?? "",
-                next_visit_date: consultation?.next_visit_date ?? "", // <-- ADD THIS
-                procedure_id: consultation?.procedure_id ?? "",
-                notes: consultation?.notes ?? "",
-            }
-        }
-    )
+    const [state, action] = useActionState<FormState, FormData>(boundAction, {})
+
+    const dateError = state?.errors?.consultation_date && !consultationDate ? state.errors.consultation_date : undefined
+    const procError = state?.errors?.procedure_id && !procedureId ? state.errors.procedure_id : undefined
 
     return (
-        <form action={action} className="space-y-4">
+        <form action={action} className="space-y-5">
             {state?.errors?.general && (
                 <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
                     {state.errors.general}
                 </div>
             )}
 
-            <div>
-                <label htmlFor="consultation_date" className="block text-sm font-medium text-gray-700">
-                    Fecha de Consulta *
-                </label>
+            <Field label="Fecha de Consulta *" error={dateError}>
                 <input
                     type="date"
-                    id="consultation_date"
                     name="consultation_date"
-                    defaultValue={state.data?.consultation_date}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.consultation_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                    value={consultationDate}
+                    onChange={e => setConsultationDate(e.target.value)}
+                    className={fieldClass(dateError)}
                 />
-                {state?.errors?.consultation_date && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.consultation_date}</p>
-                )}
-            </div>
+            </Field>
 
-
-
-            <div>
-                <label htmlFor="procedure_id" className="block text-sm font-medium text-gray-700">
-                    Procedimiento *
-                </label>
+            <Field label="Procedimiento *" error={procError}>
                 <select
-                    id="procedure_id"
                     name="procedure_id"
-                    defaultValue={state.data?.procedure_id}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.procedure_id ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                    value={procedureId}
+                    onChange={e => setProcedureId(e.target.value)}
+                    className={fieldClass(procError)}
                 >
-                    <option value="">Seleccionar procedimiento</option>
+                    <option value="">Seleccionar...</option>
                     {procedures.map((p) => (
-                        <option key={p.id} value={p.id}>
-                            {p.name}
-                        </option>
+                        <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                 </select>
-                {state?.errors?.procedure_id && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.procedure_id}</p>
-                )}
-            </div>
+            </Field>
 
-            <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700">
-                    Notas
-                </label>
+            <Field label="Notas" error={state?.errors?.notes}>
                 <textarea
-                    id="notes"
                     name="notes"
-                    rows={4}
-                    defaultValue={state.data?.notes ?? ''}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.notes ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
-                    placeholder="Notas adicionales sobre esta consulta..."
+                    rows={3}
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    className={fieldClass(state?.errors?.notes)}
+                    placeholder="Notas adicionales..."
                 />
-                {state?.errors?.notes && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.notes}</p>
-                )}
-            </div>
+            </Field>
 
-            {/* ADD THIS BLOCK */}
-            <div>
-                <label htmlFor="next_visit_date" className="block text-sm font-medium text-gray-700">
-                    Próxima Visita
-                </label>
+            <Field label="Próxima Visita" error={state?.errors?.next_visit_date}>
                 <input
                     type="date"
-                    id="next_visit_date"
                     name="next_visit_date"
-                    defaultValue={state.data?.next_visit_date ?? ''}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.next_visit_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                    value={nextVisitDate}
+                    onChange={e => setNextVisitDate(e.target.value)}
+                    className={fieldClass(state?.errors?.next_visit_date)}
                 />
-                {state?.errors?.next_visit_date && (
-                    <p className="mt-1 text-sm text-red-600">{state.errors.next_visit_date}</p>
-                )}
-            </div>
-            <div className="flex gap-3 pt-4">
-                <SubmitButton>{isEdit ? 'Actualizar Consulta' : 'Guardar Consulta'}</SubmitButton>
+            </Field>
+
+            <div className="flex gap-3 pt-2">
+                <SubmitButton>{isEdit ? "Actualizar Consulta" : "Guardar Consulta"}</SubmitButton>
                 {onCancel && (
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm hover:bg-gray-300"
+                        className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200"
                     >
                         Cancelar
                     </button>

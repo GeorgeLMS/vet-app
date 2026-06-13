@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from "react"
 import { Plus, SquarePen, Trash2, CalendarClock } from "lucide-react"
-import { ConsultationForm } from "./page-form"
+
 import { deleteConsultation } from "./actions"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { formatDate } from "@/utils"
+import { ConsultationSheet } from "@/components/ConsultationSheet"
 
 type Consultation = {
     id: string
@@ -16,21 +17,15 @@ type Consultation = {
     notes: string | null
 }
 
-type Procedure = {
-    id: string
-    name: string
-}
 
 function ConsultationRow({
     c,
     petId,
-    procedures,
     onEdit,
     onDelete,
 }: {
     c: Consultation
     petId: string
-    procedures: Procedure[]
     onEdit: () => void
     onDelete: (id: string) => void
 }) {
@@ -103,25 +98,26 @@ function ConsultationRow({
 
 export function ConsultationsList({
     petId,
+    petName,
     initialConsultations,
-    procedures,
 }: {
     petId: string
+    petName: string
     initialConsultations: Consultation[]
-    procedures: Procedure[]
 }) {
     const [consultations, setConsultations] = useState(initialConsultations)
-    const [editingId, setEditingId] = useState<string | null>(null)
-    const [isAddingNew, setIsAddingNew] = useState(false)
+    const [sheetConsultation, setSheetConsultation] = useState<Consultation | null>(null)
+    const [sheetOpen, setSheetOpen] = useState(false)
 
     const handleSave = (updated: Consultation) => {
         setConsultations(prev => prev.map(c => c.id === updated.id ? updated : c))
-        setEditingId(null)
+        setSheetOpen(false)
+        setSheetConsultation(null)
     }
 
     const handleCreate = (created: Consultation) => {
         setConsultations(prev => [created, ...prev])
-        setIsAddingNew(false)
+        setSheetOpen(false)
     }
 
     const handleDelete = (id: string) => {
@@ -138,10 +134,7 @@ export function ConsultationsList({
                 </div>
 
                 <button
-                    onClick={() => {
-                        setIsAddingNew(true)
-                        setEditingId(null)
-                    }}
+                    onClick={() => { setSheetConsultation(null); setSheetOpen(true) }}
                     className="inline-flex items-center h-8 gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-3"
                     aria-label="Agregar consulta"
                 >
@@ -151,49 +144,34 @@ export function ConsultationsList({
             </div>
 
             <div className="rounded-lg bg-white shadow overflow-hidden">
-                {consultations.length === 0 && !isAddingNew && (
+                {consultations.length === 0 && (
                     <p className="px-4 py-5 text-sm text-center text-gray-400">
                         Sin consultas registradas
                     </p>
                 )}
 
                 <div className="divide-y divide-gray-100">
-                    {isAddingNew && (
-                        <div className="px-4 py-4">
-                            <ConsultationForm
-                                petId={petId}
-                                procedures={procedures}
-                                onSuccess={handleCreate}
-                                onCancel={() => setIsAddingNew(false)}
-                            />
-                        </div>
-                    )}
-
                     {consultations.map(c => (
                         <div key={c.id}>
-                            {editingId === c.id ? (
-                                <div className="px-4 py-4">
-                                    <ConsultationForm
-                                        petId={petId}
-                                        procedures={procedures}
-                                        consultation={c}
-                                        onSuccess={handleSave}
-                                        onCancel={() => setEditingId(null)}
-                                    />
-                                </div>
-                            ) : (
-                                <ConsultationRow
-                                    c={c}
-                                    petId={petId}
-                                    procedures={procedures}
-                                    onEdit={() => { setEditingId(c.id); setIsAddingNew(false) }}
-                                    onDelete={handleDelete}
-                                />
-                            )}
+                            <ConsultationRow
+                                c={c}
+                                petId={petId}
+                                onEdit={() => { setSheetConsultation(c); setSheetOpen(true) }}
+                                onDelete={handleDelete}
+                            />
                         </div>
                     ))}
                 </div>
             </div>
+
+            <ConsultationSheet
+                petId={petId}
+                petName={petName}
+                open={sheetOpen}
+                onClose={() => { setSheetOpen(false); setSheetConsultation(null) }}
+                consultation={sheetConsultation ?? undefined}
+                onSuccess={sheetConsultation ? handleSave : handleCreate}
+            />
         </div>
     )
 }

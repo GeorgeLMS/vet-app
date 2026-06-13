@@ -5,6 +5,7 @@ import { checkIn, markSeen, unmarkSeen, deleteCheckin } from "./actions"
 import Link from "next/link"
 import { Clock, PlusCircle, CheckCircle } from "lucide-react"
 import PetInfoBlock from "@/components/PetInfoBlock"
+import { ConsultationSheet } from "@/components/ConsultationSheet"
 type Checkin = {
     id: number
     pet_id: number
@@ -64,6 +65,7 @@ export function CheckinClient({
     const [notes, setNotes] = useState("")
     const [menuOpenId, setMenuOpenId] = useState<number | null>(null)
     const [seenMenuOpenId, setSeenMenuOpenId] = useState<number | null>(null)
+    const [sheetPet, setSheetPet] = useState<{ id: number; name: string; checkinId: number } | null>(null)
     const [loading, setLoading] = useState(false)
     const menuRef = useRef<HTMLDivElement>(null)
     const seenMenuRef = useRef<HTMLDivElement>(null)
@@ -366,12 +368,12 @@ export function CheckinClient({
                                 {seenMenuOpenId === c.id && (
                                     <div className="absolute right-2 top-10 z-20 rounded-md border border-gray-200 bg-white shadow-lg text-sm overflow-hidden">
                                         {!c.has_consultation_today && (
-                                            <Link
-                                                href={`/pets/${c.pet_id}/consultations/new?from=checkins`}
-                                                className="block px-4 py-2 hover:bg-gray-50 text-blue-600 font-medium border-b"
+                                            <button
+                                                onClick={() => { setSeenMenuOpenId(null); setSheetPet({ id: c.pet_id, name: c.pet_name, checkinId: c.id }) }}
+                                                className="w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-600 font-medium border-b"
                                             >
                                                 Registrar Consulta
-                                            </Link>
+                                            </button>
                                         )}
                                         <button
                                             onClick={async () => {
@@ -391,6 +393,21 @@ export function CheckinClient({
                     </div>
                 )}
             </div>
+
+            <ConsultationSheet
+                petId={sheetPet?.id ?? 0}
+                petName={sheetPet?.name ?? ""}
+                open={!!sheetPet}
+                onClose={() => setSheetPet(null)}
+                onSuccess={() => {
+                    if (sheetPet) {
+                        setSeenList(prev => prev.map(x =>
+                            x.id === sheetPet.checkinId ? { ...x, has_consultation_today: true } : x
+                        ))
+                    }
+                    setSheetPet(null)
+                }}
+            />
         </div>
     )
 }

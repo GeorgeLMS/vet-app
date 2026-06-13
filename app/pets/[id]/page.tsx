@@ -8,21 +8,6 @@ import { PetDetailsCard } from "./pet-details-card"
 import pool from "@/pool"
 
 
-async function getClinicalHistories(petId: string) {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT id, TO_CHAR(fecha, 'DD Mon YY') as fecha
-             FROM clinical_histories
-             WHERE pet_id = $1
-             ORDER BY fecha DESC`,
-            [petId]
-        )
-        return rows
-    } finally {
-        client.release()
-    }
-}
 
 export async function getPet(id: string) {
     const session = await auth()
@@ -63,18 +48,6 @@ export async function getPet(id: string) {
     }
 }
 
-async function getPetFiles(petId: string) {
-    const client = await pool.connect()
-    try {
-        const { rows } = await client.query(
-            `SELECT * FROM pet_files WHERE pet_id = $1 ORDER BY uploaded_at DESC`,
-            [petId]
-        )
-        return rows
-    } finally {
-        client.release()
-    }
-}
 
 async function getPetConsultations(petId: string, tz: string) {
     const { rows } = await pool.query(
@@ -94,10 +67,6 @@ async function getPetConsultations(petId: string, tz: string) {
     return rows
 }
 
-async function getProcedures() {
-    const { rows } = await pool.query(`SELECT id, name FROM procedures ORDER BY display_order`)
-    return rows
-}
 
 async function getSpecies() {
     const { rows } = await pool.query(`SELECT id, name_es FROM species ORDER BY name`)
@@ -123,11 +92,8 @@ export default async function PetPage({
     const pet = await getPet(id)
     if (!pet) notFound()
 
-    const [consultations, procedures, clinicalHistories, files, species, colors] = await Promise.all([
+    const [consultations, species, colors] = await Promise.all([
         getPetConsultations(id, tz),
-        getProcedures(),
-        getClinicalHistories(id),
-        getPetFiles(id),
         getSpecies(),
         getPetColors(),
     ])
@@ -164,8 +130,8 @@ export default async function PetPage({
                     <div>
                         <ConsultationsList
                             petId={id}
+                            petName={pet.name}
                             initialConsultations={consultations}
-                            procedures={procedures}
                         />
 
                     </div>

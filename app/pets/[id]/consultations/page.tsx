@@ -41,17 +41,6 @@ async function getPetConsultations(petId: string, tz: string) {
     //}
 }
 
-async function getProcedures() {
-    //const client = await pool.connect()
-    //try {
-    const { rows } = await pool.query(
-        `SELECT id, name FROM procedures ORDER BY display_order`
-    )
-    return rows
-    //} finally {
-    //    client.release()
-    //}
-}
 
 export default async function ConsultationsPage({
     params
@@ -66,10 +55,7 @@ export default async function ConsultationsPage({
     const pet = await getPet(id)
     if (!pet) notFound()
 
-    const [consultations, procedures] = await Promise.all([
-        getPetConsultations(id, tz),
-        getProcedures()
-    ])
+    const consultations = await getPetConsultations(id, tz)
 
     return (
         <main className="min-h-screen bg-gray-50 p-6">
@@ -85,8 +71,8 @@ export default async function ConsultationsPage({
                 <div className="mt-4">
                     <ConsultationsList
                         petId={id}
+                        petName={pet.name}
                         initialConsultations={consultations}
-                        procedures={procedures}
                     />
                 </div>
             </div>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition, useEffect, useActionState } from "react"
+import { useState, useTransition, useEffect, useActionState, useRef } from "react"
+import { createPortal } from "react-dom"
 import { useTopLoader } from "nextjs-toploader"
 import { Edit, Trash2, Plus, X, Save } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
@@ -97,11 +98,56 @@ function InlineForm({
     )
 }
 
+function TextModal({ text, date, onClose }: { text: string; date: string; onClose: () => void }) {
+    useEffect(() => {
+        function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose() }
+        document.addEventListener("keydown", onKey)
+        return () => document.removeEventListener("keydown", onKey)
+    }, [onClose])
+
+    return createPortal(
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={onClose}
+        >
+            <div
+                className="relative w-full max-w-lg max-h-[80vh] rounded-xl bg-white shadow-xl flex flex-col"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                    <span className="inline-block rounded-full bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-0.5">
+                        {date}
+                    </span>
+                    <button
+                        onClick={onClose}
+                        className="flex items-center justify-center w-7 h-7 rounded-md text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                        aria-label="Cerrar"
+                    >
+                        <X size={15} />
+                    </button>
+                </div>
+                <div className="overflow-y-auto px-4 py-3">
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{text}</p>
+                </div>
+            </div>
+        </div>,
+        document.body
+    )
+}
+
 function HistoryCard({ petId, history }: { petId: string; history: History }) {
     const [editing, setEditing] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
+    const [showModal, setShowModal] = useState(false)
     const [isPending, startTransition] = useTransition()
     const topLoader = useTopLoader()
+    const textRef = useRef<HTMLParagraphElement>(null)
+    const [isClamped, setIsClamped] = useState(false)
+
+    useEffect(() => {
+        const el = textRef.current
+        if (el) setIsClamped(el.scrollHeight > el.clientHeight)
+    }, [history.motivo_consulta])
 
     if (editing) {
         return <InlineForm petId={petId} history={history} onDone={() => setEditing(false)} />
@@ -117,6 +163,13 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
 
     return (
         <>
+            {showModal && history.motivo_consulta && (
+                <TextModal
+                    text={history.motivo_consulta}
+                    date={history.fecha_formatted}
+                    onClose={() => setShowModal(false)}
+                />
+            )}
             {showConfirm && (
                 <ConfirmDialog
                     title="Eliminar historial"
@@ -136,7 +189,26 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
                 <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
                         {history.motivo_consulta ? (
-                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{history.motivo_consulta}</p>
+                            <>
+                                <p
+                                    ref={textRef}
+                                    className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-3"
+                                >
+                                    {history.motivo_consulta}
+                                </p>
+                                {isClamped && (
+                                    <div className="relative">
+                                        <div className="absolute -top-6 left-0 right-0 h-6 bg-gradient-to-b from-transparent to-white pointer-events-none" />
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="flex items-center justify-center gap-1 w-full pt-1 text-xs font-medium text-blue-500 hover:text-blue-700 transition-colors"
+                                        >
+                                            Ver consulta completa
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <p className="text-sm text-gray-400 italic">Sin motivo registrado</p>
                         )}

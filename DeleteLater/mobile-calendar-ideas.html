@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mobile Calendar — 5 ideas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px 12px; }
+  h1 { text-align: center; font-size: 18px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .subtitle { text-align: center; font-size: 12px; color: #6b7280; margin-bottom: 28px; }
+
+  .row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+
+  /* phone frame */
+  .phone { width: 300px; background: #fff; border-radius: 32px; box-shadow: 0 0 0 8px #1f2937, 0 20px 40px rgba(0,0,0,.25); overflow: hidden; flex-shrink: 0; }
+  .phone-bar { background: #1f2937; height: 28px; display: flex; align-items: center; justify-content: center; }
+  .phone-bar .notch { width: 80px; height: 14px; background: #111; border-radius: 0 0 12px 12px; }
+  .phone-screen { background: #f9fafb; min-height: 560px; overflow: hidden; position: relative; }
+  .phone-label { text-align: center; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .08em; margin-top: 10px; }
+  .option-num { display: inline-flex; align-items:center; justify-content:center; width:20px;height:20px;border-radius:50%;background:#2563eb;color:#fff;font-size:10px;font-weight:700;margin-right:5px; }
+
+  /* ── shared header ── */
+  .cal-header { background: #fff; padding: 10px 14px 8px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+  .cal-header .month { font-size: 14px; font-weight: 700; color: #111; }
+  .cal-header .arrows { display: flex; gap: 8px; }
+  .cal-header .arr { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #e5e7eb; background: #f9fafb; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #374151; cursor: pointer; }
+
+  /* ── OPTION A — full grid, dots only ── */
+  .grid-a { padding: 6px 10px; }
+  .dow-row { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-bottom: 2px; }
+  .dow-row span { text-align:center; font-size: 9px; font-weight: 600; color: #9ca3af; padding: 2px 0; }
+  .day-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .dc { min-height: 44px; border-radius: 6px; padding: 3px 2px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+  .dc:hover { background: #eff6ff; }
+  .dc.today { background: #eff6ff; }
+  .dc.today .dn { background: #2563eb; color: #fff; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
+  .dc.other-month .dn { color: #d1d5db; }
+  .dn { font-size: 10px; font-weight: 600; color: #374151; }
+  .dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; }
+  .dot.red { background: #ef4444; }
+  .dot.amber { background: #f59e0b; }
+  .dot.blue { background: #3b82f6; }
+
+  /* ── OPTION B — week strip ── */
+  .week-strip { background: #fff; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+  .week-row { display: flex; gap: 4px; }
+  .wday { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px; border-radius: 8px; cursor: pointer; }
+  .wday.active { background: #2563eb; }
+  .wday.active .wdn, .wday.active .wdl { color: #fff; }
+  .wday:not(.active):hover { background: #f3f4f6; }
+  .wdl { font-size: 8px; font-weight: 600; color: #9ca3af; text-transform: uppercase; }
+  .wdn { font-size: 13px; font-weight: 700; color: #374151; }
+  .wdot { width: 5px; height: 5px; border-radius: 50%; background: #3b82f6; }
+  .wdot.red { background: #ef4444; }
+  .wdot.none { background: transparent; }
+  .b-list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+  .b-card { background: #fff; border-radius: 10px; padding: 9px 11px; border-left: 3px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+  .b-card.red { border-color: #ef4444; }
+  .b-card .pet { font-size: 12px; font-weight: 700; color: #111; }
+  .b-card .sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .b-card .proc { font-size: 10px; color: #2563eb; margin-top: 3px; font-weight: 600; }
+
+  /* ── OPTION C — vertical list with date headers ── */
+  .c-scroll { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .c-date-header { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; margin-top: 6px; padding-bottom: 4px; border-bottom: 1px solid #e5e7eb; }
+  .c-card { background: #fff; border-radius: 10px; padding: 8px 11px; border-left: 3px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+  .c-card.amber { border-color: #f59e0b; }
+  .c-card.red { border-color: #ef4444; }
+  .c-card .pet { font-size: 12px; font-weight: 700; color: #111; }
+  .c-card .sub { font-size: 11px; color: #6b7280; }
+
+  /* ── OPTION D — tiny grid + day popover ── */
+  .d-grid-wrap { padding: 4px 8px 6px; }
+  .d-day-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+  .d-dc { min-height: 38px; border-radius: 4px; padding: 2px 1px; display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; }
+  .d-dc:hover { background: #eff6ff; }
+  .d-dc.sel { background: #dbeafe; border: 1px solid #93c5fd; }
+  .d-dc.today .d-dn { background: #2563eb; color: #fff; border-radius: 50%; width: 16px; height: 16px; display:flex;align-items:center;justify-content:center; }
+  .d-dn { font-size: 9px; font-weight: 600; color: #374151; }
+  .d-dots { display: flex; gap: 1px; }
+  .d-dot { width: 4px; height: 4px; border-radius: 50%; }
+  .d-popover { margin: 0 10px; background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.12); padding: 10px 12px; border: 1px solid #e5e7eb; }
+  .d-popover .d-pop-title { font-size: 11px; font-weight: 700; color: #2563eb; margin-bottom: 6px; }
+  .d-pop-item { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-bottom: 1px solid #f3f4f6; }
+  .d-pop-item:last-child { border: none; }
+  .d-pop-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; }
+  .d-pop-dot.amber { background: #f59e0b; }
+  .d-pop-pet { font-size: 11px; font-weight: 600; color: #111; }
+  .d-pop-sub { font-size: 10px; color: #6b7280; }
+
+  /* ── OPTION E — full grid + badge count ── */
+  .e-grid { padding: 6px 10px; }
+  .e-day-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+  .e-dc { min-height: 50px; border-radius: 7px; padding: 4px 3px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; border: 1px solid transparent; }
+  .e-dc:hover { background: #eff6ff; border-color: #bfdbfe; }
+  .e-dc.today { background: #eff6ff; }
+  .e-dc.today .e-dn { background: #2563eb; color: #fff; border-radius: 50%; width: 18px; height: 18px; display:flex;align-items:center;justify-content:center; }
+  .e-dc.other-month .e-dn { color: #d1d5db; }
+  .e-dn { font-size: 10px; font-weight: 600; color: #374151; }
+  .e-badge { font-size: 9px; font-weight: 700; background: #2563eb; color: #fff; border-radius: 999px; padding: 1px 5px; min-width: 16px; text-align: center; }
+  .e-badge.red { background: #ef4444; }
+  .e-badge.amber { background: #f59e0b; }
+
+</style>
+</head>
+<body>
+
+<h1>Mobile Calendar — 5 ideas</h1>
+<p class="subtitle">Cómo mostrar el schedule en pantallas de teléfono</p>
+
+<div class="row">
+
+  <!-- OPTION A -->
+  <div>
+    <p class="phone-label"><span class="option-num">A</span> Grid completo, solo puntos de color</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="grid-a">
+          <div class="dow-row">
+            <span>D</span><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span>
+          </div>
+          <div class="day-grid">
+            <!-- week 1 -->
+            <div class="dc other-month"><span class="dn">1</span></div>
+            <div class="dc other-month"><span class="dn">2</span></div>
+            <div class="dc other-month"><span class="dn">3</span></div>
+            <div class="dc other-month"><span class="dn">4</span></div>
+            <div class="dc other-month"><span class="dn">5</span></div>
+            <div class="dc other-month"><span class="dn">6</span></div>
+            <div class="dc other-month"><span class="dn">7</span></div>
+            <!-- week 2 -->
+            <div class="dc"><span class="dn">8</span><div class="dots"><div class="dot red"></div></div></div>
+            <div class="dc"><span class="dn">9</span></div>
+            <div class="dc"><span class="dn">10</span><div class="dots"><div class="dot blue"></div><div class="dot blue"></div></div></div>
+            <div class="dc"><span class="dn">11</span></div>
+            <div class="dc"><span class="dn">12</span><div class="dots"><div class="dot red"></div></div></div>
+            <div class="dc today"><span class="dn">13</span><div class="dots"><div class="dot amber"></div></div></div>
+            <div class="dc"><span class="dn">14</span></div>
+            <!-- week 3 -->
+            <div class="dc"><span class="dn">15</span><div class="dots"><div class="dot blue"></div></div></div>
+            <div class="dc"><span class="dn">16</span></div>
+            <div class="dc"><span class="dn">17</span><div class="dots"><div class="dot blue"></div><div class="dot blue"></div><div class="dot blue"></div></div></div>
+            <div class="dc"><span class="dn">18</span></div>
+            <div class="dc"><span class="dn">19</span><div class="dots"><div class="dot blue"></div></div></div>
+            <div class="dc"><span class="dn">20</span></div>
+            <div class="dc"><span class="dn">21</span><div class="dots"><div class="dot blue"></div></div></div>
+            <!-- week 4 -->
+            <div class="dc"><span class="dn">22</span></div>
+            <div class="dc"><span class="dn">23</span><div class="dots"><div class="dot blue"></div></div></div>
+            <div class="dc"><span class="dn">24</span></div>
+            <div class="dc"><span class="dn">25</span><div class="dots"><div class="dot blue"></div><div class="dot blue"></div></div></div>
+            <div class="dc"><span class="dn">26</span></div>
+            <div class="dc"><span class="dn">27</span></div>
+            <div class="dc"><span class="dn">28</span><div class="dots"><div class="dot blue"></div></div></div>
+            <!-- week 5 -->
+            <div class="dc"><span class="dn">29</span></div>
+            <div class="dc"><span class="dn">30</span><div class="dots"><div class="dot blue"></div></div></div>
+            <div class="dc other-month"><span class="dn">1</span></div>
+            <div class="dc other-month"><span class="dn">2</span></div>
+            <div class="dc other-month"><span class="dn">3</span></div>
+            <div class="dc other-month"><span class="dn">4</span></div>
+            <div class="dc other-month"><span class="dn">5</span></div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:10px;color:#9ca3af;padding:6px 0">Toca un día para ver las visitas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div>
+    <p class="phone-label"><span class="option-num">B</span> Franja de semana + lista debajo</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="week-strip">
+          <div class="week-row">
+            <div class="wday"><span class="wdl">L</span><span class="wdn">9</span><div class="wdot none"></div></div>
+            <div class="wday"><span class="wdl">M</span><span class="wdn">10</span><div class="wdot blue"></div></div>
+            <div class="wday"><span class="wdl">X</span><span class="wdn">11</span><div class="wdot none"></div></div>
+            <div class="wday"><span class="wdl">J</span><span class="wdn">12</span><div class="wdot red"></div></div>
+            <div class="wday active"><span class="wdl">V</span><span class="wdn">13</span><div class="wdot" style="background:#fff"></div></div>
+            <div class="wday"><span class="wdl">S</span><span class="wdn">14</span><div class="wdot none"></div></div>
+            <div class="wday"><span class="wdl">D</span><span class="wdn">15</span><div class="wdot blue"></div></div>
+          </div>
+        </div>
+        <div class="b-list">
+          <p style="font-size:11px;font-weight:700;color:#374151;margin-bottom:2px">Viernes 13 Jun</p>
+          <div class="b-card">
+            <div class="pet">Luna</div>
+            <div class="sub">María García · Perro</div>
+            <div class="proc">Vacunación</div>
+          </div>
+          <div class="b-card" style="border-color:#f59e0b">
+            <div class="pet">Milo</div>
+            <div class="sub">Carlos López · Gato</div>
+            <div class="proc">Desparasitación</div>
+          </div>
+          <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:6px">← desliza para cambiar semana →</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION C -->
+  <div>
+    <p class="phone-label"><span class="option-num">C</span> Lista vertical con cabeceras de fecha</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="c-scroll">
+          <div class="c-date-header">⚠ Vencidos</div>
+          <div class="c-card red"><div class="pet">Rocky</div><div class="sub">Pedro Ruiz · Perro · 5 Jun</div></div>
+          <div class="c-card red"><div class="pet">Bella</div><div class="sub">Ana Torres · Gato · 10 Jun</div></div>
+
+          <div class="c-date-header">Hoy — Viernes 13 Jun</div>
+          <div class="c-card amber"><div class="pet">Luna</div><div class="sub">María García · Vacunación</div></div>
+
+          <div class="c-date-header">Lunes 16 Jun</div>
+          <div class="c-card"><div class="pet">Max</div><div class="sub">Luis Soto · Perro · Revisión</div></div>
+          <div class="c-card"><div class="pet">Coco</div><div class="sub">Rosa Díaz · Gato · Baño</div></div>
+
+          <div class="c-date-header">Miércoles 18 Jun</div>
+          <div class="c-card"><div class="pet">Pelusa</div><div class="sub">Juan Mora · Conejo</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+
+  <!-- OPTION D -->
+  <div>
+    <p class="phone-label"><span class="option-num">D</span> Grid mini + popover al tocar</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="d-grid-wrap">
+          <div class="dow-row" style="margin-bottom:2px">
+            <span style="font-size:9px;color:#9ca3af;text-align:center">D</span>
+            <span style="font-size:9px;color:#9ca3af;text-align:center">L</span>
+            <span style="font-size:9px;color:#9ca3af;text-align:center">M</span>
+            <span style="font-size:9px;color:#9ca3af;text-align:center">X</span>
+            <span style="font-size:9px;color:#9ca3af;text-align:center">J</span>
+            <span style="font-size:9px;color:#9ca3af;text-align:center">V</span>
+            <span style="font-size:9px;color:#9ca3af;text-align:center">S</span>
+          </div>
+          <div class="d-day-grid">
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">1</span></div>
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">2</span></div>
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">3</span></div>
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">4</span></div>
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">5</span></div>
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">6</span></div>
+            <div class="d-dc other-month"><span class="d-dn" style="color:#d1d5db">7</span></div>
+            <div class="d-dc"><span class="d-dn">8</span><div class="d-dots"><div class="d-dot red"></div></div></div>
+            <div class="d-dc"><span class="d-dn">9</span></div>
+            <div class="d-dc"><span class="d-dn">10</span><div class="d-dots"><div class="d-dot blue"></div><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">11</span></div>
+            <div class="d-dc"><span class="d-dn">12</span><div class="d-dots"><div class="d-dot red"></div></div></div>
+            <div class="d-dc today sel"><span class="d-dn">13</span><div class="d-dots"><div class="d-dot amber"></div></div></div>
+            <div class="d-dc"><span class="d-dn">14</span></div>
+            <div class="d-dc"><span class="d-dn">15</span><div class="d-dots"><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">16</span><div class="d-dots"><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">17</span><div class="d-dots"><div class="d-dot blue"></div><div class="d-dot blue"></div><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">18</span></div>
+            <div class="d-dc"><span class="d-dn">19</span><div class="d-dots"><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">20</span></div>
+            <div class="d-dc"><span class="d-dn">21</span></div>
+            <div class="d-dc"><span class="d-dn">22</span></div>
+            <div class="d-dc"><span class="d-dn">23</span><div class="d-dots"><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">24</span></div>
+            <div class="d-dc"><span class="d-dn">25</span><div class="d-dots"><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">26</span></div>
+            <div class="d-dc"><span class="d-dn">27</span></div>
+            <div class="d-dc"><span class="d-dn">28</span></div>
+            <div class="d-dc"><span class="d-dn">29</span><div class="d-dots"><div class="d-dot blue"></div></div></div>
+            <div class="d-dc"><span class="d-dn">30</span></div>
+          </div>
+        </div>
+        <!-- popover for day 13 -->
+        <div class="d-popover">
+          <div class="d-pop-title">Viernes 13 Jun — 2 visitas</div>
+          <div class="d-pop-item">
+            <div class="d-pop-dot amber"></div>
+            <div><div class="d-pop-pet">Luna</div><div class="d-pop-sub">María García · Vacunación</div></div>
+          </div>
+          <div class="d-pop-item">
+            <div class="d-pop-dot"></div>
+            <div><div class="d-pop-pet">Milo</div><div class="d-pop-sub">Carlos López · Desparasitación</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION E -->
+  <div>
+    <p class="phone-label"><span class="option-num">E</span> Grid completo + badges con número</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="e-grid">
+          <div class="dow-row" style="margin-bottom:3px">
+            <span>D</span><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span>
+          </div>
+          <div class="e-day-grid">
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">1</span></div>
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">2</span></div>
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">3</span></div>
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">4</span></div>
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">5</span></div>
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">6</span></div>
+            <div class="e-dc other-month"><span class="e-dn" style="color:#d1d5db">7</span></div>
+            <div class="e-dc"><span class="e-dn">8</span><span class="e-badge red">1</span></div>
+            <div class="e-dc"><span class="e-dn">9</span></div>
+            <div class="e-dc"><span class="e-dn">10</span><span class="e-badge">2</span></div>
+            <div class="e-dc"><span class="e-dn">11</span></div>
+            <div class="e-dc"><span class="e-dn">12</span><span class="e-badge red">1</span></div>
+            <div class="e-dc today"><span class="e-dn">13</span><span class="e-badge amber">2</span></div>
+            <div class="e-dc"><span class="e-dn">14</span></div>
+            <div class="e-dc"><span class="e-dn">15</span><span class="e-badge">1</span></div>
+            <div class="e-dc"><span class="e-dn">16</span><span class="e-badge">2</span></div>
+            <div class="e-dc"><span class="e-dn">17</span><span class="e-badge">3</span></div>
+            <div class="e-dc"><span class="e-dn">18</span></div>
+            <div class="e-dc"><span class="e-dn">19</span><span class="e-badge">1</span></div>
+            <div class="e-dc"><span class="e-dn">20</span></div>
+            <div class="e-dc"><span class="e-dn">21</span><span class="e-badge">1</span></div>
+            <div class="e-dc"><span class="e-dn">22</span></div>
+            <div class="e-dc"><span class="e-dn">23</span><span class="e-badge">1</span></div>
+            <div class="e-dc"><span class="e-dn">24</span></div>
+            <div class="e-dc"><span class="e-dn">25</span><span class="e-badge">2</span></div>
+            <div class="e-dc"><span class="e-dn">26</span></div>
+            <div class="e-dc"><span class="e-dn">27</span></div>
+            <div class="e-dc"><span class="e-dn">28</span><span class="e-badge">1</span></div>
+            <div class="e-dc"><span class="e-dn">29</span><span class="e-badge">1</span></div>
+            <div class="e-dc"><span class="e-dn">30</span><span class="e-badge">1</span></div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:10px;color:#9ca3af;padding:8px 0">Toca un día para ver las visitas</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;padding:14px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+  <p style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">Colores por estado (igual en todas las opciones)</p>
+  <div style="display:flex;gap:18px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:#ef4444"></div><span style="font-size:11px;color:#6b7280">Vencido</span></div>
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:#f59e0b"></div><span style="font-size:11px;color:#6b7280">Hoy</span></div>
+    <div style="display:flex;align-items:center;gap:6px"><div style="width:10px;height:10px;border-radius:50%;background:#3b82f6"></div><span style="font-size:11px;color:#6b7280">Próxima visita</span></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calendar Nav — 5 ideas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px 12px; }
+  h1 { text-align: center; font-size: 18px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .subtitle { text-align: center; font-size: 12px; color: #6b7280; margin-bottom: 28px; }
+  .row { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+
+  /* phone frame */
+  .phone { width: 300px; background: #fff; border-radius: 32px;
+    box-shadow: 0 0 0 8px #1f2937, 0 20px 40px rgba(0,0,0,.25);
+    overflow: hidden; flex-shrink: 0; }
+  .phone-bar { background: #1f2937; height: 28px; display: flex; align-items: center; justify-content: center; }
+  .phone-bar .notch { width: 80px; height: 14px; background: #111; border-radius: 0 0 12px 12px; }
+  .phone-screen { background: #f9fafb; overflow: hidden; }
+  .phone-label { text-align: center; font-size: 11px; font-weight: 700; color: #6b7280;
+    text-transform: uppercase; letter-spacing: .08em; margin-top: 10px; }
+  .num-badge { display: inline-flex; align-items:center; justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:#2563eb;color:#fff;
+    font-size:10px;font-weight:700;margin-right:5px; }
+
+  /* shared top bar */
+  .top-bar { background: #fff; padding: 10px 14px; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; gap: 8px; }
+  .back-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid #e5e7eb;
+    display: flex; align-items: center; justify-content: center; font-size: 14px; color: #6b7280; flex-shrink:0; }
+  .page-title { font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: #6b7280; flex: 1; }
+
+  /* shared calendar header */
+  .cal-header { background: #fff; padding: 10px 14px 8px;
+    border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+  .cal-header .month { font-size: 14px; font-weight: 700; color: #111; }
+  .arr { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #e5e7eb;
+    background: #f9fafb; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #374151; }
+  .arrows { display: flex; gap: 6px; }
+
+  /* mini calendar grid (same across all) */
+  .cal-wrap { padding: 6px 10px 4px; background: #fff; }
+  .dow-row { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; margin-bottom: 2px; }
+  .dow-row span { text-align:center; font-size:9px; font-weight:600; color:#9ca3af; }
+  .day-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+  .dc { min-height: 36px; border-radius: 4px; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start; padding-top: 4px; gap: 2px; }
+  .dc.om .dn { color: #e5e7eb; }
+  .dn { font-size: 9px; font-weight: 600; color: #374151; }
+  .dn.today { background: #2563eb; color: #fff; border-radius: 50%;
+    width: 14px; height: 14px; display:flex;align-items:center;justify-content:center; }
+  .dots { display: flex; gap: 1px; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; }
+  .dot.b { background: #3b82f6; }
+  .dot.r { background: #ef4444; }
+  .dot.a { background: #f59e0b; }
+
+  /* ── IDEA 1: inline month+year dropdowns in the header ── */
+  .i1-header { background:#fff; padding:8px 12px; border-bottom:1px solid #e5e7eb;
+    display:flex; align-items:center; justify-content:space-between; }
+  .i1-selects { display:flex; gap:6px; }
+  .i1-sel { appearance:none; border:1px solid #e5e7eb; border-radius:7px;
+    padding:4px 22px 4px 8px; font-size:12px; font-weight:600; color:#374151;
+    background:#f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E") no-repeat right 7px center;
+    cursor:pointer; }
+
+  /* ── IDEA 2: collapsible "Ir a…" pill that reveals month+year pickers ── */
+  .i2-pill-row { background:#fff; padding:6px 12px; border-bottom:1px solid #e5e7eb;
+    display:flex; justify-content:flex-end; }
+  .i2-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 10px;
+    font-size:11px; font-weight:600; color:#2563eb; background:#eff6ff;
+    border:1px solid #bfdbfe; border-radius:999px; cursor:pointer; }
+  .i2-expand { padding: 8px 12px 10px; background:#eff6ff; border-bottom:1px solid #bfdbfe;
+    display:flex; gap:8px; align-items:center; }
+  .i2-expand label { font-size:10px; font-weight:600; color:#6b7280; }
+  .i2-expand select { appearance:none; border:1px solid #bfdbfe; border-radius:6px;
+    padding:4px 8px; font-size:11px; font-weight:600; color:#1d4ed8; background:#fff; }
+  .i2-go { margin-left:auto; padding:4px 10px; font-size:11px; font-weight:700;
+    background:#2563eb; color:#fff; border-radius:6px; border:none; cursor:pointer; }
+
+  /* ── IDEA 3: long-press / hold the month title → year grid picker ── */
+  .i3-year-grid { padding:10px 12px; background:#fff; border-bottom:1px solid #e5e7eb; }
+  .i3-year-grid p { font-size:10px; color:#9ca3af; text-align:center; margin-bottom:6px; }
+  .i3-yg { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+  .i3-yr { padding:5px 0; text-align:center; font-size:11px; font-weight:600;
+    border-radius:6px; color:#374151; background:#f9fafb; cursor:pointer; }
+  .i3-yr.sel { background:#2563eb; color:#fff; }
+  .i3-yr:hover:not(.sel) { background:#eff6ff; color:#2563eb; }
+
+  /* ── IDEA 4: bottom sheet that slides up (shown static here) ── */
+  .i4-sheet { background:#fff; border-radius:16px 16px 0 0;
+    border-top:1px solid #e5e7eb; padding:12px 14px 18px; margin-top:4px; }
+  .i4-handle { width:32px; height:4px; background:#e5e7eb; border-radius:2px;
+    margin:0 auto 12px; }
+  .i4-sheet h3 { font-size:11px; font-weight:700; color:#374151;
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+  .i4-row { display:flex; gap:8px; margin-bottom:8px; }
+  .i4-sel { flex:1; appearance:none; border:1px solid #e5e7eb; border-radius:8px;
+    padding:6px 10px; font-size:12px; font-weight:600; color:#374151;
+    background:#f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239ca3af'/%3E%3C/svg%3E") no-repeat right 8px center; }
+  .i4-go { padding:7px 16px; background:#2563eb; color:#fff; border-radius:8px;
+    font-size:12px; font-weight:700; border:none; }
+  .i4-trigger { display:flex; justify-content:flex-end; padding:6px 12px;
+    background:#fff; border-bottom:1px solid #e5e7eb; }
+  .i4-trigger button { font-size:11px; color:#6b7280; background:none; border:none;
+    display:flex; align-items:center; gap:4px; cursor:pointer; }
+
+  /* ── IDEA 5: swipe-hint year strip above the month header ── */
+  .i5-year-strip { background:#1e40af; padding:4px 12px;
+    display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; }
+  .i5-year-strip::-webkit-scrollbar { display:none; }
+  .i5-yr { flex-shrink:0; padding:3px 10px; border-radius:999px;
+    font-size:10px; font-weight:700; color:rgba(255,255,255,.5); cursor:pointer; }
+  .i5-yr.sel { background:rgba(255,255,255,.2); color:#fff; }
+
+</style>
+</head>
+<body>
+
+<h1>5 ideas — navegar mes / año en el calendario</h1>
+<p class="subtitle">Cómo saltar rápido a un mes lejano sin pulsar ‹ › muchas veces</p>
+
+<div class="row">
+
+  <!-- IDEA 1 -->
+  <div>
+    <p class="phone-label"><span class="num-badge">1</span> Dropdowns inline en el header</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="top-bar">
+          <div class="back-btn">‹</div>
+          <span class="page-title">Agenda</span>
+        </div>
+        <!-- SPECIAL HEADER with selects -->
+        <div class="i1-header">
+          <div class="i1-selects">
+            <select class="i1-sel">
+              <option>Junio</option><option>Julio</option>
+            </select>
+            <select class="i1-sel">
+              <option>2026</option><option>2025</option><option>2024</option>
+            </select>
+          </div>
+          <div class="arrows">
+            <div class="arr">‹</div>
+            <div class="arr">›</div>
+          </div>
+        </div>
+        <!-- mini grid -->
+        <div class="cal-wrap">
+          <div class="dow-row"><span>D</span><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span></div>
+          <div class="day-grid">
+            <div class="dc om"><span class="dn">1</span></div><div class="dc om"><span class="dn">2</span></div><div class="dc om"><span class="dn">3</span></div><div class="dc om"><span class="dn">4</span></div><div class="dc om"><span class="dn">5</span></div><div class="dc om"><span class="dn">6</span></div><div class="dc om"><span class="dn">7</span></div>
+            <div class="dc"><span class="dn">8</span><div class="dots"><div class="dot r"></div></div></div>
+            <div class="dc"><span class="dn">9</span></div>
+            <div class="dc"><span class="dn">10</span><div class="dots"><div class="dot b"></div><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">11</span></div>
+            <div class="dc"><span class="dn">12</span><div class="dots"><div class="dot r"></div></div></div>
+            <div class="dc"><span class="dn today">13</span><div class="dots"><div class="dot a"></div></div></div>
+            <div class="dc"><span class="dn">14</span></div>
+            <div class="dc"><span class="dn">15</span><div class="dots"><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">16</span></div>
+            <div class="dc"><span class="dn">17</span><div class="dots"><div class="dot b"></div><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">18</span></div>
+            <div class="dc"><span class="dn">19</span></div>
+            <div class="dc"><span class="dn">20</span></div>
+            <div class="dc"><span class="dn">21</span><div class="dots"><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">22</span></div>
+            <div class="dc"><span class="dn">23</span></div>
+            <div class="dc"><span class="dn">24</span><div class="dots"><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">25</span></div>
+            <div class="dc"><span class="dn">26</span></div>
+            <div class="dc"><span class="dn">27</span></div>
+            <div class="dc"><span class="dn">28</span><div class="dots"><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">29</span></div>
+            <div class="dc"><span class="dn">30</span><div class="dots"><div class="dot b"></div></div></div>
+            <div class="dc om"><span class="dn">1</span></div><div class="dc om"><span class="dn">2</span></div><div class="dc om"><span class="dn">3</span></div><div class="dc om"><span class="dn">4</span></div><div class="dc om"><span class="dn">5</span></div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:10px;color:#9ca3af;padding:6px">Selecciona mes y año directamente en el header</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEA 2 -->
+  <div>
+    <p class="phone-label"><span class="num-badge">2</span> Pill "Ir a…" que expande filtros</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="top-bar">
+          <div class="back-btn">‹</div>
+          <span class="page-title">Agenda</span>
+        </div>
+        <!-- collapsed state shown as second row -->
+        <div class="i2-pill-row">
+          <div class="i2-pill">🗓 Ir a mes… ▾</div>
+        </div>
+        <!-- EXPANDED (shown open for the mockup) -->
+        <div class="i2-expand">
+          <label>Mes</label>
+          <select><option>Junio</option><option>Julio</option></select>
+          <label>Año</label>
+          <select><option>2026</option><option>2025</option><option>2024</option></select>
+          <button class="i2-go">Ir</button>
+        </div>
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="cal-wrap">
+          <div class="dow-row"><span>D</span><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span></div>
+          <div class="day-grid">
+            <div class="dc om"><span class="dn">1</span></div><div class="dc om"><span class="dn">2</span></div><div class="dc om"><span class="dn">3</span></div><div class="dc om"><span class="dn">4</span></div><div class="dc om"><span class="dn">5</span></div><div class="dc om"><span class="dn">6</span></div><div class="dc om"><span class="dn">7</span></div>
+            <div class="dc"><span class="dn">8</span><div class="dots"><div class="dot r"></div></div></div><div class="dc"><span class="dn">9</span></div><div class="dc"><span class="dn">10</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">11</span></div><div class="dc"><span class="dn">12</span></div><div class="dc"><span class="dn today">13</span><div class="dots"><div class="dot a"></div></div></div><div class="dc"><span class="dn">14</span></div>
+            <div class="dc"><span class="dn">15</span></div><div class="dc"><span class="dn">16</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">17</span></div><div class="dc"><span class="dn">18</span></div><div class="dc"><span class="dn">19</span></div><div class="dc"><span class="dn">20</span></div><div class="dc"><span class="dn">21</span><div class="dots"><div class="dot b"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEA 3 -->
+  <div>
+    <p class="phone-label"><span class="num-badge">3</span> Toca el título → abre grid de años</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="top-bar">
+          <div class="back-btn">‹</div>
+          <span class="page-title">Agenda</span>
+        </div>
+        <!-- header: title is tappable -->
+        <div class="cal-header" style="cursor:pointer">
+          <span class="month" style="text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;color:#2563eb">
+            Junio 2026 ▾
+          </span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <!-- year grid (shown open) -->
+        <div class="i3-year-grid">
+          <p>Selecciona un año</p>
+          <div class="i3-yg">
+            <div class="i3-yr">2022</div>
+            <div class="i3-yr">2023</div>
+            <div class="i3-yr">2024</div>
+            <div class="i3-yr">2025</div>
+            <div class="i3-yr sel">2026</div>
+            <div class="i3-yr">2027</div>
+            <div class="i3-yr">2028</div>
+            <div class="i3-yr">2029</div>
+          </div>
+          <p style="margin-top:8px">Luego elige el mes</p>
+          <div class="i3-yg" style="margin-top:4px">
+            <div class="i3-yr">Ene</div><div class="i3-yr">Feb</div><div class="i3-yr">Mar</div><div class="i3-yr">Abr</div>
+            <div class="i3-yr">May</div><div class="i3-yr sel">Jun</div><div class="i3-yr">Jul</div><div class="i3-yr">Ago</div>
+            <div class="i3-yr">Sep</div><div class="i3-yr">Oct</div><div class="i3-yr">Nov</div><div class="i3-yr">Dic</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row">
+
+  <!-- IDEA 4 -->
+  <div>
+    <p class="phone-label"><span class="num-badge">4</span> Botón pequeño → bottom sheet</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="top-bar">
+          <div class="back-btn">‹</div>
+          <span class="page-title">Agenda</span>
+          <!-- small trigger button in top bar -->
+          <button style="margin-left:auto;font-size:10px;color:#6b7280;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:3px 8px;cursor:pointer">
+            Ir a mes ›
+          </button>
+        </div>
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="cal-wrap">
+          <div class="dow-row"><span>D</span><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span></div>
+          <div class="day-grid">
+            <div class="dc om"><span class="dn">1</span></div><div class="dc om"><span class="dn">2</span></div><div class="dc om"><span class="dn">3</span></div><div class="dc om"><span class="dn">4</span></div><div class="dc om"><span class="dn">5</span></div><div class="dc om"><span class="dn">6</span></div><div class="dc om"><span class="dn">7</span></div>
+            <div class="dc"><span class="dn">8</span><div class="dots"><div class="dot r"></div></div></div><div class="dc"><span class="dn">9</span></div><div class="dc"><span class="dn">10</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">11</span></div><div class="dc"><span class="dn">12</span></div><div class="dc"><span class="dn today">13</span><div class="dots"><div class="dot a"></div></div></div><div class="dc"><span class="dn">14</span></div>
+            <div class="dc"><span class="dn">15</span></div><div class="dc"><span class="dn">16</span></div><div class="dc"><span class="dn">17</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">18</span></div><div class="dc"><span class="dn">19</span></div><div class="dc"><span class="dn">20</span></div><div class="dc"><span class="dn">21</span></div>
+          </div>
+        </div>
+        <!-- bottom sheet sliding up -->
+        <div class="i4-sheet">
+          <div class="i4-handle"></div>
+          <h3>Ir a un mes</h3>
+          <div class="i4-row">
+            <select class="i4-sel">
+              <option>Junio</option><option>Enero</option>
+            </select>
+            <select class="i4-sel">
+              <option>2026</option><option>2025</option><option>2024</option>
+            </select>
+            <button class="i4-go">Ir</button>
+          </div>
+          <p style="font-size:10px;color:#9ca3af;text-align:center">Se abre desde abajo al pulsar "Ir a mes"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEA 5 -->
+  <div>
+    <p class="phone-label"><span class="num-badge">5</span> Franja de años deslizable arriba</p>
+    <div class="phone" style="margin-top:8px">
+      <div class="phone-bar"><div class="notch"></div></div>
+      <div class="phone-screen">
+        <div class="top-bar">
+          <div class="back-btn">‹</div>
+          <span class="page-title">Agenda</span>
+        </div>
+        <!-- scrollable year strip -->
+        <div class="i5-year-strip">
+          <div class="i5-yr">2023</div>
+          <div class="i5-yr">2024</div>
+          <div class="i5-yr">2025</div>
+          <div class="i5-yr sel">2026</div>
+          <div class="i5-yr">2027</div>
+          <div class="i5-yr">2028</div>
+        </div>
+        <div class="cal-header">
+          <span class="month">Junio 2026</span>
+          <div class="arrows"><div class="arr">‹</div><div class="arr">›</div></div>
+        </div>
+        <div class="cal-wrap">
+          <div class="dow-row"><span>D</span><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span></div>
+          <div class="day-grid">
+            <div class="dc om"><span class="dn">1</span></div><div class="dc om"><span class="dn">2</span></div><div class="dc om"><span class="dn">3</span></div><div class="dc om"><span class="dn">4</span></div><div class="dc om"><span class="dn">5</span></div><div class="dc om"><span class="dn">6</span></div><div class="dc om"><span class="dn">7</span></div>
+            <div class="dc"><span class="dn">8</span><div class="dots"><div class="dot r"></div></div></div><div class="dc"><span class="dn">9</span></div><div class="dc"><span class="dn">10</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">11</span></div><div class="dc"><span class="dn">12</span></div><div class="dc"><span class="dn today">13</span><div class="dots"><div class="dot a"></div></div></div><div class="dc"><span class="dn">14</span></div>
+            <div class="dc"><span class="dn">15</span></div><div class="dc"><span class="dn">16</span></div><div class="dc"><span class="dn">17</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">18</span></div><div class="dc"><span class="dn">19</span></div><div class="dc"><span class="dn">20</span></div><div class="dc"><span class="dn">21</span><div class="dots"><div class="dot b"></div></div></div>
+            <div class="dc"><span class="dn">22</span></div><div class="dc"><span class="dn">23</span></div><div class="dc"><span class="dn">24</span></div><div class="dc"><span class="dn">25</span><div class="dots"><div class="dot b"></div></div></div><div class="dc"><span class="dn">26</span></div><div class="dc"><span class="dn">27</span></div><div class="dc"><span class="dn">28</span></div>
+            <div class="dc"><span class="dn">29</span></div><div class="dc"><span class="dn">30</span></div><div class="dc om"><span class="dn">1</span></div><div class="dc om"><span class="dn">2</span></div><div class="dc om"><span class="dn">3</span></div><div class="dc om"><span class="dn">4</span></div><div class="dc om"><span class="dn">5</span></div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:10px;color:#9ca3af;padding:6px">Desliza la franja azul para cambiar año, luego usa ‹ › para el mes</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- summary table -->
+<div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+  <p style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px">Resumen</p>
+  <table style="width:100%;border-collapse:collapse;font-size:11px;color:#374151">
+    <tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:6px 8px;font-weight:700">1</td>
+      <td style="padding:6px 8px">Dropdowns inline</td>
+      <td style="padding:6px 8px;color:#6b7280">Siempre visible, muy directo. Ocupa espacio extra en el header.</td>
+    </tr>
+    <tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:6px 8px;font-weight:700">2</td>
+      <td style="padding:6px 8px">Pill "Ir a…" expandible</td>
+      <td style="padding:6px 8px;color:#6b7280">Oculto por defecto, se expande debajo del header. Tu idea original.</td>
+    </tr>
+    <tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:6px 8px;font-weight:700">3</td>
+      <td style="padding:6px 8px">Toca el título → año+mes grid</td>
+      <td style="padding:6px 8px;color:#6b7280">Sin botones extra. Cero espacio usado. Poco descubrible.</td>
+    </tr>
+    <tr style="border-bottom:1px solid #f3f4f6">
+      <td style="padding:6px 8px;font-weight:700">4</td>
+      <td style="padding:6px 8px">Bottom sheet</td>
+      <td style="padding:6px 8px;color:#6b7280">Nativo mobile. No tapa el calendario. Botón pequeño en top bar.</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 8px;font-weight:700">5</td>
+      <td style="padding:6px 8px">Franja de años deslizable</td>
+      <td style="padding:6px 8px;color:#6b7280">Visual y rápida. Deslizar año → ‹ › para mes. Siempre visible.</td>
+    </tr>
+  </table>
+</div>
+
+</body>
+</html>
