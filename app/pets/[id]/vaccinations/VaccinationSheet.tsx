@@ -81,10 +81,7 @@ export function VaccinationSheet({
                         petId={petId}
                         vaccineTypes={vaccineTypes}
                         vaccination={vaccination}
-                        onSuccess={() => {
-                            onSuccess?.()
-                            onClose()
-                        }}
+                        onSuccess={onSuccess ?? onClose}
                         onCancel={onClose}
                     />
                 </div>

@@ -1,5 +1,5 @@
 "use client"
-import { useActionState, useEffect, useState } from "react"
+import { useActionState, useEffect, useRef, useState } from "react"
 import { SubmitButton } from "@/components/SubmitButton"
 import { createVaccination, updateVaccination } from "./actions"
 import VaccineTypeSelect, { VaccineType } from "./VaccineTypeSelect"
@@ -25,9 +25,11 @@ export default function VaccinationForm({ petId, vaccineTypes, vaccination, onSu
     const [vaccineTypeId, setVaccineTypeId] = useState(
         state.data?.vaccine_type_id ?? (vaccination ? String(vaccination.vaccine_type_id) : "")
     )
+    const onSuccessRef = useRef(onSuccess)
+    onSuccessRef.current = onSuccess
 
     useEffect(() => {
-        if (state.success) onSuccess()
+        if (state.success) onSuccessRef.current()
     }, [state.success])
 
     return (

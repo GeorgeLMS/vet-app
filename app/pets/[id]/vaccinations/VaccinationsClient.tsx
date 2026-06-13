@@ -101,6 +101,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
     const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set())
     const [sheetOpen, setSheetOpen] = useState(false)
     const [sheetVaccination, setSheetVaccination] = useState<Vaccination | undefined>(undefined)
+    const [sheetKey, setSheetKey] = useState(0)
 
     const load = useCallback(async () => {
         const data = await getVaccinationsData(petId)
@@ -131,7 +132,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                         <button
-                            onClick={() => { setSheetVaccination(undefined); setSheetOpen(true) }}
+                            onClick={() => { setSheetVaccination(undefined); setSheetOpen(true); setSheetKey(k => k + 1) }}
                             className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
                         >
                             <Plus size={18} /> Agregar Vacuna
@@ -192,24 +193,37 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
 
                                             {/* Content */}
                                             <div style={{ flex: 1 }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                    <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#1f2937' }}>{newest.vaccine_name}</h3>
+                                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1f2937', marginBottom: '2px' }}>{newest.vaccine_name}</p>
+                                                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+                                                    {newest.age_at_vaccination ? `Edad al aplicar: ${newest.age_at_vaccination}` : ''}
+                                                </p>
+                                                <div style={{ height: '0.5px', background: '#e5e7eb', marginBottom: '8px' }} />
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                                    <div>
+                                                        <p style={{ fontSize: '11px', color: '#9ca3af' }}>Aplicada</p>
+                                                        <p style={{ fontSize: '12px', color: '#1f2937' }}>{formatDate(newest.application_date)}</p>
+                                                    </div>
+                                                    {newest.next_vaccination_date && (
+                                                        <div>
+                                                            <p style={{ fontSize: '11px', color: '#9ca3af' }}>Próxima</p>
+                                                            <p style={{ fontSize: '12px', color: status.dateColor }}>
+                                                                {formatDate(newest.next_vaccination_date)}
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                     {status.label && (
-                                                        <span style={{
-                                                            fontSize: '11px',
-                                                            padding: '4px 8px',
-                                                            borderRadius: '12px',
-                                                            background: status.bg,
-                                                            color: status.text,
-                                                            fontWeight: 500,
-                                                        }}>
-                                                            {status.label}
-                                                        </span>
+                                                        <div style={{ marginLeft: 'auto' }}>
+                                                            <span style={{
+                                                                fontSize: '11px', fontWeight: 500,
+                                                                padding: '2px 8px', borderRadius: '20px',
+                                                                background: status.bg, color: status.text,
+                                                                border: `0.5px solid ${status.border}`,
+                                                            }}>
+                                                                {status.label}
+                                                            </span>
+                                                        </div>
                                                     )}
                                                 </div>
-                                                <p style={{ fontSize: '13px', color: '#6b7280' }}>
-                                                    Aplicada {formatDate(newest.application_date)} {newest.age_at_vaccination ? `· Edad: ${newest.age_at_vaccination}` : ''}
-                                                </p>
                                             </div>
 
                                             {/* Menu button */}
@@ -217,7 +231,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                                                 <VaccinationRowMenu
                                                     id={newest.id}
                                                     petId={petId}
-                                                    onEdit={() => { setSheetVaccination(newest); setSheetOpen(true) }}
+                                                    onEdit={() => { setSheetVaccination(newest); setSheetOpen(true); setSheetKey(k => k + 1) }}
                                                     onDelete={() => handleDelete(newest.id)}
                                                     isPending={deletingId === newest.id}
                                                 />
@@ -385,6 +399,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
             </div>
 
             <VaccinationSheet
+                key={sheetKey}
                 petId={petId}
                 petName={petName}
                 open={sheetOpen}
