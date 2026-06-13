@@ -107,7 +107,13 @@ export default async function PetPage({
                     <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-0.5">
                         Ficha de la Mascota
                     </p>
-                    <PageTitle>{pet.name}</PageTitle>
+                    <div className="flex items-center gap-2">
+                        <PageTitle>{pet.name}</PageTitle>
+                        <span className="text-lg text-gray-500">•</span>
+                        <a href={`/clients/${pet.client_id}`} className="text-lg font-semibold text-blue-500 hover:underline font-[family-name:var(--font-outfit)]">
+                            {pet.client_name}
+                        </a>
+                    </div>
                     <div className="flex items-center justify-between mb-2 mt-1">
                         <div className="flex items-center gap-2">
                             <NavBar />

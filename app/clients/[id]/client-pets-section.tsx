@@ -1,6 +1,6 @@
 'use client'
-import { useState, useTransition } from "react"
-import { Trash2 } from "lucide-react"
+import { useState, useTransition, useEffect, useRef } from "react"
+import Link from "next/link"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import PetInfoBlock from "@/components/PetInfoBlock"
 import { deletePet } from "@/app/pets/actions"
@@ -20,13 +20,6 @@ type Pet = {
     notes: string | null
 }
 
-const Spinner = () => (
-    <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-    </svg>
-)
-
 function PetRow({ pet, clientId, clientName, clientPhone }: {
     pet: Pet
     clientId: number
@@ -34,7 +27,19 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
     clientPhone: string | null
 }) {
     const [showConfirm, setShowConfirm] = useState(false)
+    const [menuOpen, setMenuOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        function handler(e: MouseEvent) {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setMenuOpen(false)
+            }
+        }
+        if (menuOpen) document.addEventListener("mousedown", handler)
+        return () => document.removeEventListener("mousedown", handler)
+    }, [menuOpen])
 
     function handleDelete() {
         setShowConfirm(false)
@@ -53,8 +58,11 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div className="flex items-center gap-2 p-3">
-                <div className="flex-1 min-w-0">
+            <div ref={menuRef} className="relative overflow-visible">
+                <div
+                    onClick={() => setMenuOpen(v => !v)}
+                    className="cursor-pointer hover:bg-gray-50 active:bg-gray-100 px-3 py-3"
+                >
                     <PetInfoBlock
                         petId={pet.id}
                         name={pet.name}
@@ -63,7 +71,7 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
                         breed={pet.breed}
                         colorName={pet.color_name}
                         colorHex={pet.color_hex}
-                        clientId={clientId}
+
                         clientName={clientName}
                         clientPhone={clientPhone}
                         birthDate={pet.birth_date}
@@ -71,16 +79,38 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
                         weight={pet.weight}
                         lastConsultationDate={pet.last_consultation_date}
                         notes={pet.notes}
+
                     />
                 </div>
-                <button
-                    onClick={() => setShowConfirm(true)}
-                    disabled={isPending}
-                    className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-md border border-red-200 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
-                    aria-label="Eliminar mascota"
-                >
-                    {isPending ? <Spinner /> : <Trash2 size={16} />}
-                </button>
+
+                {menuOpen && (
+                    <div className="absolute right-2 top-10 z-20 rounded-md border border-gray-200 bg-white shadow-lg text-sm overflow-hidden">
+                        <Link
+                            href={`/pets/${pet.id}`}
+                            onClick={() => setMenuOpen(false)}
+                            className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                        >
+                            Perfil de {pet.name}
+                        </Link>
+                        <Link
+                            href={`/clients/${clientId}`}
+                            onClick={() => setMenuOpen(false)}
+                            className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                        >
+                            Perfil de {clientName}
+                        </Link>
+                        <div className="mx-3 border-t border-gray-300 mt-1" />
+                        <div className="pt-1">
+                            <button
+                                onClick={() => { setMenuOpen(false); setShowConfirm(true) }}
+                                disabled={isPending}
+                                className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600 disabled:opacity-50"
+                            >
+                                Eliminar mascota
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     )
@@ -101,7 +131,7 @@ export default function ClientPetsSection({ pets, clientId, clientName, clientPh
     }
 
     return (
-        <div className="rounded-lg bg-white shadow divide-y divide-gray-100">
+        <div className="rounded-lg bg-white shadow divide-y divide-gray-100 overflow-visible">
             {pets.map((pet) => (
                 <PetRow
                     key={pet.id}

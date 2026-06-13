@@ -6,7 +6,7 @@ import { ConsultationForm } from "@/app/pets/[id]/consultations/page-form"
 import { useRouter } from "next/navigation"
 
 type Procedure = { id: string; name: string }
-type Consultation = { id: string; consultation_date: string; next_visit_date: string | null; procedure_id: string; notes: string | null }
+type Consultation = { id: string; consultation_date: string; next_visit_date: string | null; procedure_id: string; notes: string | null; next_visit_notes: string | null }
 
 export function ConsultationSheet({
     petId,

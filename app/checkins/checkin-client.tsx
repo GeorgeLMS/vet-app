@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { checkIn, markSeen, unmarkSeen, deleteCheckin } from "./actions"
+import { checkIn, markSeen, deleteCheckin } from "./actions"
 import Link from "next/link"
 import { Clock, PlusCircle, CheckCircle } from "lucide-react"
 import PetInfoBlock from "@/components/PetInfoBlock"
@@ -278,7 +278,7 @@ export function CheckinClient({
                                         breed={c.breed}
                                         colorName={c.color}
                                         colorHex={c.color_hex}
-                                        clientId={c.client_id}
+
                                         clientName={c.client_name}
                                         clientPhone={c.phone}
                                         birthDate={c.pet_birth_date}
@@ -287,6 +287,7 @@ export function CheckinClient({
                                         notes={c.pet_notes}
                                         timeLabel={c.checked_in_at_time}
                                         timeLabelRed
+
                                     />
                                     {c.notes && (
                                         <p className="text-xs italic text-gray-500 mt-1 ml-9">"{c.notes}"</p>
@@ -302,22 +303,39 @@ export function CheckinClient({
                                                 setSeenList(prev => prev.some(x => x.id === c.id) ? prev : [{ ...c, seen_at_time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }, ...prev])
                                                 await markSeen(c.id, c.pet_id)
                                             }}
-                                            className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium border-b"
+                                            className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium"
                                         >
                                             Marcar como Visto
                                         </button>
                                         <button
                                             onClick={async () => {
                                                 setMenuOpenId(null)
-                                                if (confirm(`¿Eliminar registro de ${c.pet_name}? No se puede deshacer.`)) {
+                                                if (confirm(`¿Cancelar el ingreso de ${c.pet_name}? Se quitará de la lista.`)) {
                                                     setWaitingList(prev => prev.filter(x => x.id !== c.id))
                                                     await deleteCheckin(c.id)
                                                 }
                                             }}
                                             className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600"
                                         >
-                                            Eliminar
+                                            Cancelar Ingreso
                                         </button>
+                                        <div className="mx-3 border-t border-gray-300 mt-1" />
+                                        <div className="pt-1">
+                                            <Link
+                                                href={`/pets/${c.pet_id}`}
+                                                onClick={() => setMenuOpenId(null)}
+                                                className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                                            >
+                                                Perfil de {c.pet_name}
+                                            </Link>
+                                            <Link
+                                                href={`/clients/${c.client_id}`}
+                                                onClick={() => setMenuOpenId(null)}
+                                                className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                                            >
+                                                Perfil de {c.client_name}
+                                            </Link>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -339,8 +357,8 @@ export function CheckinClient({
                         {seenList.map((c) => (
                             <div key={c.id} className="relative overflow-visible">
                                 <div
-                                    onClick={() => !c.has_consultation_today && setSeenMenuOpenId(seenMenuOpenId === c.id ? null : c.id)}
-                                    className={`px-4 py-2 ${c.has_consultation_today ? 'opacity-60' : 'cursor-pointer hover:bg-gray-50 active:bg-gray-100'}`}
+                                    onClick={() => setSeenMenuOpenId(seenMenuOpenId === c.id ? null : c.id)}
+                                    className={`px-4 py-2 cursor-pointer hover:bg-gray-50 active:bg-gray-100 ${c.has_consultation_today ? 'opacity-60' : ''}`}
                                 >
                                     <PetInfoBlock
                                         petId={c.pet_id}
@@ -350,7 +368,7 @@ export function CheckinClient({
                                         breed={c.breed}
                                         colorName={c.color}
                                         colorHex={c.color_hex}
-                                        clientId={c.client_id}
+
                                         clientName={c.client_name}
                                         clientPhone={c.phone}
                                         birthDate={c.pet_birth_date}
@@ -359,6 +377,8 @@ export function CheckinClient({
                                         notes={c.pet_notes}
                                         timeLabel={c.seen_at_time}
                                         pendingConsultation={!c.has_consultation_today}
+                                        done={c.has_consultation_today}
+
                                     />
                                     {c.notes && (
                                         <p className="text-xs italic text-gray-500 mt-1 ml-9">"{c.notes}"</p>
@@ -370,22 +390,25 @@ export function CheckinClient({
                                         {!c.has_consultation_today && (
                                             <button
                                                 onClick={() => { setSeenMenuOpenId(null); setSheetPet({ id: c.pet_id, name: c.pet_name, checkinId: c.id }) }}
-                                                className="w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-600 font-medium border-b"
+                                                className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium"
                                             >
                                                 Registrar Consulta
                                             </button>
                                         )}
-                                        <button
-                                            onClick={async () => {
-                                                setSeenMenuOpenId(null)
-                                                setSeenList(prev => prev.filter(x => x.id !== c.id))
-                                                setWaitingList(prev => [...prev, { ...c, seen_at_time: null, seen_at_ms: null }])
-                                                await unmarkSeen(c.id)
-                                            }}
-                                            className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600"
+                                        <Link
+                                            href={`/pets/${c.pet_id}`}
+                                            onClick={() => setSeenMenuOpenId(null)}
+                                            className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
                                         >
-                                            Regresar a En Espera
-                                        </button>
+                                            Perfil de {c.pet_name}
+                                        </Link>
+                                        <Link
+                                            href={`/clients/${c.client_id}`}
+                                            onClick={() => setSeenMenuOpenId(null)}
+                                            className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                                        >
+                                            Perfil de {c.client_name}
+                                        </Link>
                                     </div>
                                 )}
                             </div>

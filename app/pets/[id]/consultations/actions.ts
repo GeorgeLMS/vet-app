@@ -10,6 +10,7 @@ export type FormState = {
         next_visit_date?: string
         procedure_id?: string
         notes?: string
+        next_visit_notes?: string
         general?: string
     }
     data?: {
@@ -19,6 +20,7 @@ export type FormState = {
         procedure_id?: string
         procedure_name?: string
         notes?: string | null
+        next_visit_notes?: string | null
     }
 }
 
@@ -34,12 +36,14 @@ export async function createConsultation(
     const nextVisitDate = formData.get("next_visit_date")?.toString() || null
     const procedureId = formData.get("procedure_id")?.toString() ?? ""
     const notes = formData.get("notes")?.toString().trim() || null
+    const nextVisitNotes = formData.get("next_visit_notes")?.toString().trim() || null
 
     const data: FormState["data"] = {
         consultation_date: consultationDate,
         next_visit_date: nextVisitDate,
         procedure_id: procedureId,
-        notes
+        notes,
+        next_visit_notes: nextVisitNotes,
     }
     const errors: FormState["errors"] = {}
 
@@ -80,6 +84,10 @@ export async function createConsultation(
         errors.notes = "Las notas deben tener 1000 caracteres o menos"
     }
 
+    if (nextVisitNotes && nextVisitNotes.length > 1000) {
+        errors.next_visit_notes = "Las notas deben tener 1000 caracteres o menos"
+    }
+
     if (Object.keys(errors).length > 0) {
         return { errors, data }
     }
@@ -88,9 +96,9 @@ export async function createConsultation(
     try {
         const { rows } = await client.query(
             `WITH inserted AS (
-                INSERT INTO consultations (pet_id, consultation_date, next_visit_date, procedure_id, notes)
-                VALUES ($1, $2, $3, $4, $5)
-                RETURNING id, consultation_date, next_visit_date, procedure_id, notes
+                INSERT INTO consultations (pet_id, consultation_date, next_visit_date, procedure_id, notes, next_visit_notes)
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING id, consultation_date, next_visit_date, procedure_id, notes, next_visit_notes
             )
             SELECT
                 i.id,
@@ -98,10 +106,11 @@ export async function createConsultation(
                 to_char(i.next_visit_date, 'YYYY-MM-DD') as next_visit_date,
                 i.procedure_id,
                 p.name as procedure_name,
-                i.notes
+                i.notes,
+                i.next_visit_notes
             FROM inserted i
             LEFT JOIN procedures p ON i.procedure_id = p.id`,
-            [petId, consultationDate, nextVisitDate, procedureId, notes]
+            [petId, consultationDate, nextVisitDate, procedureId, notes, nextVisitNotes]
         )
 
         revalidatePath(`/pets/${petId}/consultations`)
@@ -130,12 +139,14 @@ export async function updateConsultation(
     const nextVisitDate = formData.get("next_visit_date")?.toString() || null
     const procedureId = formData.get("procedure_id")?.toString() ?? ""
     const notes = formData.get("notes")?.toString().trim() || null
+    const nextVisitNotes = formData.get("next_visit_notes")?.toString().trim() || null
 
     const data: FormState["data"] = {
         consultation_date: consultationDate,
         next_visit_date: nextVisitDate,
         procedure_id: procedureId,
-        notes
+        notes,
+        next_visit_notes: nextVisitNotes,
     }
     const errors: FormState["errors"] = {}
 
@@ -176,6 +187,10 @@ export async function updateConsultation(
         errors.notes = "Las notas deben tener 1000 caracteres o menos"
     }
 
+    if (nextVisitNotes && nextVisitNotes.length > 1000) {
+        errors.next_visit_notes = "Las notas deben tener 1000 caracteres o menos"
+    }
+
     if (Object.keys(errors).length > 0) {
         return { errors, data }
     }
@@ -185,9 +200,9 @@ export async function updateConsultation(
         const { rows } = await client.query(
             `WITH updated AS (
                 UPDATE consultations
-                SET consultation_date = $1, next_visit_date = $2, procedure_id = $3, notes = $4
-                WHERE id = $5
-                RETURNING id, consultation_date, next_visit_date, procedure_id, notes
+                SET consultation_date = $1, next_visit_date = $2, procedure_id = $3, notes = $4, next_visit_notes = $5
+                WHERE id = $6
+                RETURNING id, consultation_date, next_visit_date, procedure_id, notes, next_visit_notes
             )
             SELECT
                 u.id,
@@ -195,10 +210,11 @@ export async function updateConsultation(
                 to_char(u.next_visit_date, 'YYYY-MM-DD') as next_visit_date,
                 u.procedure_id,
                 p.name as procedure_name,
-                u.notes
+                u.notes,
+                u.next_visit_notes
             FROM updated u
             LEFT JOIN procedures p ON u.procedure_id = p.id`,
-            [consultationDate, nextVisitDate, procedureId, notes, consultationId]
+            [consultationDate, nextVisitDate, procedureId, notes, nextVisitNotes, consultationId]
         )
 
         revalidatePath(`/pets/${petId}/consultations`)

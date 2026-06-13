@@ -28,6 +28,7 @@ async function getPetConsultations(petId: string, tz: string) {
             TO_CHAR(c.consultation_date AT TIME ZONE $2, 'YYYY-MM-DD') as consultation_date,
                 c.procedure_id,
                 c.notes,
+                c.next_visit_notes,
                 p.name as procedure_name,
             TO_CHAR(c.next_visit_date AT TIME ZONE $2, 'YYYY-MM-DD') as next_visit_date
 

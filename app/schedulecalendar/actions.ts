@@ -9,6 +9,7 @@ export type CalendarVisit = {
     client_name: string
     next_visit_date: string  // 'YYYY-MM-DD'
     procedure_name: string | null
+    next_visit_notes: string | null
 }
 
 export async function getVisitsForMonth(year: number, month: number): Promise<CalendarVisit[]> {
@@ -20,7 +21,8 @@ export async function getVisitsForMonth(year: number, month: number): Promise<Ca
             p.name  AS pet_name,
             cl.name AS client_name,
             TO_CHAR(c.next_visit_date, 'YYYY-MM-DD') AS next_visit_date,
-            pr.name AS procedure_name
+            pr.name AS procedure_name,
+            c.next_visit_notes
         FROM consultations c
         JOIN pets       p  ON c.pet_id       = p.id
         JOIN clients    cl ON p.client_id     = cl.id

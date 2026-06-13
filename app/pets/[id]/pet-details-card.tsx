@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SquarePen, FileText, FolderOpen, Syringe, ClipboardPlus, Bug } from "lucide-react"
+import { SquarePen } from "lucide-react"
 import { EditPetForm } from "./edit/edit-form"
 import PetInfoBlock from "@/components/PetInfoBlock"
 import type { PetColor } from "@/components/PetColorSelect"
@@ -82,7 +82,7 @@ export function PetDetailsCard({
                         breed={pet.breed}
                         colorName={pet.color}
                         colorHex={pet.color_hex}
-                        clientId={pet.client_id}
+
                         clientName={pet.client_name}
                         clientPhone={pet.client_phone}
                         birthDate={pet.birth_date}
@@ -90,6 +90,7 @@ export function PetDetailsCard({
                         weight={pet.weight?.toString() ?? null}
                         lastConsultationDate={lastConsultationDate}
                         notes={pet.notes}
+
                     />
 
                     {/* Quick actions */}

@@ -354,9 +354,10 @@ export default function CalendarClient({
                                     </span>
                                     <div className="min-w-0">
                                         <p className="text-sm font-semibold text-gray-800 truncate">{v.pet_name}</p>
-                                        <p className="text-xs text-gray-400 truncate">
-                                            {v.client_name}{v.procedure_name ? ` · ${v.procedure_name}` : ''}
-                                        </p>
+                                        <p className="text-xs text-gray-400 truncate">{v.client_name}</p>
+                                        {v.next_visit_notes && (
+                                            <p className="text-xs text-gray-500 italic mt-0.5 line-clamp-3">{v.next_visit_notes}</p>
+                                        )}
                                     </div>
                                 </Link>
                             )

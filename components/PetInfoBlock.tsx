@@ -1,6 +1,5 @@
 'use client'
 import { SpeciesIcon } from "@/components/SpeciesIcon"
-import Link from "next/link"
 import { formatDate, formatPhone } from "@/utils"
 
 type PetInfoBlockProps = {
@@ -11,7 +10,6 @@ type PetInfoBlockProps = {
     breed: string | null
     colorName?: string | null
     colorHex?: string | null
-    clientId?: number
     clientName: string
     clientPhone?: string | null
     birthDate?: string | null
@@ -22,14 +20,7 @@ type PetInfoBlockProps = {
     timeLabel?: string | null
     timeLabelRed?: boolean
     pendingConsultation?: boolean
-}
-
-function iconBgClass(gender: string | null) {
-    if (!gender) return "bg-gray-100"
-    const g = gender.toLowerCase().trim()
-    if (g === 'macho' || g === 'male' || g === 'm') return "bg-blue-50"
-    if (g === 'hembra' || g === 'female' || g === 'f') return "bg-pink-50"
-    return "bg-gray-100"
+    done?: boolean
 }
 
 export default function PetInfoBlock({
@@ -40,7 +31,6 @@ export default function PetInfoBlock({
     breed,
     colorName,
     colorHex,
-    clientId,
     clientName,
     clientPhone,
     birthDate,
@@ -51,6 +41,7 @@ export default function PetInfoBlock({
     timeLabel,
     timeLabelRed,
     pendingConsultation,
+    done,
 }: PetInfoBlockProps) {
     const validAge = age && age !== '—' && age !== '-' ? age : null
 
@@ -69,17 +60,13 @@ export default function PetInfoBlock({
                 {/* Name + breed + last consultation top-right */}
                 <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <Link
-                            href={`/pets/${petId}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="!inline text-[16px] font-semibold text-blue-400 hover:underline font-[family-name:var(--font-outfit)] leading-tight"
-                        >
+                        <span className={`!inline text-[16px] font-semibold text-gray-600 font-[family-name:var(--font-outfit)] leading-tight ${done ? "line-through decoration-gray-500" : ""}`}>
                             {name}
-                        </Link>
+                        </span>
                         {breed && (
                             <>
                                 <span className="w-0.5 h-0.5 rounded-full bg-gray-500 inline-block flex-shrink-0" />
-                                <span className="text-sm text-gray-700 truncate">{breed}</span>
+                                <span className={`text-sm text-gray-700 truncate ${done ? "line-through decoration-gray-500" : ""}`}>{breed}</span>
                             </>
                         )}
                     </div>
@@ -101,17 +88,7 @@ export default function PetInfoBlock({
                 {/* Client + phone */}
                 <div className="flex items-center justify-between gap-1.5 min-w-0">
                     <div className="flex items-center gap-1.5 min-w-0">
-                        {clientId ? (
-                            <Link
-                                href={`/clients/${clientId}`}
-                                onClick={(e) => e.stopPropagation()}
-                                className="!inline text-[14px] font-semibold text-lime-600 hover:underline truncate font-[family-name:var(--font-outfit)]"
-                            >
-                                {clientName}
-                            </Link>
-                        ) : (
-                            <span className="truncate text-[12px] font-medium text-gray-900 font-[family-name:var(--font-outfit)]">{clientName}</span>
-                        )}
+                        <span className="truncate text-[14px] font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">{clientName}</span>
                         {clientPhone && (
                             <>
                                 <span className="w-0.5 h-0.5 rounded-full bg-gray-500 flex-shrink-0 self-center" />
@@ -159,7 +136,6 @@ export default function PetInfoBlock({
                         )}
                     </div>
                 )}
-
 
                 {notes && (
                     <p className="text-xs italic text-gray-500 mt-1">{notes}</p>

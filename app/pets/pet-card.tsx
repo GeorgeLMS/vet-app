@@ -1,6 +1,7 @@
 'use client'
 import { useState, useTransition } from "react"
 import { Edit, Trash2, ChevronRight } from "lucide-react"
+import Link from "next/link"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { deletePet } from "./actions"
 import { Pet, Species, PetColor } from "./types"
@@ -64,7 +65,7 @@ export default function PetCard({
                             breed={pet.breed}
                             colorName={petColor?.name_es}
                             colorHex={petColor?.hex}
-                            clientId={pet.client_id}
+
                             clientName={pet.client_name}
                             clientPhone={pet.client_phone}
                             birthDate={pet.birth_date}
@@ -72,6 +73,7 @@ export default function PetCard({
                             weight={pet.weight}
                             lastConsultationDate={pet.last_consultation_date}
                             notes={pet.notes}
+
                         />
                     </div>
                     <button
@@ -83,8 +85,25 @@ export default function PetCard({
                     </button>
                 </div>
 
-                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showActions ? "max-h-24 opacity-100" : "max-h-0 opacity-0"}`}>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showActions ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
                     <div className="px-4 pb-4">
+                        <div className="flex items-center gap-3 mb-3">
+                            <Link
+                                href={`/pets/${pet.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-sm text-blue-500 hover:underline"
+                            >
+                                Perfil de {pet.name}
+                            </Link>
+                            <span className="text-gray-300">•</span>
+                            <Link
+                                href={`/clients/${pet.client_id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-sm text-blue-500 hover:underline"
+                            >
+                                Perfil de {pet.client_name}
+                            </Link>
+                        </div>
                         <div className="flex items-center justify-between">
                             <PetQuickActions petId={pet.id} />
                             <div className="flex items-center gap-2">

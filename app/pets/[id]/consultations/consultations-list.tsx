@@ -15,6 +15,7 @@ type Consultation = {
     procedure_id: string
     procedure_name: string | null
     notes: string | null
+    next_visit_notes: string | null
 }
 
 
@@ -72,6 +73,11 @@ function ConsultationRow({
                             <CalendarClock size={11} className="shrink-0" />
                             Próxima visita: {formatDate(c.next_visit_date)}
                         </span>
+                    )}
+                    {c.next_visit_notes && (
+                        <p className="text-xs text-slate-600 italic bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 mt-0.5 break-words whitespace-normal">
+                            {c.next_visit_notes}
+                        </p>
                     )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">

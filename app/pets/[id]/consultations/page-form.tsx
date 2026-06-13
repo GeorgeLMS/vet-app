@@ -50,7 +50,7 @@ export function ConsultationForm({
 }: {
     petId: string
     procedures: { id: string; name: string }[]
-    consultation?: { id: string; consultation_date: string; next_visit_date: string | null; procedure_id: string; notes: string | null }
+    consultation?: { id: string; consultation_date: string; next_visit_date: string | null; procedure_id: string; notes: string | null; next_visit_notes: string | null }
     onSuccess?: (c: any) => void
     onCancel?: () => void
 }) {
@@ -60,6 +60,7 @@ export function ConsultationForm({
     const [nextVisitDate, setNextVisitDate] = useState(consultation?.next_visit_date ?? "")
     const [procedureId, setProcedureId] = useState(consultation?.procedure_id ?? "")
     const [notes, setNotes] = useState(consultation?.notes ?? "")
+    const [nextVisitNotes, setNextVisitNotes] = useState(consultation?.next_visit_notes ?? "")
 
     const boundAction = async (prev: FormState, formData: FormData) => {
         const result = isEdit
@@ -127,6 +128,17 @@ export function ConsultationForm({
                     value={nextVisitDate}
                     onChange={e => setNextVisitDate(e.target.value)}
                     className={fieldClass(state?.errors?.next_visit_date)}
+                />
+            </Field>
+
+            <Field label="Próxima Visita Notas" error={state?.errors?.next_visit_notes}>
+                <textarea
+                    name="next_visit_notes"
+                    rows={3}
+                    value={nextVisitNotes}
+                    onChange={e => setNextVisitNotes(e.target.value)}
+                    className={fieldClass(state?.errors?.next_visit_notes)}
+                    placeholder="Notas para la próxima visita..."
                 />
             </Field>
 
