@@ -1,8 +1,9 @@
 'use client'
-import { useState, useTransition, useEffect, useRef } from "react"
+import { useState, useTransition, useEffect } from "react"
 import Link from "next/link"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import PetInfoBlock from "@/components/PetInfoBlock"
+import DropdownMenu, { useDropdownPosition } from "@/components/DropdownMenu"
 import { deletePet } from "@/app/pets/actions"
 
 type Pet = {
@@ -29,17 +30,13 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
     const [showConfirm, setShowConfirm] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const [isPending, startTransition] = useTransition()
-    const menuRef = useRef<HTMLDivElement>(null)
+    const { triggerRef, menuRef, position, calculatePosition } = useDropdownPosition()
 
     useEffect(() => {
-        function handler(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setMenuOpen(false)
-            }
+        if (menuOpen) {
+            calculatePosition()
         }
-        if (menuOpen) document.addEventListener("mousedown", handler)
-        return () => document.removeEventListener("mousedown", handler)
-    }, [menuOpen])
+    }, [menuOpen, calculatePosition])
 
     function handleDelete() {
         setShowConfirm(false)
@@ -58,8 +55,9 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div ref={menuRef} className="relative overflow-visible">
+            <div className="relative overflow-visible">
                 <div
+                    ref={triggerRef}
                     onClick={() => setMenuOpen(v => !v)}
                     className="cursor-pointer hover:bg-gray-50 active:bg-gray-100 px-3 py-3"
                 >
@@ -83,34 +81,37 @@ function PetRow({ pet, clientId, clientName, clientPhone }: {
                     />
                 </div>
 
-                {menuOpen && (
-                    <div className="absolute right-2 top-10 z-20 rounded-md border border-gray-200 bg-white shadow-lg text-sm overflow-hidden">
-                        <Link
-                            href={`/pets/${pet.id}`}
-                            onClick={() => setMenuOpen(false)}
-                            className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                <DropdownMenu
+                    open={menuOpen}
+                    onClose={() => setMenuOpen(false)}
+                    menuRef={menuRef}
+                    position={position}
+                >
+                    <Link
+                        href={`/pets/${pet.id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                    >
+                        Perfil de {pet.name}
+                    </Link>
+                    <Link
+                        href={`/clients/${clientId}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                    >
+                        Perfil de {clientName}
+                    </Link>
+                    <div className="mx-3 border-t border-gray-300 mt-1" />
+                    <div className="pt-1">
+                        <button
+                            onClick={() => { setMenuOpen(false); setShowConfirm(true) }}
+                            disabled={isPending}
+                            className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600 disabled:opacity-50"
                         >
-                            Perfil de {pet.name}
-                        </Link>
-                        <Link
-                            href={`/clients/${clientId}`}
-                            onClick={() => setMenuOpen(false)}
-                            className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
-                        >
-                            Perfil de {clientName}
-                        </Link>
-                        <div className="mx-3 border-t border-gray-300 mt-1" />
-                        <div className="pt-1">
-                            <button
-                                onClick={() => { setMenuOpen(false); setShowConfirm(true) }}
-                                disabled={isPending}
-                                className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600 disabled:opacity-50"
-                            >
-                                Eliminar mascota
-                            </button>
-                        </div>
+                            Eliminar mascota
+                        </button>
                     </div>
-                )}
+                </DropdownMenu>
             </div>
         </>
     )

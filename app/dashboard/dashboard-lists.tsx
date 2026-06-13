@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Clock, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import PetInfoBlock from "@/components/PetInfoBlock"
-import { markSeen, unmarkSeen, deleteCheckin } from "@/app/checkins/actions"
+import { markSeen, deleteCheckin } from "@/app/checkins/actions"
 import { ConsultationSheet } from "@/components/ConsultationSheet"
+import DropdownMenu, { useDropdownPosition } from "@/components/DropdownMenu"
 
 type Checkin = {
     id: number
@@ -26,6 +27,176 @@ type Checkin = {
     has_consultation_today: boolean
 }
 
+function WaitingRow({
+    checkin,
+    onMarkSeen,
+    onCancel,
+}: {
+    checkin: Checkin
+    onMarkSeen: (id: number) => void
+    onCancel: (id: number) => void
+}) {
+    const { triggerRef, menuRef, position, calculatePosition } = useDropdownPosition()
+    const [menuOpen, setMenuOpen] = useState(false)
+
+    useEffect(() => {
+        if (menuOpen) {
+            calculatePosition()
+        }
+    }, [menuOpen, calculatePosition])
+
+    return (
+        <div className="relative overflow-visible">
+            <div
+                ref={triggerRef}
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="cursor-pointer hover:bg-gray-50 active:bg-gray-100 px-4 py-2"
+            >
+                <PetInfoBlock
+                    petId={checkin.pet_id}
+                    name={checkin.pet_name}
+                    species={checkin.species}
+                    gender={checkin.gender}
+                    breed={checkin.breed}
+                    clientName={checkin.client_name}
+                    clientPhone={checkin.phone}
+                    timeLabel={checkin.checked_in_at_time}
+                    timeLabelRed
+                />
+                {checkin.notes && (
+                    <p className="text-xs italic text-gray-500 mt-1 ml-9">"{checkin.notes}"</p>
+                )}
+            </div>
+
+            <DropdownMenu
+                open={menuOpen}
+                onClose={() => setMenuOpen(false)}
+                menuRef={menuRef}
+                position={position}
+            >
+                <button
+                    onClick={async () => {
+                        setMenuOpen(false)
+                        onMarkSeen(checkin.id)
+                        await markSeen(checkin.id, checkin.pet_id)
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium"
+                >
+                    Marcar como Visto
+                </button>
+                <button
+                    onClick={async () => {
+                        setMenuOpen(false)
+                        if (confirm(`¿Cancelar el ingreso de ${checkin.pet_name}? Se quitará de la lista.`)) {
+                            onCancel(checkin.id)
+                            await deleteCheckin(checkin.id)
+                        }
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600"
+                >
+                    Cancelar Ingreso
+                </button>
+                <div className="mx-3 border-t border-gray-300 mt-1" />
+                <div className="pt-1">
+                    <Link
+                        href={`/pets/${checkin.pet_id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                    >
+                        Perfil de {checkin.pet_name}
+                    </Link>
+                    <Link
+                        href={`/clients/${checkin.client_id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                    >
+                        Perfil de {checkin.client_name}
+                    </Link>
+                </div>
+            </DropdownMenu>
+        </div>
+    )
+}
+
+function SeenRow({
+    checkin,
+    onOpenConsultation,
+}: {
+    checkin: Checkin
+    onOpenConsultation: () => void
+}) {
+    const { triggerRef, menuRef, position, calculatePosition } = useDropdownPosition()
+    const [menuOpen, setMenuOpen] = useState(false)
+
+    useEffect(() => {
+        if (menuOpen) {
+            calculatePosition()
+        }
+    }, [menuOpen, calculatePosition])
+
+    return (
+        <div className="relative overflow-visible">
+            <div
+                ref={triggerRef}
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={`px-4 py-2 cursor-pointer hover:bg-gray-50 active:bg-gray-100 ${checkin.has_consultation_today ? 'opacity-60' : ''}`}
+            >
+                <PetInfoBlock
+                    petId={checkin.pet_id}
+                    name={checkin.pet_name}
+                    species={checkin.species}
+                    gender={checkin.gender}
+                    breed={checkin.breed}
+                    clientName={checkin.client_name}
+                    clientPhone={checkin.phone}
+                    timeLabel={checkin.seen_at_time}
+                    pendingConsultation={!checkin.has_consultation_today}
+                    done={checkin.has_consultation_today}
+                />
+                {checkin.notes && (
+                    <p className="text-xs italic text-gray-500 mt-1 ml-9">"{checkin.notes}"</p>
+                )}
+            </div>
+
+            <DropdownMenu
+                open={menuOpen}
+                onClose={() => setMenuOpen(false)}
+                menuRef={menuRef}
+                position={position}
+            >
+                {!checkin.has_consultation_today && (
+                    <button
+                        onClick={() => {
+                            setMenuOpen(false)
+                            onOpenConsultation()
+                        }}
+                        className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium"
+                    >
+                        Registrar Consulta
+                    </button>
+                )}
+                <div className="mx-3 border-t border-gray-300 mt-1" />
+                <div className="pt-1">
+                    <Link
+                        href={`/pets/${checkin.pet_id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                    >
+                        Perfil de {checkin.pet_name}
+                    </Link>
+                    <Link
+                        href={`/clients/${checkin.client_id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
+                    >
+                        Perfil de {checkin.client_name}
+                    </Link>
+                </div>
+            </DropdownMenu>
+        </div>
+    )
+}
+
 export function DashboardLists({
     waiting: initialWaiting,
     seen: initialSeen,
@@ -35,24 +206,7 @@ export function DashboardLists({
 }) {
     const [waitingList, setWaitingList] = useState<Checkin[]>(initialWaiting)
     const [seenList, setSeenList] = useState<Checkin[]>(initialSeen)
-    const [menuOpenId, setMenuOpenId] = useState<number | null>(null)
-    const [seenMenuOpenId, setSeenMenuOpenId] = useState<number | null>(null)
     const [sheetPet, setSheetPet] = useState<{ id: number; name: string; checkinId: number } | null>(null)
-    const menuRef = useRef<HTMLDivElement>(null)
-    const seenMenuRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setMenuOpenId(null)
-            }
-            if (seenMenuRef.current && !seenMenuRef.current.contains(e.target as Node)) {
-                setSeenMenuOpenId(null)
-            }
-        }
-        document.addEventListener("mousedown", handleClick)
-        return () => document.removeEventListener("mousedown", handleClick)
-    }, [])
 
     return (
         <>
@@ -77,76 +231,22 @@ export function DashboardLists({
                         Nadie esperando
                     </p>
                 ) : (
-                    <div ref={menuRef} className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100">
                         {waitingList.map((c) => (
-                            <div key={c.id} className="relative overflow-visible">
-                                <div
-                                    onClick={() => setMenuOpenId(menuOpenId === c.id ? null : c.id)}
-                                    className="cursor-pointer hover:bg-gray-50 active:bg-gray-100 px-4 py-2"
-                                >
-                                    <PetInfoBlock
-                                        petId={c.pet_id}
-                                        name={c.pet_name}
-                                        species={c.species}
-                                        gender={c.gender}
-                                        breed={c.breed}
-
-                                        clientName={c.client_name}
-                                        clientPhone={c.phone}
-                                        timeLabel={c.checked_in_at_time}
-                                        timeLabelRed
-
-                                    />
-                                    {c.notes && (
-                                        <p className="text-xs italic text-gray-500 mt-1 ml-9">"{c.notes}"</p>
-                                    )}
-                                </div>
-
-                                {menuOpenId === c.id && (
-                                    <div className="absolute right-2 top-10 z-20 rounded-md border border-gray-200 bg-white shadow-lg text-sm overflow-hidden">
-                                        <button
-                                            onClick={async () => {
-                                                setMenuOpenId(null)
-                                                setWaitingList(prev => prev.filter(x => x.id !== c.id))
-                                                setSeenList(prev => prev.some(x => x.id === c.id) ? prev : [{ ...c, seen_at_time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }, ...prev])
-                                                await markSeen(c.id, c.pet_id)
-                                            }}
-                                            className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium"
-                                        >
-                                            Marcar como Visto
-                                        </button>
-                                        <button
-                                            onClick={async () => {
-                                                setMenuOpenId(null)
-                                                if (confirm(`¿Cancelar el ingreso de ${c.pet_name}? Se quitará de la lista.`)) {
-                                                    setWaitingList(prev => prev.filter(x => x.id !== c.id))
-                                                    await deleteCheckin(c.id)
-                                                }
-                                            }}
-                                            className="w-full px-4 py-2 text-left hover:bg-red-50 text-red-600"
-                                        >
-                                            Cancelar Ingreso
-                                        </button>
-                                        <div className="mx-3 border-t border-gray-300 mt-1" />
-                                        <div className="pt-1">
-                                            <Link
-                                                href={`/pets/${c.pet_id}`}
-                                                onClick={() => setMenuOpenId(null)}
-                                                className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
-                                            >
-                                                Perfil de {c.pet_name}
-                                            </Link>
-                                            <Link
-                                                href={`/clients/${c.client_id}`}
-                                                onClick={() => setMenuOpenId(null)}
-                                                className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
-                                            >
-                                                Perfil de {c.client_name}
-                                            </Link>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            <WaitingRow
+                                key={c.id}
+                                checkin={c}
+                                onMarkSeen={(id) => {
+                                    setWaitingList(prev => prev.filter(x => x.id !== id))
+                                    const checkin = waitingList.find(x => x.id === id)
+                                    if (checkin) {
+                                        setSeenList(prev => [{ ...checkin, seen_at_time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) }, ...prev])
+                                    }
+                                }}
+                                onCancel={(id) => {
+                                    setWaitingList(prev => prev.filter(x => x.id !== id))
+                                }}
+                            />
                         ))}
                     </div>
                 )}
@@ -166,62 +266,15 @@ export function DashboardLists({
                             {seenList.length}
                         </span>
                     </div>
-                    <div ref={seenMenuRef} className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100">
                         {seenList.map((c) => (
-                            <div key={c.id} className="relative overflow-visible">
-                                <div
-                                    onClick={() => setSeenMenuOpenId(seenMenuOpenId === c.id ? null : c.id)}
-                                    className={`px-4 py-2 cursor-pointer hover:bg-gray-50 active:bg-gray-100 ${c.has_consultation_today ? 'opacity-60' : ''}`}
-                                >
-                                    <PetInfoBlock
-                                        petId={c.pet_id}
-                                        name={c.pet_name}
-                                        species={c.species}
-                                        gender={c.gender}
-                                        breed={c.breed}
-
-                                        clientName={c.client_name}
-                                        clientPhone={c.phone}
-                                        timeLabel={c.seen_at_time}
-                                        pendingConsultation={!c.has_consultation_today}
-                                        done={c.has_consultation_today}
-
-                                    />
-                                    {c.notes && (
-                                        <p className="text-xs italic text-gray-500 mt-1 ml-9">"{c.notes}"</p>
-                                    )}
-                                </div>
-
-                                {seenMenuOpenId === c.id && (
-                                    <div className="absolute right-2 top-10 z-20 rounded-md border border-gray-200 bg-white shadow-lg text-sm overflow-hidden">
-                                        {!c.has_consultation_today && (
-                                            <button
-                                                onClick={() => { setSeenMenuOpenId(null); setSheetPet({ id: c.pet_id, name: c.pet_name, checkinId: c.id }) }}
-                                                className="w-full px-4 py-2 text-left hover:bg-green-50 text-green-700 font-medium"
-                                            >
-                                                Registrar Consulta
-                                            </button>
-                                        )}
-                                        <div className="mx-3 border-t border-gray-300 mt-1" />
-                                        <div className="pt-1">
-                                            <Link
-                                                href={`/pets/${c.pet_id}`}
-                                                onClick={() => setSeenMenuOpenId(null)}
-                                                className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
-                                            >
-                                                Perfil de {c.pet_name}
-                                            </Link>
-                                            <Link
-                                                href={`/clients/${c.client_id}`}
-                                                onClick={() => setSeenMenuOpenId(null)}
-                                                className="block w-full px-4 py-2 text-left hover:bg-gray-50 text-blue-500"
-                                            >
-                                                Perfil de {c.client_name}
-                                            </Link>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            <SeenRow
+                                key={c.id}
+                                checkin={c}
+                                onOpenConsultation={() => {
+                                    setSheetPet({ id: c.pet_id, name: c.pet_name, checkinId: c.id })
+                                }}
+                            />
                         ))}
                     </div>
                 </div>
