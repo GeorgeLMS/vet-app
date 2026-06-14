@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expand Indicators - Deworming Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f3f3f3;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+        .examples {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 50px;
+        }
+        .example-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .example-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .example-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .deworming-container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border: 0.5px solid #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            overflow: hidden;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card.obsolete {
+            opacity: 0.6;
+        }
+        .card-bar {
+            width: 5px;
+            background: #1D9E75;
+            flex-shrink: 0;
+        }
+        .card-bar.obsolete {
+            background: #8A8985;
+        }
+        .card-bar.expired {
+            background: #E24B4A;
+        }
+        .card-content {
+            flex: 1;
+            padding: 12px 14px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #E1F5EE;
+            color: #085041;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .card-icon.obsolete {
+            background: #EEEDEA;
+            color: #6B6B66;
+        }
+        .card-icon.expired {
+            background: #FCEBEB;
+            color: #791F1F;
+        }
+        .card-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+        .card-badge {
+            font-size: 11px;
+            font-weight: 500;
+            padding: 1px 7px;
+            border-radius: 20px;
+            background: #EEEDFE;
+            color: #3C3489;
+            border: 0.5px solid #CECBF6;
+        }
+        .card-age {
+            font-size: 12px;
+            color: #999;
+            margin-top: 1px;
+        }
+        .card-menu {
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+        }
+        .card-divider {
+            height: 0.5px;
+            background: #e5e7eb;
+            margin: 8px 0;
+        }
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 12px;
+        }
+        .footer-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .footer-label {
+            font-size: 11px;
+            color: #999;
+        }
+        .footer-value {
+            font-size: 12px;
+            color: #333;
+        }
+        .status-badge {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: #E1F5EE;
+            color: #085041;
+            border: 0.5px solid #9FE1CB;
+        }
+        .status-badge.obsolete {
+            background: #EEEDEA;
+            color: #6B6B66;
+            border: 0.5px solid #D4D3CC;
+        }
+        .status-badge.expired {
+            background: #FCEBEB;
+            color: #791F1F;
+            border: 0.5px solid #F7C1C1;
+        }
+
+        /* Indicator Styles */
+        .indicator-container {
+            display: flex;
+            justify-content: center;
+            padding: 12px 0;
+            margin: 8px 0;
+        }
+
+        /* 1. Fade Gradient */
+        .card.fade-gradient {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .card.fade-gradient::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(transparent, rgba(255,255,255,0.9));
+            pointer-events: none;
+        }
+
+        /* 2. Chevron Icon */
+        .chevron-indicator {
+            text-align: right;
+            padding: 8px 14px;
+            color: #999;
+            font-size: 18px;
+            font-weight: 300;
+        }
+
+        /* 3. See More Link */
+        .see-more-link {
+            text-align: center;
+            padding: 12px;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 8px;
+            border-radius: 8px;
+            background: white;
+            border: 0.5px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        .see-more-link:hover {
+            background: #f9f9f9;
+        }
+
+        /* 4. Pulsing Dots */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .pulsing-dots {
+            text-align: center;
+            font-size: 22px;
+            color: #999;
+            padding: 8px 0;
+            animation: pulse 1.5s infinite;
+            cursor: pointer;
+            margin: 8px 0;
+        }
+
+        /* 5. Height Truncation with Shadow */
+        .card.truncated {
+            max-height: 90px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .card.truncated::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.08));
+        }
+
+        /* 6. Badge with Arrow */
+        .expand-badge {
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            margin-top: 8px;
+        }
+        .badge-button {
+            background: white;
+            color: #2563eb;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 0.5px solid #bfdbfe;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .badge-button:hover {
+            background: #f0f4ff;
+        }
+
+        /* 7. Light Strip */
+        .card.with-strip {
+            position: relative;
+        }
+        .card.with-strip::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #bfdbfe;
+        }
+
+        /* 8. Dashed Border */
+        .card.dashed-border {
+            border-bottom: 2px dashed #d1d5db;
+        }
+
+        /* 9. Numeric Bubble */
+        .numeric-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: #2563eb;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        }
+        .card.with-numeric {
+            position: relative;
+        }
+
+        /* 10. Preview */
+        .preview-item {
+            background: white;
+            border: 0.5px solid #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            overflow: hidden;
+            margin-top: 10px;
+            opacity: 0.3;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .preview-item:hover {
+            opacity: 0.5;
+        }
+        .preview-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 10px;
+            color: #999;
+            background: #f9f9f9;
+            padding: 2px 6px;
+            border-radius: 0 0 6px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Expand Indicators - Deworming Examples</h1>
+        <p class="subtitle">Styled to match the actual deworming page design</p>
+
+        <!-- 1. Fade Gradient -->
+        <div class="example-section">
+            <div class="example-title">1. Bottom Fade Gradient</div>
+            <div class="example-description">The last vigente card fades at the bottom, suggesting more content below. User clicks anywhere on the card to expand.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card fade-gradient">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Chevron Icon -->
+        <div class="example-section">
+            <div class="example-title">2. Chevron Icon</div>
+            <div class="example-description">Chevron (▼) appears at the bottom-right of the last vigente card. Click the card or chevron to expand.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chevron-indicator">▼</div>
+            </div>
+        </div>
+
+        <!-- 3. See More Link -->
+        <div class="example-section">
+            <div class="example-title">3. "See More" Link Button</div>
+            <div class="example-description">Explicit clickable link below the last vigente card showing count of obsolete items.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="see-more-link">Ver 2 obsoletas</div>
+            </div>
+        </div>
+
+        <!-- 4. Pulsing Dots -->
+        <div class="example-section">
+            <div class="example-title">4. Pulsing Dots (⋯)</div>
+            <div class="example-description">Animated three dots indicator between vigente and obsolete items. Subtle and minimal.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pulsing-dots">⋯</div>
+                <div class="card obsolete">
+                    <div class="card-bar obsolete"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon obsolete">🔍</div>
+                                <div>
+                                    <div class="card-name">Fenbendazol</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 2 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">15/03/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value">15/06/2024</div>
+                            </div>
+                            <div class="status-badge obsolete">Obsoleta</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Height Truncation -->
+        <div class="example-section">
+            <div class="example-title">5. Height Truncation with Fade</div>
+            <div class="example-description">Last vigente card is truncated with a fade shadow at the bottom, clearly indicating hidden content.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card truncated">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Badge with Arrow -->
+        <div class="example-section">
+            <div class="example-title">6. Expandable Count Badge</div>
+            <div class="example-description">Badge button showing count of obsolete items with downward arrow indicator.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="expand-badge">
+                    <div class="badge-button">↓ Ver 2 obsoletas</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Light Strip -->
+        <div class="example-section">
+            <div class="example-title">7. Bottom Light Strip</div>
+            <div class="example-description">Thin blue strip at the bottom of the last vigente card subtly indicates more content.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card with-strip">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Dashed Border -->
+        <div class="example-section">
+            <div class="example-title">8. Dashed Bottom Border</div>
+            <div class="example-description">Last vigente card has a dashed border suggesting continuation of items below.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card dashed-border">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Numeric Bubble -->
+        <div class="example-section">
+            <div class="example-title">9. Numeric Bubble Badge</div>
+            <div class="example-description">Small blue circle in corner of last vigente card showing "+2" to indicate hidden items.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card with-numeric">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                    <div class="numeric-badge">+2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Preview -->
+        <div class="example-section">
+            <div class="example-title">10. Faint Preview of Hidden Items</div>
+            <div class="example-description">Very faint/transparent preview of first obsolete item shown below last vigente card. Hover to peek.</div>
+            <div class="deworming-container">
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Ivermectina Plus</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 8 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">10/06/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">10/12/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">180 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-bar"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon">🔍</div>
+                                <div>
+                                    <div class="card-name">Praziquantel</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 4 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">02/05/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value" style="color: #1D9E75;">02/11/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Válida por</div>
+                                <div class="footer-value">155 días</div>
+                            </div>
+                            <div class="status-badge">Vigente</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-item">
+                    <div class="preview-label">Obsoleta</div>
+                    <div class="card-bar obsolete"></div>
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <div class="card-icon obsolete">🔍</div>
+                                <div>
+                                    <div class="card-name">Fenbendazol</div>
+                                    <div class="card-badge">Interna</div>
+                                </div>
+                            </div>
+                            <div class="card-menu">⋮</div>
+                        </div>
+                        <div class="card-age">Edad al aplicar: 2 meses</div>
+                        <div class="card-divider"></div>
+                        <div class="card-footer">
+                            <div class="footer-item">
+                                <div class="footer-label">Aplicada</div>
+                                <div class="footer-value">15/03/2024</div>
+                            </div>
+                            <div class="footer-item">
+                                <div class="footer-label">Próxima</div>
+                                <div class="footer-value">15/06/2024</div>
+                            </div>
+                            <div class="status-badge obsolete">Obsoleta</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

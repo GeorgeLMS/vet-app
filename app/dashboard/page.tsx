@@ -192,17 +192,6 @@ export default async function DashboardPage() {
                         </span>
                     </LoadingLink>
 
-                    <span className="w-0.5 h-0.5 rounded-full bg-gray-400 flex-shrink-0" />
-
-                    <LoadingLink
-                        href="/schedule"
-                        className="inline-flex items-center gap-1.5 py-1"
-                    >
-                        <ClipboardList className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
-                        <span className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                            Agenda Lista
-                        </span>
-                    </LoadingLink>
                 </div>
 
                 <DashboardLists waiting={waiting} seen={seen} />

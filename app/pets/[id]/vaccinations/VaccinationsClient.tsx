@@ -31,10 +31,10 @@ const COLOR_MAP: Record<string, { bar: string; avatarBg: string; avatarText: str
 
 const STATUS_MAP = {
     ok: { label: 'Vigente', bg: '#E1F5EE', text: '#085041', border: '#9FE1CB', dateColor: '#1D9E75', bar: '#1D9E75' },
-    soon: { label: 'Por vencer', bg: '#FAEEDA', text: '#633806', border: '#FAC775', dateColor: '#BA7517', bar: '#EF9F27' },
+    soon: { label: 'Vigente', bg: '#E1F5EE', text: '#085041', border: '#9FE1CB', dateColor: '#1D9E75', bar: '#1D9E75' },
     expired: { label: 'Vencida', bg: '#FCEBEB', text: '#791F1F', border: '#F7C1C1', dateColor: '#A32D2D', bar: '#E24B4A' },
-    replaced: { label: 'Obsoleta', bg: '#E6F1FB', text: '#0C447C', border: '#B3D9F2', dateColor: '#378ADD', bar: '#378ADD' },
-    none: { label: null, bg: '', text: '', border: '', dateColor: 'var(--color-text-secondary)', bar: '#B4B2A9' },
+    replaced: { label: 'Obsoleta', bg: '#F3F4F6', text: '#4B5563', border: '#D1D5DB', dateColor: '#6B7280', bar: '#9CA3AF' },
+    none: { label: 'Vigente', bg: '#E1F5EE', text: '#085041', border: '#9FE1CB', dateColor: '#1D9E75', bar: '#1D9E75' },
 }
 
 function getStatus(
@@ -136,7 +136,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                                             <div style={{ width: '5px', background: status.bar, flexShrink: 0 }} />
                                             <div style={{ flex: 1, padding: '16px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1 }}>
                                                         <div style={{
                                                             width: '40px',
                                                             height: '40px',
@@ -154,37 +154,9 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                                                         </div>
                                                         <div style={{ flex: 1 }}>
                                                             <p style={{ fontSize: '15px', fontWeight: 600, color: '#1f2937', marginBottom: '2px' }}>{vaccination.vaccine_name}</p>
-                                                            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+                                                            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
                                                                 {vaccination.age_at_vaccination ? `Edad al aplicar: ${vaccination.age_at_vaccination}` : ''}
                                                             </p>
-                                                            <div style={{ height: '0.5px', background: '#e5e7eb', marginBottom: '8px' }} />
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                                                                <div>
-                                                                    <p style={{ fontSize: '11px', color: '#9ca3af' }}>Aplicada</p>
-                                                                    <p style={{ fontSize: '12px', color: '#1f2937' }}>{formatDate(vaccination.application_date)}</p>
-                                                                </div>
-                                                                {vaccination.next_vaccination_date && (
-                                                                    <div>
-                                                                        <p style={{ fontSize: '11px', color: '#9ca3af' }}>Próxima</p>
-                                                                        <p style={{
-                                                                            fontSize: '12px',
-                                                                            color: status.dateColor
-                                                                        }}>
-                                                                            {formatDate(vaccination.next_vaccination_date)}
-                                                                        </p>
-                                                                    </div>
-                                                                )}
-                                                                {status.label && (
-                                                                    <span style={{
-                                                                        fontSize: '11px', fontWeight: 500,
-                                                                        padding: '2px 8px', borderRadius: '20px',
-                                                                        background: status.bg, color: status.text,
-                                                                        border: `0.5px solid ${status.border}`,
-                                                                    }}>
-                                                                        {status.label}
-                                                                    </span>
-                                                                )}
-                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -195,6 +167,42 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                                                         onDelete={() => handleDelete(vaccination.id)}
                                                         isPending={deletingId === vaccination.id}
                                                     />
+                                                </div>
+
+                                                <div style={{ height: '0.5px', background: '#e5e7eb', margin: '8px 0' }} />
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                                    <div>
+                                                        <p style={{ fontSize: '11px', color: '#9ca3af' }}>Aplicada</p>
+                                                        <p style={{ fontSize: '12px', color: '#1f2937' }}>{formatDate(vaccination.application_date)}</p>
+                                                    </div>
+                                                    {vaccination.next_vaccination_date && (
+                                                        <div>
+                                                            <p style={{ fontSize: '11px', color: '#9ca3af' }}>Próxima</p>
+                                                            <p style={{ fontSize: '12px', color: '#1f2937' }}>
+                                                                {formatDate(vaccination.next_vaccination_date)}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {vaccination.next_vaccination_date && statusKey !== 'replaced' && (
+                                                        <div>
+                                                            <p style={{ fontSize: '11px', color: '#9ca3af' }}>{statusKey === 'expired' ? 'Vencida por' : 'Válida por'}</p>
+                                                            <p style={{ fontSize: '12px', color: status.dateColor }}>
+                                                                {Math.abs(Math.ceil((new Date(vaccination.next_vaccination_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} días
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {status.label && (
+                                                        <div style={{ marginLeft: 'auto' }}>
+                                                            <span style={{
+                                                                fontSize: '11px', fontWeight: 500,
+                                                                padding: '2px 8px', borderRadius: '20px',
+                                                                background: status.bg, color: status.text,
+                                                                border: `0.5px solid ${status.border}`,
+                                                            }}>
+                                                                {status.label}
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

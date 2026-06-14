@@ -3,6 +3,8 @@ import { useState, useTransition } from "react"
 import { Edit, Trash2, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import ConfirmDialog from "@/components/ConfirmDialog"
+import { SlideDown } from "@/components/SlideDown"
+import { useBump } from "@/hooks/useBump"
 import { deletePet } from "./actions"
 import { Pet, Species, PetColor } from "./types"
 import PetFormCard from "./pet-form-card"
@@ -29,6 +31,12 @@ export default function PetCard({
     const [showConfirm, setShowConfirm] = useState(false)
     const [showActions, setShowActions] = useState(false)
     const [isPending, startTransition] = useTransition()
+    const bump = useBump()
+
+    function toggle() {
+        setShowActions(v => !v)
+        bump.trigger()
+    }
 
     if (isEditing) {
         return <PetFormCard pet={pet} species={species} colors={colors} onCancel={onCancel} onSuccess={onCancel} />
@@ -53,7 +61,7 @@ export default function PetCard({
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div className="rounded-lg bg-white shadow relative cursor-pointer" onClick={() => setShowActions(v => !v)}>
+            <div className="rounded-lg bg-white shadow relative cursor-pointer" onClick={toggle}>
                 {/* Header */}
                 <div className="flex items-center gap-3 p-2 bg-white">
                     <div className="flex-1 min-w-0">
@@ -77,15 +85,19 @@ export default function PetCard({
                         />
                     </div>
                     <button
-                        onClick={(e) => { e.stopPropagation(); setShowActions(v => !v); }}
+                        onClick={(e) => { e.stopPropagation(); toggle() }}
                         className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                        style={{
+                            transform: `scale(${bump.isBumping() ? 1.25 : 1}) rotate(${showActions ? 90 : 0}deg)`,
+                            transition: 'transform 0.2s ease',
+                        }}
                         aria-label={showActions ? "Ocultar acciones" : "Mostrar acciones"}
                     >
-                        <ChevronRight size={18} className={`transition-transform duration-200 ${showActions ? "rotate-90" : ""}`} />
+                        <ChevronRight size={18} />
                     </button>
                 </div>
 
-                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showActions ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
+                <SlideDown open={showActions}>
                     <div className="px-4 pb-4">
                         <div className="flex items-center gap-3 mb-3">
                             <Link
@@ -126,7 +138,7 @@ export default function PetCard({
                             </div>
                         </div>
                     </div>
-                </div>
+                </SlideDown>
 
             </div>
         </>
