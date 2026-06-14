@@ -27,16 +27,24 @@ export function ConsultationSheet({
     const [procedures, setProcedures] = useState<Procedure[]>([])
 
     useEffect(() => {
+        if (procedures.length > 0) return
+
+        let isMounted = true
+
         fetch("/api/procedures")
             .then(r => r.json())
-            .then(data => setProcedures(data))
-    }, [])
+            .then(data => {
+                if (isMounted) setProcedures(data)
+            })
+
+        return () => { isMounted = false }
+    }, [procedures.length])
 
     return (
         <BottomSheet open={open} onClose={onClose} height="70dvh">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
-                <p className="text-base font-semibold text-gray-800">
+                <p className="text-base font-semibold text-gray-600">
                     {consultation ? "Editar Consulta" : "Nueva Consulta"} · {petName}
                 </p>
             </div>
