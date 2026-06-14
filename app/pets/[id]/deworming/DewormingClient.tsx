@@ -121,8 +121,8 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
                             const isExpanded = expandedTypes[type] ?? false
                             const typeStyle = TYPE_STYLES[type] ?? TYPE_STYLES.Interna
 
-                            const nonObsolete: { d: Deworming; statusKey: string }[] = []
-                            const obsolete: { d: Deworming; statusKey: string }[] = []
+                            const nonObsolete: { d: Deworming; statusKey: keyof typeof STATUS_MAP }[] = []
+                            const obsolete: { d: Deworming; statusKey: keyof typeof STATUS_MAP }[] = []
 
                             typeRecords.forEach((d, index) => {
                                 const statusKey = getStatus(d.next_deworming_date, index === 0)
@@ -131,7 +131,7 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
 
                             const obsoleteCount = obsolete.length
 
-                            function renderCard(d: Deworming, statusKey: string, isLastVigente: boolean) {
+                            function renderCard(d: Deworming, statusKey: keyof typeof STATUS_MAP, isLastVigente: boolean) {
                                 if (editingId === d.id) {
                                     return (
                                         <DewormingForm
