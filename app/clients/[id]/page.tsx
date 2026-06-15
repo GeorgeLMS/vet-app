@@ -15,7 +15,7 @@ async function getClientData(id: string, tz: string) {
     try {
         const [clientResult, petsResult] = await Promise.all([
             conn.query(
-                `SELECT id, name, email, phone, address, notes FROM clients WHERE id = $1`,
+                `SELECT id, name, email, phone, address, notes FROM clients WHERE id = $1 AND is_archived = FALSE`,
                 [id]
             ),
             conn.query(
@@ -37,7 +37,7 @@ FROM pets p
 LEFT JOIN species s ON p.species_id = s.id
 LEFT JOIN pet_colors pc ON p.color_id = pc.id
 LEFT JOIN consultations con ON con.pet_id = p.id
-WHERE p.client_id = $1
+WHERE p.client_id = $1 AND p.is_archived = FALSE
 GROUP BY p.id, p.name, p.gender, p.breed, p.notes, p.weight, p.color_id, p.birth_date, s.name_es, pc.name_es, pc.hex
 ORDER BY last_consultation_date DESC NULLS LAST, p.name ASC`,
                 [id, tz]

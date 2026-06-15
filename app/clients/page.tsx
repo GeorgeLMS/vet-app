@@ -32,15 +32,16 @@ async function getClients(tz: string) {
                         'weight', p.weight,
                         'age', age_display(p.birth_date, $1)
                     ) ORDER BY p.name
-                ) FILTER (WHERE p.id IS NOT NULL) AS pets
+                ) FILTER (WHERE p.id IS NOT NULL AND p.is_archived = FALSE) AS pets
             FROM clients c
-            LEFT JOIN pets p ON p.client_id = c.id
+            LEFT JOIN pets p ON p.client_id = c.id AND p.is_archived = FALSE
             LEFT JOIN species s ON p.species_id = s.id
             LEFT JOIN (
                 SELECT pet_id, MAX(consultation_date) AS last_consultation
                 FROM consultations
                 GROUP BY pet_id
             ) pet_cons ON pet_cons.pet_id = p.id
+            WHERE c.is_archived = FALSE
             GROUP BY c.id, c.name, c.phone, c.email, c.address
             ORDER BY c.name ASC
         `, [tz])

@@ -31,11 +31,12 @@ export async function getPetsPageData() {
           c.name as client_name,
           c.phone as client_phone,
           p.gender,
-            TO_CHAR((MAX(con.consultation_date) AT TIME ZONE $1)::date, 'YYYY-MM-DD') AS last_consultation
+            TO_CHAR((MAX(con.consultation_date) AT TIME ZONE $1)::date, 'YYYY-MM-DD') AS last_consultation_date
         FROM pets p
         LEFT JOIN species s ON p.species_id = s.id
         LEFT JOIN clients c ON p.client_id = c.id
         LEFT JOIN consultations con ON p.id = con.pet_id
+        WHERE p.is_archived = FALSE
         GROUP BY p.id, p.name, p.breed, p.notes, p.weight, p.species_id, p.color_id, p.birth_date, s.name_es, c.id, c.name, p.gender
         ORDER BY p.id DESC
         `,

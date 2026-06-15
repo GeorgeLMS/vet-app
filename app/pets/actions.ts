@@ -170,3 +170,21 @@ export async function deletePet(petId: number) {
 
     revalidatePath('/pets')
 }
+
+export async function archivePet(petId: number) {
+    const session = await auth()
+    if (!session) throw new Error("Unauthorized")
+
+    const client = await pool.connect()
+    try {
+        await client.query('UPDATE pets SET is_archived = TRUE WHERE id = $1', [petId])
+    } catch (error) {
+        console.error('Error archiving pet:', error)
+        return { success: false, error: 'Error al archivar mascota' }
+    } finally {
+        client.release()
+    }
+
+    revalidatePath('/pets')
+    return { success: true }
+}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import { Trash2, RefreshCw, FileText, AlertTriangle } from "lucide-react"
+import { Trash2, RefreshCw, FileText, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 
 type OrphanedFile = {
@@ -37,12 +37,14 @@ function formatDate(iso: string) {
 }
 
 export default function OrphanedFiles() {
+    const [open, setOpen] = useState(false)
     const [result, setResult] = useState<ScanResult | null>(null)
     const [scanning, setScanning] = useState(false)
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [confirmFile, setConfirmFile] = useState<OrphanedFile | null>(null)
     const [confirmDeleteAll, setConfirmDeleteAll] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [hasScanned, setHasScanned] = useState(false)
 
     async function handleScan() {
         setScanning(true)
@@ -57,6 +59,14 @@ export default function OrphanedFiles() {
         } finally {
             setScanning(false)
         }
+    }
+
+    function handleToggle() {
+        if (!open && !hasScanned) {
+            handleScan()
+            setHasScanned(true)
+        }
+        setOpen(v => !v)
     }
 
     async function handleDelete(file: OrphanedFile) {
@@ -111,25 +121,35 @@ export default function OrphanedFiles() {
                 />
             )}
 
-            <div className="rounded-lg bg-white shadow">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                    <div>
-                        <h2 className="text-sm font-semibold text-gray-900">Archivos huérfanos en Cloudinary</h2>
-                        <p className="text-xs text-gray-400 mt-0.5">Archivos subidos que no están vinculados a ningún registro en la base de datos</p>
+            <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
+                <button
+                    className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer disabled:opacity-50"
+                    onClick={handleToggle}
+                    disabled={scanning}
+                >
+                    <div className="flex items-center gap-2">
+                        <FileText size={15} className="text-gray-400" />
+                        {scanning ? (
+                            <>
+                                <Spinner />
+                                <span className="text-sm font-medium text-gray-700">Escaneando Cloudinary...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className="text-sm font-medium text-gray-900">Archivos huérfanos en Cloudinary</span>
+                                {result && result.orphaned.length > 0 && (
+                                    <span className="text-xs rounded-full bg-red-100 text-red-600 font-semibold px-2 py-0.5">
+                                        {result.orphaned.length} archivo{result.orphaned.length !== 1 ? 's' : ''}
+                                    </span>
+                                )}
+                            </>
+                        )}
                     </div>
-                    <button
-                        onClick={handleScan}
-                        disabled={scanning}
-                        className="flex items-center gap-1.5 rounded-md border border-blue-200 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors px-3 py-1.5 text-sm disabled:opacity-50"
-                    >
-                        {scanning ? <Spinner /> : <RefreshCw size={14} />}
-                        {scanning ? "Escaneando..." : "Escanear"}
-                    </button>
-                </div>
+                    {open ? <ChevronUp size={15} className="text-gray-400" /> : <ChevronDown size={15} className="text-gray-400" />}
+                </button>
 
-                {/* Body */}
-                <div className="p-4">
+                {open && (
+                    <div className="border-t border-gray-100 p-4 bg-gray-50">
                     {error && (
                         <p className="text-sm text-red-600">{error}</p>
                     )}
@@ -205,7 +225,8 @@ export default function OrphanedFiles() {
                             )}
                         </>
                     )}
-                </div>
+                    </div>
+                )}
             </div>
         </>
     )

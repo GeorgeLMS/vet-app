@@ -37,17 +37,12 @@ export default function PetFiles({ petId, initialFiles }: Props) {
         try {
             const res = await fetch(`/api/pet-files/download?public_id=${encodeURIComponent(file.public_id)}&name=${encodeURIComponent(file.file_name)}&resource_type=${file.resource_type}`)
             const blob = await res.blob()
-
-            if (navigator.canShare && navigator.canShare({ files: [new File([blob], file.file_name, { type: blob.type })] })) {
-                await navigator.share({ files: [new File([blob], file.file_name, { type: blob.type })] })
-            } else {
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement("a")
-                a.href = url
-                a.download = file.file_name
-                a.click()
-                URL.revokeObjectURL(url)
-            }
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = file.file_name
+            a.click()
+            URL.revokeObjectURL(url)
         } finally {
             setDownloading(null)
         }

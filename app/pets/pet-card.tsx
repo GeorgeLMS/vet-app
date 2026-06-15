@@ -5,11 +5,12 @@ import Link from "next/link"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { SlideDown } from "@/components/SlideDown"
 import { useBump } from "@/hooks/useBump"
-import { deletePet } from "./actions"
+import { archivePet } from "./actions"
 import { Pet, Species, PetColor } from "./types"
 import PetFormCard from "./pet-form-card"
 import PetInfoBlock from "@/components/PetInfoBlock"
 import PetQuickActions from "@/components/PerQuickActions"
+import ArchiveButton from "@/components/ArchiveButton"
 
 const Spinner = () => (
     <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -19,7 +20,7 @@ const Spinner = () => (
 )
 
 export default function PetCard({
-    pet, species, colors, isEditing, onEdit, onCancel
+    pet, species, colors, isEditing, onEdit, onCancel, onArchived
 }: {
     pet: Pet
     species: Species[]
@@ -27,8 +28,8 @@ export default function PetCard({
     isEditing: boolean
     onEdit: () => void
     onCancel: () => void
+    onArchived?: () => void
 }) {
-    const [showConfirm, setShowConfirm] = useState(false)
     const [showActions, setShowActions] = useState(false)
     const [isPending, startTransition] = useTransition()
     const bump = useBump()
@@ -44,23 +45,8 @@ export default function PetCard({
 
     const petColor = colors.find(c => c.id === pet.color_id)
 
-    async function handleDelete() {
-        setShowConfirm(false)
-        startTransition(async () => { await deletePet(pet.id) })
-    }
-
     return (
         <>
-            {showConfirm && (
-                <ConfirmDialog
-                    title="Eliminar mascota"
-                    message={`¿Eliminar a ${pet.name}? Se borrarán todas sus consultas también.`}
-                    confirmText="Sí, eliminar"
-                    danger
-                    onConfirm={handleDelete}
-                    onCancel={() => setShowConfirm(false)}
-                />
-            )}
             <div className="rounded-lg bg-white shadow relative cursor-pointer" onClick={toggle}>
                 {/* Header */}
                 <div className="flex items-center gap-3 p-2 bg-white">
@@ -127,14 +113,15 @@ export default function PetCard({
                                 >
                                     <Edit size={16} />
                                 </button>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setShowConfirm(true); }}
-                                    disabled={isPending}
-                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-red-200 text-red-500 hover:bg-red-100 hover:border-red-300 transition-colors disabled:opacity-50"
-                                    aria-label="Eliminar mascota"
-                                >
-                                    {isPending ? <Spinner /> : <Trash2 size={16} />}
-                                </button>
+                                <div onClick={(e) => e.stopPropagation()}>
+                                    <ArchiveButton
+                                        itemId={pet.id}
+                                        itemName={pet.name}
+                                        itemType="pet"
+                                        archiveAction={archivePet}
+                                        onArchived={() => onArchived?.()}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

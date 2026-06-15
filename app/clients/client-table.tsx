@@ -5,6 +5,8 @@ import Link from "next/link"
 import { Search } from "lucide-react"
 import { formatDate, formatPhone } from "@/utils"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
+import ArchiveButton from "@/components/ArchiveButton"
+import { archiveClient } from "./actions"
 
 type Pet = {
     id: number
@@ -26,18 +28,23 @@ type Client = {
     pets: Pet[] | null
 }
 
-export default function ClientTable({ clients }: { clients: Client[] }) {
+export default function ClientTable({ clients: initialClients }: { clients: Client[] }) {
     const [search, setSearch] = useState("")
+    const [displayedClients, setDisplayedClients] = useState(initialClients)
 
     const filteredClients = useMemo(() => {
-        if (!search.trim()) return clients
+        if (!search.trim()) return displayedClients
         const query = search.toLowerCase()
-        return clients.filter(client =>
+        return displayedClients.filter(client =>
             client.name.toLowerCase().includes(query) ||
             client.phone?.toLowerCase().includes(query) ||
             client.email?.toLowerCase().includes(query)
         )
-    }, [search, clients])
+    }, [search, displayedClients])
+
+    const handleClientArchived = (clientId: string) => {
+        setDisplayedClients(prev => prev.filter(c => c.id !== clientId))
+    }
 
     return (
         <>
@@ -79,11 +86,20 @@ export default function ClientTable({ clients }: { clients: Client[] }) {
                                         </>
                                     )}
                                 </div>
-                                {client.last_consultation && (
-                                    <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
-                                        U: {formatDate(client.last_consultation)}
-                                    </span>
-                                )}
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                    {client.last_consultation && (
+                                        <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
+                                            U: {formatDate(client.last_consultation)}
+                                        </span>
+                                    )}
+                                    <ArchiveButton
+                                        itemId={client.id}
+                                        itemName={client.name}
+                                        itemType="client"
+                                        archiveAction={archiveClient}
+                                        onArchived={() => handleClientArchived(client.id)}
+                                    />
+                                </div>
                             </div>
 
                             {(client.pets?.length ?? 0) > 0 && (

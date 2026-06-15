@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import OrphanedFiles from "./orphaned-files"
 import DuplicateClients from "./duplicate-clients"
+import ArchivedItems from "./archived-items"
 
 export default async function AdministrationPage() {
     const session = await auth()
@@ -20,6 +21,7 @@ export default async function AdministrationPage() {
                 </div>
                 <div className="space-y-4">
                     <DuplicateClients />
+                    <ArchivedItems />
                     <OrphanedFiles />
                 </div>
             </div>

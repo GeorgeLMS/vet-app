@@ -281,9 +281,11 @@ function DuplicateGroupRow({
 }
 
 export default function DuplicateClients() {
+    const [open, setOpen] = useState(false)
     const [groups, setGroups] = useState<DuplicateGroup[] | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [hasScanned, setHasScanned] = useState(false)
 
     async function handleScan() {
         setLoading(true)
@@ -297,6 +299,14 @@ export default function DuplicateClients() {
         } finally {
             setLoading(false)
         }
+    }
+
+    function handleToggle() {
+        if (!open && !hasScanned) {
+            handleScan()
+            setHasScanned(true)
+        }
+        setOpen(v => !v)
     }
 
     function handleMerged(groupNameKey: string, secondaryId: number) {
@@ -326,23 +336,35 @@ export default function DuplicateClients() {
     }
 
     return (
-        <div className="rounded-lg bg-white shadow">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                <div>
-                    <h2 className="text-sm font-semibold text-gray-900">Clientes duplicados</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Clientes con el mismo nombre — fusiónalos o elimina el sobrante</p>
+        <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
+            <button
+                className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 cursor-pointer"
+                onClick={handleToggle}
+                disabled={loading}
+            >
+                <div className="flex items-center gap-2">
+                    <Users size={15} className="text-gray-400" />
+                    {loading ? (
+                        <>
+                            <Spinner />
+                            <span className="text-sm font-medium text-gray-700">Buscando duplicados...</span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-sm font-medium text-gray-900">Clientes duplicados</span>
+                            {groups && groups.length > 0 && (
+                                <span className="text-xs rounded-full bg-red-100 text-red-600 font-semibold px-2 py-0.5">
+                                    {groups.length} grupo{groups.length !== 1 ? 's' : ''}
+                                </span>
+                            )}
+                        </>
+                    )}
                 </div>
-                <button
-                    onClick={handleScan}
-                    disabled={loading}
-                    className="flex items-center gap-1.5 rounded-md border border-blue-200 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors px-3 py-1.5 text-sm disabled:opacity-50"
-                >
-                    {loading ? <Spinner /> : <RefreshCw size={14} />}
-                    {loading ? "Buscando..." : "Buscar"}
-                </button>
-            </div>
+                {open ? <ChevronUp size={15} className="text-gray-400" /> : <ChevronDown size={15} className="text-gray-400" />}
+            </button>
 
-            <div className="p-4">
+            {open && (
+            <div className="p-4 bg-gray-50">
                 {error && <p className="text-sm text-red-600">{error}</p>}
 
                 {!groups && !loading && !error && (
@@ -374,6 +396,7 @@ export default function DuplicateClients() {
                     </div>
                 )}
             </div>
+            )}
         </div>
     )
 }

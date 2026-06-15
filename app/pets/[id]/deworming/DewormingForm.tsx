@@ -39,7 +39,7 @@ export default function DewormingForm({ petId, deworming, onSuccess, onCancel }:
                 </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label htmlFor="product" className="block text-sm font-medium text-gray-900">
                         Producto *
@@ -79,7 +79,7 @@ export default function DewormingForm({ petId, deworming, onSuccess, onCancel }:
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label htmlFor="application_date" className="block text-sm font-medium text-gray-900">
                         Fecha de Aplicación *

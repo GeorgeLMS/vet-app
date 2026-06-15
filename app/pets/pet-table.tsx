@@ -5,7 +5,7 @@ import PetFormCard from "./pet-form-card"
 import { Pet, Species, PetColor } from "./types"
 
 export default function PetTable({
-    pets,
+    pets: initialPets,
     species,
     colors
 }: {
@@ -16,8 +16,13 @@ export default function PetTable({
     const [editingId, setEditingId] = useState<number | null>(null)
     const [creatingNew, setCreatingNew] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
+    const [displayedPets, setDisplayedPets] = useState(initialPets)
 
-    const filteredPets = pets.filter(pet =>
+    const handlePetArchived = (petId: number) => {
+        setDisplayedPets(prev => prev.filter(p => p.id !== petId))
+    }
+
+    const filteredPets = displayedPets.filter(pet =>
         pet.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pet.breed?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pet.client_name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -69,6 +74,7 @@ export default function PetTable({
                             isEditing={editingId === pet.id}
                             onEdit={() => setEditingId(pet.id)}
                             onCancel={() => setEditingId(null)}
+                            onArchived={() => handlePetArchived(pet.id)}
                         />
                     ))
                 )}

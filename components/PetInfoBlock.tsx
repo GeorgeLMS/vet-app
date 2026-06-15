@@ -79,7 +79,7 @@ export default function PetInfoBlock({
                         )}
                         {lastConsultationDate && (
                             <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
-                                {`U: ${formatDate(lastConsultationDate)}`}
+                                {`Ult: ${formatDate(lastConsultationDate)}`}
                             </span>
                         )}
                     </div>
