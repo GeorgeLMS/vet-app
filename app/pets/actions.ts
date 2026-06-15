@@ -171,13 +171,13 @@ export async function deletePet(petId: number) {
     revalidatePath('/pets')
 }
 
-export async function archivePet(petId: number) {
+export async function archivePet(petId: string | number) {
     const session = await auth()
     if (!session) throw new Error("Unauthorized")
 
     const client = await pool.connect()
     try {
-        await client.query('UPDATE pets SET is_archived = TRUE WHERE id = $1', [petId])
+        await client.query('UPDATE pets SET is_archived = TRUE WHERE id = $1', [typeof petId === 'string' ? parseInt(petId) : petId])
     } catch (error) {
         console.error('Error archiving pet:', error)
         return { success: false, error: 'Error al archivar mascota' }
