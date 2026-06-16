@@ -41,28 +41,29 @@ export function ConsultationSheet({
     }, [procedures.length])
 
     return (
-        <BottomSheet open={open} onClose={onClose} height="70dvh">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
-                <p className="text-base font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
-                    {consultation ? "Editar Consulta" : "Nueva Consulta"} · {petName}
-                </p>
-            </div>
-
-            {/* Scrollable form area */}
-            <div className="overflow-y-auto flex-1 px-5 py-2">
-                <ConsultationForm
-                    key={consultation?.id ?? "new"}
-                    petId={String(petId)}
-                    procedures={procedures}
-                    consultation={consultation}
-                    onSuccess={(c) => {
-                        onSuccess ? onSuccess(c) : onClose()
-                        router.refresh()
-                    }}
-                    onCancel={onClose}
-                />
-            </div>
+        <BottomSheet
+            open={open}
+            onClose={onClose}
+            height="70dvh"
+            header={
+                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
+                    <p className="text-base font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
+                        {consultation ? "Editar Consulta" : "Nueva Consulta"} · {petName}
+                    </p>
+                </div>
+            }
+        >
+            <ConsultationForm
+                key={consultation?.id ?? "new"}
+                petId={String(petId)}
+                procedures={procedures}
+                consultation={consultation}
+                onSuccess={(c) => {
+                    onSuccess ? onSuccess(c) : onClose()
+                    router.refresh()
+                }}
+                onCancel={onClose}
+            />
         </BottomSheet>
     )
 }

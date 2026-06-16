@@ -35,16 +35,14 @@ export function VaccinationSheet({
 }) {
     return (
         <BottomSheet open={open} onClose={onClose} height="60dvh">
-            <div className="overflow-y-auto flex-1 px-5 py-2">
-                <VaccinationForm
-                    key={vaccination?.id ?? "new"}
-                    petId={petId}
-                    vaccineTypes={vaccineTypes}
-                    vaccination={vaccination}
-                    onSuccess={onSuccess ?? onClose}
-                    onCancel={onClose}
-                />
-            </div>
+            <VaccinationForm
+                key={vaccination?.id ?? "new"}
+                petId={petId}
+                vaccineTypes={vaccineTypes}
+                vaccination={vaccination}
+                onSuccess={onSuccess ?? onClose}
+                onCancel={onClose}
+            />
         </BottomSheet>
     )
 }

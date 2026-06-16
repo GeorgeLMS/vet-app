@@ -1,17 +1,19 @@
 "use client"
 
-import { useEffect, useState, ReactNode, Fragment } from "react"
-import { X } from "lucide-react"
+import { useCallback, useEffect, useRef, useState, ReactNode, Fragment } from "react"
+import { X, ChevronDown } from "lucide-react"
 
 export function BottomSheet({
     open,
     onClose,
     height = "90dvh",
+    header,
     children,
 }: {
     open: boolean
     onClose: () => void
     height?: string
+    header?: ReactNode
     children: ReactNode
 }) {
     useEffect(() => {
@@ -26,6 +28,28 @@ export function BottomSheet({
     useEffect(() => {
         if (open) setRenderKey(k => k + 1)
     }, [open])
+
+    // Scroll-down hint: a fade + bouncing chevron shown only when the form
+    // overflows below the fold, so the user knows there's more to scroll to.
+    const [showScrollHint, setShowScrollHint] = useState(false)
+    const observerRef = useRef<ResizeObserver | null>(null)
+
+    const measure = useCallback((el: HTMLDivElement | null) => {
+        if (!el) return
+        setShowScrollHint(el.scrollHeight - el.scrollTop - el.clientHeight > 8)
+    }, [])
+
+    // Callback ref: re-measures whenever the scroll area mounts (it remounts on
+    // each open via renderKey) and tracks size changes via ResizeObserver.
+    const scrollRef = useCallback((el: HTMLDivElement | null) => {
+        observerRef.current?.disconnect()
+        if (el) {
+            measure(el)
+            const ro = new ResizeObserver(() => measure(el))
+            ro.observe(el)
+            observerRef.current = ro
+        }
+    }, [measure])
 
     return (
         <>
@@ -65,7 +89,26 @@ export function BottomSheet({
                     </button>
                 </div>
 
-                <Fragment key={renderKey}>{children}</Fragment>
+                <Fragment key={renderKey}>
+                    {header}
+
+                    {/* Scrollable body + scroll-down hint */}
+                    <div className="relative flex-1 min-h-0">
+                        <div
+                            ref={scrollRef}
+                            onScroll={(e) => measure(e.currentTarget)}
+                            className="h-full overflow-y-auto px-5 py-2"
+                        >
+                            {children}
+                        </div>
+
+                        <div
+                            className={`pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-3 pt-10 transition-opacity duration-200 ${showScrollHint ? "opacity-100" : "opacity-0"}`}
+                        >
+                            <ChevronDown size={20} className="animate-bounce text-gray-400" />
+                        </div>
+                    </div>
+                </Fragment>
             </div>
         </>
     )
