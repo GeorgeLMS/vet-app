@@ -21,16 +21,10 @@ export async function POST(req: Request) {
 
     const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase() : ""
     const baseName = file.name.slice(0, file.name.lastIndexOf(".") || file.name.length).replace(/[^a-zA-Z0-9_-]/g, "_")
-    const isPdf = ext === ".pdf"
+    const publicId = `pets/${petId}/${Date.now()}_${baseName}${ext}`
 
-    // PDFs upload as "image" type so Cloudinary delivers them with Content-Type
-    // application/pdf (renders inline in the browser). For image-type the format
-    // extension is appended by Cloudinary, so the publicId must NOT include it —
-    // otherwise the URL ends up as "file.pdf.pdf".
-    const resourceType = isPdf ? "image" : "auto"
-    const publicId = isPdf
-        ? `pets/${petId}/${Date.now()}_${baseName}`
-        : `pets/${petId}/${Date.now()}_${baseName}${ext}`
+    const isPdf = ext === ".pdf"
+    const resourceType = isPdf ? "raw" : "auto"
 
     const result = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
