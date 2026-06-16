@@ -1,8 +1,10 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
 import { Plus } from "lucide-react"
+import Link from "next/link"
 import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
+import PillButton from "@/components/PillButton"
 import { formatDate } from "@/utils"
 import { getVaccinationsData, deleteVaccination } from "./actions"
 import VaccinationRowMenu from "./VaccinationRowMenu"
@@ -91,19 +93,22 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-4">
-                    <PageTitle>{petName} — Vacunas</PageTitle>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                        <button
-                            onClick={() => { setSheetVaccination(undefined); setSheetOpen(true); setSheetKey(k => k + 1) }}
-                            className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            <Plus size={18} /> Agregar Vacuna
-                        </button>
-                    </div>
+                    <PageTitle>
+                        Vacunas • <Link href={`/pets/${petId}`} className="text-blue-600 hover:underline">{petName}</Link>
+                    </PageTitle>
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between mb-2 mt-3">
+                    <NavBar />
+                    <PillButton
+                        onClick={() => { setSheetVaccination(undefined); setSheetOpen(true); setSheetKey(k => k + 1) }}
+                        ariaLabel="Agregar vacuna"
+                    >
+                        <Plus size={11} strokeWidth={2.5} /> Agregar vacuna
+                    </PillButton>
+                </div>
+
+                <div className="flex flex-col gap-2 mt-2">
                     {vaccinations.length === 0 && (
                         <div className="rounded-lg bg-white shadow p-12 text-center">
                             <p className="text-gray-400">No hay vacunas registradas.</p>
@@ -153,7 +158,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                                                             {initial}
                                                         </div>
                                                         <div style={{ flex: 1 }}>
-                                                            <p style={{ fontSize: '15px', fontWeight: 600, color: '#1f2937', marginBottom: '2px' }}>{vaccination.vaccine_name}</p>
+                                                            <p style={{ fontSize: '15px', fontWeight: 600, color: '#4b5563', marginBottom: '2px', fontFamily: 'var(--font-outfit)' }}>{vaccination.vaccine_name}</p>
                                                             <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>
                                                                 {vaccination.age_at_vaccination ? `Edad al aplicar: ${vaccination.age_at_vaccination}` : ''}
                                                             </p>

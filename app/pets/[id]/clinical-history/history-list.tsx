@@ -6,6 +6,8 @@ import { useTopLoader } from "nextjs-toploader"
 import { Edit, Trash2, Plus, X, Save } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import ClinicalHistoryFiles from "@/components/ClinicalHistoryFiles"
+import PillButton from "@/components/PillButton"
+import { formatDate } from "@/utils"
 import { createClinicalHistory, updateClinicalHistory, deleteClinicalHistory, FormState } from "./actions"
 
 type HistoryFile = {
@@ -19,7 +21,7 @@ type HistoryFile = {
 
 type History = {
     id: number
-    fecha_formatted: string
+    fecha: string
     motivo_consulta: string | null
     files: HistoryFile[]
 }
@@ -116,7 +118,7 @@ function TextModal({ text, date, onClose }: { text: string; date: string; onClos
             >
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                     <span className="inline-block rounded-full bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-0.5">
-                        {date}
+                        {formatDate(date)}
                     </span>
                     <button
                         onClick={onClose}
@@ -166,7 +168,7 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
             {showModal && history.motivo_consulta && (
                 <TextModal
                     text={history.motivo_consulta}
-                    date={history.fecha_formatted}
+                    date={history.fecha}
                     onClose={() => setShowModal(false)}
                 />
             )}
@@ -216,7 +218,7 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
 
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
                         <span className="inline-block rounded-full bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-0.5">
-                            {history.fecha_formatted}
+                            {formatDate(history.fecha)}
                         </span>
                         <div className="flex items-center gap-1.5">
                             <button
@@ -246,36 +248,34 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
 
 export default function HistoryList({
     petId,
-    histories
+    histories,
+    creatingProp,
+    onCreatingChange
 }: {
     petId: string
     histories: History[]
+    creatingProp?: boolean
+    onCreatingChange?: (creating: boolean) => void
 }) {
     const [creating, setCreating] = useState(false)
+    const isCreating = creatingProp !== undefined ? creatingProp : creating
+    const setIsCreating = onCreatingChange || setCreating
 
     return (
         <div className="space-y-0.5">
-            {!creating && (
-                <div className="flex justify-end mb-2">
-                    <button
-                        onClick={() => setCreating(true)}
-                        className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
-                    >
-                        <Plus size={15} />
-                        Nuevo Historial
-                    </button>
-                </div>
+            {!isCreating && (
+                <></>
             )}
 
-            {creating && (
-                <InlineForm petId={petId} onDone={() => setCreating(false)} />
+            {isCreating && (
+                <InlineForm petId={petId} onDone={() => setIsCreating(false)} />
             )}
 
-            {histories.length === 0 && !creating && (
+            {histories.length === 0 && !isCreating && (
                 <div className="rounded-lg bg-white shadow p-12 text-center">
                     <p className="text-gray-500 mb-4">No hay historiales clínicos registrados</p>
                     <button
-                        onClick={() => setCreating(true)}
+                        onClick={() => setIsCreating(true)}
                         className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     >
                         <Plus size={16} />

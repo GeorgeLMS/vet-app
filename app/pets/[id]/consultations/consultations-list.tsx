@@ -7,6 +7,7 @@ import { deleteConsultation } from "./actions"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { formatDate } from "@/utils"
 import { ConsultationSheet } from "@/components/ConsultationSheet"
+import PillButton from "@/components/PillButton"
 
 type Consultation = {
     id: string
@@ -59,7 +60,7 @@ function ConsultationRow({
                         <span className="text-xs font-medium text-gray-500">
                             {formatDate(c.consultation_date)}
                         </span>
-                        <span className="text-sm font-medium text-gray-800">
+                        <span className="text-[14px] font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
                             {c.procedure_name || 'Procedimiento eliminado'}
                         </span>
                     </div>
@@ -106,14 +107,20 @@ export function ConsultationsList({
     petId,
     petName,
     initialConsultations,
+    sheetOpenProp,
+    onSheetOpenChange,
 }: {
     petId: string
     petName: string
     initialConsultations: Consultation[]
+    sheetOpenProp?: boolean
+    onSheetOpenChange?: (open: boolean) => void
 }) {
     const [consultations, setConsultations] = useState(initialConsultations)
     const [sheetConsultation, setSheetConsultation] = useState<Consultation | null>(null)
-    const [sheetOpen, setSheetOpen] = useState(false)
+    const [sheetOpenLocal, setSheetOpenLocal] = useState(false)
+    const sheetOpen = sheetOpenProp !== undefined ? sheetOpenProp : sheetOpenLocal
+    const setSheetOpen = onSheetOpenChange || setSheetOpenLocal
 
     const handleSave = (updated: Consultation) => {
         setConsultations(prev => prev.map(c => c.id === updated.id ? updated : c))
@@ -132,22 +139,6 @@ export function ConsultationsList({
 
     return (
         <div className="space-y-2">
-            <div className="flex justify-between items-end h-8 px-1">
-                <div>
-                    <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Consultas
-                    </span>
-                </div>
-
-                <button
-                    onClick={() => { setSheetConsultation(null); setSheetOpen(true) }}
-                    className="inline-flex items-center h-8 gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-full px-3"
-                    aria-label="Agregar consulta"
-                >
-                    <Plus size={11} strokeWidth={2.5} />
-                    Agregar consulta
-                </button>
-            </div>
 
             <div className="rounded-lg bg-white shadow overflow-hidden">
                 {consultations.length === 0 && (

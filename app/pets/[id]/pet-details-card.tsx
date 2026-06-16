@@ -42,18 +42,6 @@ export function PetDetailsCard({
 
     return (
         <div className="rounded-lg bg-white p-4 shadow">
-            <div className="mb-4 flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">Detalles de la Mascota</h2>
-                {!editing && (
-                    <button
-                        onClick={() => setEditing(true)}
-                        className="flex items-center justify-center w-7 h-7 rounded-md border border-blue-200  text-blue-600 hover:bg-blue-100 transition-colors"
-                        aria-label="Editar mascota"
-                    >
-                        <SquarePen size={14} />
-                    </button>
-                )}
-            </div>
 
             {editing ? (
                 <EditPetForm
@@ -90,6 +78,7 @@ export function PetDetailsCard({
                         weight={pet.weight?.toString() ?? null}
                         lastConsultationDate={lastConsultationDate}
                         notes={pet.notes}
+                        onEdit={() => setEditing(true)}
 
                     />
 

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from "react"
-import { Upload, FileText, Trash2 } from "lucide-react"
+import { useState, useRef } from "react"
+import { FileText, Trash2 } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
+import { Toast, type Toast as ToastType } from "@/components/Toast"
 
 type PetFile = {
     id: number
@@ -16,6 +17,9 @@ type PetFile = {
 type Props = {
     petId: string
     initialFiles: PetFile[]
+    uploadingProp?: boolean
+    onUploadingChange?: (uploading: boolean) => void
+    fileInputRef?: React.RefObject<HTMLInputElement>
 }
 
 const Spinner = () => (
@@ -25,26 +29,47 @@ const Spinner = () => (
     </svg>
 )
 
-export default function PetFiles({ petId, initialFiles }: Props) {
+export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadingChange, fileInputRef }: Props) {
     const [files, setFiles] = useState<PetFile[]>(initialFiles)
-    const [uploading, setUploading] = useState(false)
+    const [uploadingLocal, setUploadingLocal] = useState(false)
+    const uploading = uploadingProp !== undefined ? uploadingProp : uploadingLocal
+    const setUploading = onUploadingChange || setUploadingLocal
     const [deleting, setDeleting] = useState<number | null>(null)
     const [downloading, setDownloading] = useState<number | null>(null)
     const [confirmFile, setConfirmFile] = useState<PetFile | null>(null)
+    const [toasts, setToasts] = useState<ToastType[]>([])
+    const localFileInputRef = useRef<HTMLInputElement>(null)
+    const finalInputRef = fileInputRef || localFileInputRef
+
+    const addToast = (message: string, type: 'success' | 'error' | 'loading' = 'success') => {
+        const id = Date.now().toString()
+        setToasts(prev => [...prev, { id, message, type }])
+        return id
+    }
+
+    const removeToast = (id: string) => {
+        setToasts(prev => prev.filter(t => t.id !== id))
+    }
 
     async function handleDownload(file: PetFile) {
-        setDownloading(file.id)
-        try {
-            const res = await fetch(`/api/pet-files/download?public_id=${encodeURIComponent(file.public_id)}&name=${encodeURIComponent(file.file_name)}&resource_type=${file.resource_type}`)
-            const blob = await res.blob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement("a")
-            a.href = url
-            a.download = file.file_name
-            a.click()
-            URL.revokeObjectURL(url)
-        } finally {
-            setDownloading(null)
+        const isPdf = file.file_name.toLowerCase().endsWith('.pdf')
+
+        if (isPdf) {
+            window.open(file.url, '_blank')
+        } else {
+            setDownloading(file.id)
+            try {
+                const res = await fetch(`/api/pet-files/download?public_id=${encodeURIComponent(file.public_id)}&name=${encodeURIComponent(file.file_name)}&resource_type=${file.resource_type}`)
+                const blob = await res.blob()
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement("a")
+                a.href = url
+                a.download = file.file_name
+                a.click()
+                URL.revokeObjectURL(url)
+            } finally {
+                setDownloading(null)
+            }
         }
     }
 
@@ -54,27 +79,38 @@ export default function PetFiles({ petId, initialFiles }: Props) {
         e.target.value = ""
 
         setUploading(true)
-        const formData = new FormData()
-        formData.append("file", file)
-        formData.append("petId", petId)
+        const toastId = addToast(`Subiendo ${file.name}...`, 'loading')
 
-        const res = await fetch("/api/upload", { method: "POST", body: formData })
-        const data = await res.json()
+        try {
+            const formData = new FormData()
+            formData.append("file", file)
+            formData.append("petId", petId)
 
-        const saveRes = await fetch("/api/pet-files", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                petId,
-                url: data.url,
-                public_id: data.public_id,
-                file_name: data.file_name,
-                resource_type: data.resource_type,
+            const res = await fetch("/api/upload", { method: "POST", body: formData })
+            const data = await res.json()
+
+            const saveRes = await fetch("/api/pet-files", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    petId,
+                    url: data.url,
+                    public_id: data.public_id,
+                    file_name: data.file_name,
+                    resource_type: data.resource_type,
+                })
             })
-        })
-        const saved = await saveRes.json()
-        setFiles(prev => [...prev, saved])
-        setUploading(false)
+            const saved = await saveRes.json()
+            setFiles(prev => [...prev, saved])
+
+            removeToast(toastId)
+            addToast(`${file.name} subido correctamente`, 'success')
+        } catch (error) {
+            removeToast(toastId)
+            addToast(`Error al subir ${file.name}`, 'error')
+        } finally {
+            setUploading(false)
+        }
     }
 
     async function handleDelete(file: PetFile) {
@@ -91,6 +127,8 @@ export default function PetFiles({ petId, initialFiles }: Props) {
 
     return (
         <>
+            <Toast toasts={toasts} onRemove={removeToast} />
+
             {confirmFile && (
                 <ConfirmDialog
                     title="Eliminar archivo"
@@ -103,12 +141,8 @@ export default function PetFiles({ petId, initialFiles }: Props) {
             )}
 
             <div className="rounded-lg bg-white p-4 shadow">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Archivos ({files.length})</h2>
-                    <label className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors cursor-pointer">
-                        {uploading ? <Spinner /> : <Upload size={18} />}
-                        <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
-                    </label>
+                <div>
+                    <input ref={finalInputRef} type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
                 </div>
 
                 {files.length === 0 ? (

@@ -44,7 +44,7 @@ export function ConsultationSheet({
         <BottomSheet open={open} onClose={onClose} height="70dvh">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
-                <p className="text-base font-semibold text-gray-600">
+                <p className="text-base font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
                     {consultation ? "Editar Consulta" : "Nueva Consulta"} · {petName}
                 </p>
             </div>

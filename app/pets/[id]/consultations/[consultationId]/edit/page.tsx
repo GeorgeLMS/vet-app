@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
+import Link from "next/link"
 import { Pool } from "pg"
 import { EditConsultationForm } from "./page-form"
 import NavBar from "@/components/NavBar"
@@ -58,7 +59,17 @@ export default async function EditConsultationPage({
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
-                    <PageTitle>Editar Consulta - {consultation.pet_name}</PageTitle>
+                    <div className="flex items-baseline gap-2 flex-nowrap">
+                        <h1 className="text-2xl font-bold text-gray-700 font-[family-name:var(--font-outfit)] flex-shrink-0">Editar Consulta</h1>
+                        <p className="text-2xl font-semibold font-[family-name:var(--font-outfit)] flex-shrink-0">
+                            • <Link
+                                href={`/pets/${consultation.pet_id}`}
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                                {consultation.pet_name}
+                            </Link>
+                        </p>
+                    </div>
                     <div className="flex items-center justify-between mb-2">
                         <NavBar />
                     </div>

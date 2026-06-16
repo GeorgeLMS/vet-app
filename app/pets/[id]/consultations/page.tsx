@@ -1,10 +1,8 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
-
-import NavBar from "@/components/NavBar"
-import PageTitle from "@/components/PageTitle"
+import Link from "next/link"
 import pool from "@/pool"
-import { ConsultationsList } from "./consultations-list"
+import ConsultationsWrapper from "./consultations-wrapper"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -62,15 +60,22 @@ export default async function ConsultationsPage({
         <main className="min-h-screen bg-gray-50 p-6">
             <div className="mx-auto max-w-2xl">
                 {/* Page header */}
-                <div >
-                    <PageTitle>{pet.name}</PageTitle>
-                    <div className="mt-3">
-                        <NavBar />
+                <div>
+                    <div className="flex items-baseline gap-2 flex-nowrap">
+                        <h1 className="text-2xl font-bold text-gray-700 font-[family-name:var(--font-outfit)] flex-shrink-0">Consultas</h1>
+                        <p className="text-2xl font-semibold font-[family-name:var(--font-outfit)] flex-shrink-0">
+                            • <Link
+                                href={`/pets/${pet.id}`}
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                                {pet.name}
+                            </Link>
+                        </p>
                     </div>
                 </div>
 
                 <div className="mt-4">
-                    <ConsultationsList
+                    <ConsultationsWrapper
                         petId={id}
                         petName={pet.name}
                         initialConsultations={consultations}

@@ -1,6 +1,7 @@
 'use client'
 import { SpeciesIcon } from "@/components/SpeciesIcon"
 import { formatDate, formatPhone } from "@/utils"
+import { SquarePen } from "lucide-react"
 
 type PetInfoBlockProps = {
     petId: number
@@ -21,6 +22,7 @@ type PetInfoBlockProps = {
     timeLabelRed?: boolean
     pendingConsultation?: boolean
     done?: boolean
+    onEdit?: () => void
 }
 
 export default function PetInfoBlock({
@@ -42,6 +44,7 @@ export default function PetInfoBlock({
     timeLabelRed,
     pendingConsultation,
     done,
+    onEdit,
 }: PetInfoBlockProps) {
     const validAge = age && age !== '—' && age !== '-' ? age : null
 
@@ -81,6 +84,15 @@ export default function PetInfoBlock({
                             <span className="text-[11px] font-mono px-1.5 py-0.5 rounded-full" style={{ color: '#6b84a8', backgroundColor: '#f0f4fa' }}>
                                 {`Ult: ${formatDate(lastConsultationDate)}`}
                             </span>
+                        )}
+                        {onEdit && (
+                            <button
+                                onClick={onEdit}
+                                className="flex items-center justify-center w-7 h-7 rounded-md border border-blue-200 text-blue-600 hover:bg-blue-100 transition-colors"
+                                aria-label="Editar mascota"
+                            >
+                                <SquarePen size={14} />
+                            </button>
                         )}
                     </div>
                 </div>

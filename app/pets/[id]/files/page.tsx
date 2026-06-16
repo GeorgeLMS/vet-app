@@ -1,13 +1,7 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
-import { Pool } from "pg"
 import Link from "next/link"
-import NavBar from "@/components/NavBar"
-import PageTitle from "@/components/PageTitle"
-import NavButton from "@/components/NavButton"
-import NavButtonWithText from "@/components/NavButtonWithText"
-import { SpeciesIcon } from "@/components/SpeciesIcon"
-import PetFiles from "@/components/PetFiles"
+import FilesWrapper from "./files-wrapper"
 import pool from "@/pool"
 
 
@@ -58,27 +52,22 @@ export default async function FilesListPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
-                <div className="mb-2">
-                    <PageTitle>{pet.name}</PageTitle>
-                    {/* <p className="text-gray-600 mt-1">
-                        {pet.owner_id ? (
-                            <Link
-                                href={`/clients/${pet.owner_id}`}
+                <div className="mb-4">
+                    <div className="flex items-baseline gap-2 flex-nowrap">
+                        <h1 className="text-2xl font-bold text-gray-700 font-[family-name:var(--font-outfit)] flex-shrink-0">Archivos</h1>
+                        <p className="text-2xl font-semibold font-[family-name:var(--font-outfit)] flex-shrink-0">
+                            • <Link
+                                href={`/pets/${pet.id}`}
                                 className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                                {pet.owner_name}
+                                {pet.name}
                             </Link>
-                        ) : (
-                            <span>{pet.owner_name}</span>
-                        )}
-                    </p> */}
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
+                        </p>
                     </div>
                 </div>
 
-                <div id="archivos">
-                    <PetFiles petId={id} initialFiles={files} />
+                <div id="archivos" className="mt-4">
+                    <FilesWrapper petId={id} initialFiles={files} />
                 </div>
             </div>
         </main>

@@ -57,6 +57,7 @@ async function getPetConsultations(petId: string, tz: string) {
             TO_CHAR(c.next_visit_date AT TIME ZONE $2, 'YYYY-MM-DD') as next_visit_date,
             c.procedure_id,
             c.notes,
+            c.next_visit_notes,
             p.name as procedure_name
         FROM consultations c
         LEFT JOIN procedures p ON c.procedure_id = p.id
@@ -109,8 +110,8 @@ export default async function PetPage({
                     </p>
                     <div className="flex items-center gap-2">
                         <PageTitle>{pet.name}</PageTitle>
-                        <span className="text-lg text-gray-500">•</span>
-                        <a href={`/clients/${pet.client_id}`} className="text-lg font-semibold text-blue-500 hover:underline font-[family-name:var(--font-outfit)]">
+                        <span className="text-2xl text-gray-500">•</span>
+                        <a href={`/clients/${pet.client_id}`} className="text-2xl font-bold text-blue-500 hover:underline font-[family-name:var(--font-outfit)]">
                             {pet.client_name}
                         </a>
                     </div>

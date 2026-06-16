@@ -1,10 +1,8 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
-import NavBar from "@/components/NavBar"
-import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
-import HistoryList from "./history-list"
+import HistoryWrapper from "./history-wrapper"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -28,7 +26,7 @@ async function getClinicalHistories(petId: string) {
         const { rows } = await client.query(
             `SELECT
                 ch.id,
-                TO_CHAR(ch.fecha, 'DD/MM/YYYY') as fecha_formatted,
+                TO_CHAR(ch.fecha, 'YYYY-MM-DD') as fecha,
                 ch.motivo_consulta,
                 ch.created_at,
                 COALESCE(
@@ -68,33 +66,23 @@ export default async function ClinicalHistoryListPage({
     return (
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-6xl">
-                <div className="mb-2">
-                    <PageTitle>Historiales Clínicos</PageTitle>
-                    <p className="text-gray-600 mt-1">
-                        <Link
-                            href={`/pets/${pet.id}`}
-                            className="text-blue-600 hover:text-blue-800 hover:underline"
-                        >
-                            {pet.name}
-                        </Link>
-                        {" - "}
-                        {pet.owner_id ? (
-                            <Link
-                                href={`/clients/${pet.owner_id}`}
+                <div className="mb-4">
+                    <div className="flex items-baseline gap-2 flex-nowrap">
+                        <h1 className="text-2xl font-bold text-gray-700 font-[family-name:var(--font-outfit)] flex-shrink-0">Historiales Clínicos</h1>
+                        <p className="text-2xl font-semibold font-[family-name:var(--font-outfit)] flex-shrink-0">
+                            • <Link
+                                href={`/pets/${pet.id}`}
                                 className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
-                                {pet.owner_name}
+                                {pet.name}
                             </Link>
-                        ) : (
-                            <span>{pet.owner_name}</span>
-                        )}
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                        <NavBar />
+                        </p>
                     </div>
                 </div>
 
-                <HistoryList petId={id} histories={histories} />
+                <div className="mt-4">
+                    <HistoryWrapper petId={id} histories={histories} />
+                </div>
             </div>
         </main>
     )

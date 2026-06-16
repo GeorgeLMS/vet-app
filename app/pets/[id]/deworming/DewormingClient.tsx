@@ -1,8 +1,10 @@
 "use client"
 import { useEffect, useState, useCallback } from "react"
 import { Plus, ChevronDown } from "lucide-react"
+import Link from "next/link"
 import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
+import PillButton from "@/components/PillButton"
 import { SlideDown } from "@/components/SlideDown"
 import { formatDate } from "@/utils"
 import { useBump } from "@/hooks/useBump"
@@ -82,17 +84,28 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
         <main className="min-h-screen bg-gray-100 p-6">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-4">
-                    <PageTitle>{petName} — Desparasitación</PageTitle>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                        <button
-                            onClick={() => { setCreatingNew(true); setEditingId(null) }}
-                            disabled={creatingNew}
-                            className="flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                        >
-                            <Plus size={18} /> Agregar
-                        </button>
+                    <div className="flex items-baseline gap-2 flex-nowrap">
+                        <h1 className="text-2xl font-bold text-gray-700 font-[family-name:var(--font-outfit)] flex-shrink-0">Desparasitación</h1>
+                        <p className="text-2xl font-semibold font-[family-name:var(--font-outfit)] flex-shrink-0">
+                            • <Link
+                                href={`/pets/${petId}`}
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                                {petName}
+                            </Link>
+                        </p>
                     </div>
+                </div>
+
+                <div className="flex items-center justify-between mb-2 mt-3">
+                    <NavBar />
+                    <PillButton
+                        onClick={() => { setCreatingNew(true); setEditingId(null) }}
+                        disabled={creatingNew}
+                        ariaLabel="Agregar desparasitación"
+                    >
+                        <Plus size={11} strokeWidth={2.5} /> Agregar desparasitación
+                    </PillButton>
                 </div>
 
                 <div className="flex flex-col gap-2.5">
