@@ -103,9 +103,9 @@ export function BottomSheet({
                         </div>
 
                         <div
-                            className={`pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-3 pt-10 transition-opacity duration-200 ${showScrollHint ? "opacity-100" : "opacity-0"}`}
+                            className={`pointer-events-none absolute inset-x-0 bottom-0 flex justify-center bg-gradient-to-t from-white via-white/90 to-transparent pb-3 pt-16 transition-opacity duration-200 ${showScrollHint ? "opacity-100" : "opacity-0"}`}
                         >
-                            <ChevronDown size={20} className="animate-bounce text-gray-400" />
+                            <ChevronDown size={28} className="animate-bounce text-blue-500" />
                         </div>
                     </div>
                 </Fragment>
