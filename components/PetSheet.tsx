@@ -29,7 +29,7 @@ export function PetSheet({
     onClose: () => void
 }) {
     return (
-        <BottomSheet open={open} onClose={onClose} height="90dvh">
+        <BottomSheet open={open} onClose={onClose} height="80dvh">
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 flex-shrink-0">
                 <p className="text-base font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
