@@ -52,9 +52,11 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
     }
 
     async function handleDownload(file: PetFile) {
-        const isPdf = file.file_name.toLowerCase().endsWith('.pdf')
+        // Files the browser can render natively in a new tab (PDFs, images, text).
+        // Everything else streams through the download endpoint as an attachment.
+        const viewableInBrowser = /\.(pdf|jpe?g|png|gif|webp|svg|bmp|avif|txt)$/i.test(file.file_name)
 
-        if (isPdf) {
+        if (viewableInBrowser) {
             window.open(file.url, '_blank')
         } else {
             setDownloading(file.id)
