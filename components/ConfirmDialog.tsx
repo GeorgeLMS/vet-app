@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Spinner = () => (
     <svg className="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -31,14 +31,27 @@ export default function ConfirmDialog({
     onCancel
 }: Props) {
     const [typed, setTyped] = useState('')
+    const [isClosing, setIsClosing] = useState(false)
     const canConfirm = !requireTyped || typed === requireTyped
+
+    const handleCancel = () => {
+        setIsClosing(true)
+        setTimeout(() => onCancel(), 300)
+    }
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(4px)' }}
+            className="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300"
+            style={{
+                backgroundColor: isClosing ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,0.25)',
+                backdropFilter: isClosing ? 'blur(0px)' : 'blur(4px)'
+            }}
         >
-            <div className="bg-white rounded-2xl shadow-xl p-6 w-80 flex flex-col gap-4 border border-[var(--border)]">
+            <div className="transition-all duration-300" style={{
+                transform: isClosing ? 'scale(0.95)' : 'scale(1)',
+                opacity: isClosing ? 0 : 1
+            }}>
+                <div className="bg-white rounded-2xl shadow-xl p-6 w-80 flex flex-col gap-4 border border-[var(--border)]">
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                         <div
@@ -86,7 +99,7 @@ export default function ConfirmDialog({
 
                 <div className="flex gap-2 pt-1">
                     <button
-                        onClick={onCancel}
+                        onClick={handleCancel}
                         disabled={isLoading}
                         className="flex-1 py-2.5 rounded-xl text-sm font-medium cursor-pointer border border-[var(--border)] bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ color: 'var(--text-secondary)' }}
@@ -109,6 +122,7 @@ export default function ConfirmDialog({
                         )}
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     );

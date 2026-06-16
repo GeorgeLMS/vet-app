@@ -20,7 +20,6 @@ export function VaccinationSheet({
     petId,
     petName,
     open,
-    formKey,
     onClose,
     onSuccess,
     vaccineTypes,
@@ -29,7 +28,6 @@ export function VaccinationSheet({
     petId: string
     petName: string
     open: boolean
-    formKey?: number
     onClose: () => void
     onSuccess?: () => void
     vaccineTypes: VaccineType[]
@@ -39,7 +37,7 @@ export function VaccinationSheet({
         <BottomSheet open={open} onClose={onClose} height="60dvh">
             <div className="overflow-y-auto flex-1 px-5 py-2">
                 <VaccinationForm
-                    key={formKey ?? (vaccination?.id ?? "new")}
+                    key={vaccination?.id ?? "new"}
                     petId={petId}
                     vaccineTypes={vaccineTypes}
                     vaccination={vaccination}

@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SquarePen } from "lucide-react"
-import { EditPetForm } from "./edit/edit-form"
+import { PetSheet } from "@/components/PetSheet"
 import PetInfoBlock from "@/components/PetInfoBlock"
 import type { PetColor } from "@/components/PetColorSelect"
 import PetQuickActions from "@/components/PerQuickActions"
@@ -42,52 +41,48 @@ export function PetDetailsCard({
 
     return (
         <div className="rounded-lg bg-white p-4 shadow">
+            <PetInfoBlock
+                petId={pet.id}
+                name={pet.name}
+                species={pet.species}
+                gender={pet.gender}
+                breed={pet.breed}
+                colorName={pet.color}
+                colorHex={pet.color_hex}
 
-            {editing ? (
-                <EditPetForm
-                    petId={petId}
-                    pet={{
-                        name: pet.name,
-                        species_id: pet.species_id,
-                        color_id: pet.color_id,
-                        breed: pet.breed,
-                        birth_date: pet.birth_date,
-                        weight: pet.weight,
-                        notes: pet.notes,
-                        gender: pet.gender,
-                    }}
-                    species={species}
-                    colors={colors}
-                    onCancel={() => setEditing(false)}
-                />
-            ) : (
-                <>
-                    <PetInfoBlock
-                        petId={pet.id}
-                        name={pet.name}
-                        species={pet.species}
-                        gender={pet.gender}
-                        breed={pet.breed}
-                        colorName={pet.color}
-                        colorHex={pet.color_hex}
+                clientName={pet.client_name}
+                clientPhone={pet.client_phone}
+                birthDate={pet.birth_date}
+                age={pet.age_pet}
+                weight={pet.weight?.toString() ?? null}
+                lastConsultationDate={lastConsultationDate}
+                notes={pet.notes}
+                onEdit={() => setEditing(true)}
 
-                        clientName={pet.client_name}
-                        clientPhone={pet.client_phone}
-                        birthDate={pet.birth_date}
-                        age={pet.age_pet}
-                        weight={pet.weight?.toString() ?? null}
-                        lastConsultationDate={lastConsultationDate}
-                        notes={pet.notes}
-                        onEdit={() => setEditing(true)}
+            />
 
-                    />
+            {/* Quick actions */}
+            <div className="mt-2 pt-4 border-t border-gray-200 flex items-center gap-2">
+                <PetQuickActions petId={pet.id} />
+            </div>
 
-                    {/* Quick actions */}
-                    <div className="mt-2 pt-4 border-t border-gray-200 flex items-center gap-2">
-                        <PetQuickActions petId={pet.id} />
-                    </div>
-                </>
-            )}
+            <PetSheet
+                petId={petId}
+                pet={{
+                    name: pet.name,
+                    species_id: pet.species_id,
+                    color_id: pet.color_id,
+                    breed: pet.breed,
+                    birth_date: pet.birth_date,
+                    weight: pet.weight,
+                    notes: pet.notes,
+                    gender: pet.gender,
+                }}
+                species={species}
+                colors={colors}
+                open={editing}
+                onClose={() => setEditing(false)}
+            />
         </div>
     )
 }

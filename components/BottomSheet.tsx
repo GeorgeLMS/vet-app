@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, ReactNode } from "react"
+import { useEffect, useState, ReactNode, Fragment } from "react"
 import { X } from "lucide-react"
 
 export function BottomSheet({
@@ -17,6 +17,14 @@ export function BottomSheet({
     useEffect(() => {
         document.body.style.overflow = open ? "hidden" : ""
         return () => { document.body.style.overflow = "" }
+    }, [open])
+
+    // Remount children each time the sheet opens so any form inside starts
+    // fresh. BottomSheet keeps its children mounted (it only slides off-screen),
+    // so without this they would retain stale state between opens.
+    const [renderKey, setRenderKey] = useState(0)
+    useEffect(() => {
+        if (open) setRenderKey(k => k + 1)
     }, [open])
 
     return (
@@ -57,7 +65,7 @@ export function BottomSheet({
                     </button>
                 </div>
 
-                {children}
+                <Fragment key={renderKey}>{children}</Fragment>
             </div>
         </>
     )

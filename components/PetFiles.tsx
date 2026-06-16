@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import { FileText, Trash2 } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { Toast, type Toast as ToastType } from "@/components/Toast"
+import { formatDate } from "@/utils"
 
 type PetFile = {
     id: number
@@ -106,7 +107,6 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
             setFiles(prev => [...prev, saved])
 
             removeToast(toastId)
-            addToast(`${file.name} subido correctamente`, 'success')
         } catch (error) {
             removeToast(toastId)
             addToast(`Error al subir ${file.name}`, 'error')
@@ -116,7 +116,6 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
     }
 
     async function handleDelete(file: PetFile) {
-        setConfirmFile(null)
         setDeleting(file.id)
         await fetch("/api/pet-files", {
             method: "DELETE",
@@ -125,6 +124,7 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
         })
         setFiles(prev => prev.filter(f => f.id !== file.id))
         setDeleting(null)
+        setConfirmFile(null)
     }
 
     return (
@@ -137,6 +137,7 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
                     message={`¿Eliminar "${confirmFile.file_name}"? Esta acción no se puede deshacer.`}
                     confirmText="Sí, eliminar"
                     danger
+                    isLoading={deleting === confirmFile.id}
                     onConfirm={() => handleDelete(confirmFile)}
                     onCancel={() => setConfirmFile(null)}
                 />
@@ -150,19 +151,22 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
                 {files.length === 0 ? (
                     <p className="text-sm text-gray-400 text-center py-4">No hay archivos subidos.</p>
                 ) : (
-                    <ul className="space-y-2">
-                        {files.map(file => (
-                            <li key={file.id} className="flex items-center justify-between gap-2 text-sm">
+                    <ul>
+                        {[...files].sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()).map(file => (
+                            <li key={file.id} className="flex items-center justify-between gap-2 border-b border-gray-200 py-3">
+                                <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                    <button
+                                        onClick={() => handleDownload(file)}
+                                        disabled={downloading === file.id}
+                                        className="flex items-center gap-2 text-blue-600 hover:underline truncate disabled:opacity-50 text-sm"
+                                    >
+                                        {downloading === file.id ? <Spinner /> : <FileText size={16} className="shrink-0" />}
+                                        <span className="truncate">{file.file_name}</span>
+                                    </button>
+                                    <span className="text-sm text-gray-500 pl-6">{formatDate(file.uploaded_at)}</span>
+                                </div>
                                 <button
-                                    onClick={() => handleDownload(file)}
-                                    disabled={downloading === file.id}
-                                    className="flex items-center gap-2 text-blue-600 hover:underline truncate disabled:opacity-50"
-                                >
-                                    {downloading === file.id ? <Spinner /> : <FileText size={16} className="shrink-0" />}
-                                    <span className="truncate">{file.file_name}</span>
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(file)}
+                                    onClick={() => setConfirmFile(file)}
                                     disabled={deleting === file.id}
                                     className="text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200 hover:border-red-300 p-1.5 rounded-md transition-colors shrink-0 disabled:opacity-50"
                                     aria-label="Eliminar archivo"

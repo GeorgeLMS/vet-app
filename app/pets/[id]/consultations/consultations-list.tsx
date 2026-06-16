@@ -54,50 +54,56 @@ function ConsultationRow({
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div className="px-4 py-3 flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                        <span className="text-xs font-medium text-gray-500">
-                            {formatDate(c.consultation_date)}
-                        </span>
-                        <span className="text-[14px] font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
-                            {c.procedure_name || 'Procedimiento eliminado'}
-                        </span>
+            <div className="px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                            <span className="text-xs font-medium text-gray-500">
+                                {formatDate(c.consultation_date)}
+                            </span>
+                            <span className="text-[14px] font-semibold text-gray-600 font-[family-name:var(--font-outfit)]">
+                                {c.procedure_name || 'Procedimiento eliminado'}
+                            </span>
+                        </div>
+                        {c.notes && (
+                            <p className="text-xs text-gray-400 italic break-words whitespace-normal mt-0.5">
+                                {c.notes}
+                            </p>
+                        )}
                     </div>
-                    {c.notes && (
-                        <p className="text-xs text-gray-400 italic break-words whitespace-normal mt-0.5">
-                            {c.notes}
-                        </p>
-                    )}
-                    {c.next_visit_date && (
-                        <span className="inline-flex items-center gap-1 mt-1.5 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">
-                            <CalendarClock size={11} className="shrink-0" />
-                            Próxima visita: {formatDate(c.next_visit_date)}
-                        </span>
-                    )}
-                    {c.next_visit_notes && (
-                        <p className="text-xs text-slate-600 italic bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5 mt-0.5 break-words whitespace-normal">
-                            {c.next_visit_notes}
-                        </p>
-                    )}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                            onClick={onEdit}
+                            className="flex items-center justify-center w-7 h-7 rounded-md border border-blue-200  text-blue-600 hover:bg-blue-100 transition-colors"
+                            aria-label="Editar consulta"
+                        >
+                            <SquarePen size={13} />
+                        </button>
+                        <button
+                            onClick={() => setShowConfirm(true)}
+                            disabled={isPending}
+                            className="flex items-center justify-center w-7 h-7 rounded-md border border-red-200  text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50"
+                            aria-label="Eliminar consulta"
+                        >
+                            <Trash2 size={13} />
+                        </button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                    <button
-                        onClick={onEdit}
-                        className="flex items-center justify-center w-7 h-7 rounded-md border border-blue-200  text-blue-600 hover:bg-blue-100 transition-colors"
-                        aria-label="Editar consulta"
-                    >
-                        <SquarePen size={13} />
-                    </button>
-                    <button
-                        onClick={() => setShowConfirm(true)}
-                        disabled={isPending}
-                        className="flex items-center justify-center w-7 h-7 rounded-md border border-red-200  text-red-500 hover:bg-red-100 transition-colors disabled:opacity-50"
-                        aria-label="Eliminar consulta"
-                    >
-                        <Trash2 size={13} />
-                    </button>
-                </div>
+                {(c.next_visit_date || c.next_visit_notes) && (
+                    <div className="mt-1.5 flex w-full flex-col gap-0.5 text-slate-600 bg-slate-100 border border-slate-200 rounded-lg px-2 py-1">
+                        {c.next_visit_date && (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium">
+                                <CalendarClock size={11} className="shrink-0" />
+                                Próxima visita: {formatDate(c.next_visit_date)}
+                            </span>
+                        )}
+                        {c.next_visit_notes && (
+                            <p className="text-xs italic break-words whitespace-normal">
+                                {c.next_visit_notes}
+                            </p>
+                        )}
+                    </div>
+                )}
             </div>
         </>
     )
@@ -131,6 +137,7 @@ export function ConsultationsList({
     const handleCreate = (created: Consultation) => {
         setConsultations(prev => [created, ...prev])
         setSheetOpen(false)
+        setSheetConsultation(null)
     }
 
     const handleDelete = (id: string) => {
@@ -140,16 +147,27 @@ export function ConsultationsList({
     return (
         <div className="space-y-2">
 
-            <div className="rounded-lg bg-white shadow overflow-hidden">
-                {consultations.length === 0 && (
+            {consultations.length === 0 && (
+                <div className="rounded-lg bg-white shadow overflow-hidden">
                     <p className="px-4 py-5 text-sm text-center text-gray-400">
                         Sin consultas registradas
                     </p>
-                )}
+                </div>
+            )}
 
-                <div className="divide-y divide-gray-100">
-                    {consultations.map(c => (
-                        <div key={c.id}>
+            <div className="space-y-1">
+                {consultations.map((c, i) => {
+                    const isFirst = i === 0
+                    const isLast = i === consultations.length - 1
+                    const corners = isFirst && isLast
+                        ? "rounded-lg"
+                        : isFirst
+                            ? "rounded-t-lg"
+                            : isLast
+                                ? "rounded-b-lg"
+                                : ""
+                    return (
+                        <div key={c.id} className={`${corners} bg-white shadow overflow-hidden`}>
                             <ConsultationRow
                                 c={c}
                                 petId={petId}
@@ -157,8 +175,8 @@ export function ConsultationsList({
                                 onDelete={handleDelete}
                             />
                         </div>
-                    ))}
-                </div>
+                    )
+                })}
             </div>
 
             <ConsultationSheet

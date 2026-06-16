@@ -117,7 +117,7 @@ function TextModal({ text, date, onClose }: { text: string; date: string; onClos
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                    <span className="inline-block rounded-full bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-0.5">
+                    <span className="inline-block rounded-full bg-green-100 text-green-700 text-xs font-medium px-2.5 py-0.5">
                         {formatDate(date)}
                     </span>
                     <button
@@ -137,7 +137,7 @@ function TextModal({ text, date, onClose }: { text: string; date: string; onClos
     )
 }
 
-function HistoryCard({ petId, history }: { petId: string; history: History }) {
+function HistoryCard({ petId, history, isFirst, isLast }: { petId: string; history: History; isFirst?: boolean; isLast?: boolean }) {
     const [editing, setEditing] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
     const [showModal, setShowModal] = useState(false)
@@ -187,7 +187,7 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
                     onCancel={() => setShowConfirm(false)}
                 />
             )}
-            <div className="rounded-lg bg-white shadow p-3 space-y-3">
+            <div className={`bg-white shadow p-3 space-y-3 ${isFirst ? 'rounded-t-lg' : ''} ${isLast ? 'rounded-b-lg' : ''}`}>
                 <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
                         {history.motivo_consulta ? (
@@ -217,7 +217,7 @@ function HistoryCard({ petId, history }: { petId: string; history: History }) {
                     </div>
 
                     <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                        <span className="inline-block rounded-full bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-0.5">
+                        <span className="text-xs font-medium text-gray-500">
                             {formatDate(history.fecha)}
                         </span>
                         <div className="flex items-center gap-1.5">
@@ -284,8 +284,8 @@ export default function HistoryList({
                 </div>
             )}
 
-            {histories.map(history => (
-                <HistoryCard key={history.id} petId={petId} history={history} />
+            {histories.map((history, index) => (
+                <HistoryCard key={history.id} petId={petId} history={history} isFirst={index === 0} isLast={index === histories.length - 1} />
             ))}
         </div>
     )

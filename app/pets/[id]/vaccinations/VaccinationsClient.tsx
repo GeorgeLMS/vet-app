@@ -66,7 +66,6 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
     const [deletingId, setDeletingId] = useState<number | null>(null)
     const [sheetOpen, setSheetOpen] = useState(false)
     const [sheetVaccination, setSheetVaccination] = useState<Vaccination | undefined>(undefined)
-    const [sheetKey, setSheetKey] = useState(0)
 
     const load = useCallback(async () => {
         const data = await getVaccinationsData(petId)
@@ -101,7 +100,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                 <div className="flex items-center justify-between mb-2 mt-3">
                     <NavBar />
                     <PillButton
-                        onClick={() => { setSheetVaccination(undefined); setSheetOpen(true); setSheetKey(k => k + 1) }}
+                        onClick={() => { setSheetVaccination(undefined); setSheetOpen(true) }}
                         ariaLabel="Agregar vacuna"
                     >
                         <Plus size={11} strokeWidth={2.5} /> Agregar vacuna
@@ -168,7 +167,7 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                                                     <VaccinationRowMenu
                                                         id={vaccination.id}
                                                         petId={petId}
-                                                        onEdit={() => { setSheetVaccination(vaccination); setSheetOpen(true); setSheetKey(k => k + 1) }}
+                                                        onEdit={() => { setSheetVaccination(vaccination); setSheetOpen(true) }}
                                                         onDelete={() => handleDelete(vaccination.id)}
                                                         isPending={deletingId === vaccination.id}
                                                     />
@@ -222,7 +221,6 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                 petId={petId}
                 petName={petName}
                 open={sheetOpen}
-                formKey={sheetKey}
                 onClose={() => { setSheetOpen(false); setSheetVaccination(undefined) }}
                 onSuccess={handleSheetSuccess}
                 vaccineTypes={vaccineTypes}

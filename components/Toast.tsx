@@ -37,11 +37,16 @@ const textMap = {
 
 export function Toast({ toasts, onRemove }: ToastProps) {
     return (
-        <div className="fixed bottom-6 right-6 z-50 space-y-3">
-            {toasts.map(toast => (
-                <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
-            ))}
-        </div>
+        <>
+            {toasts.length > 0 && (
+                <div className="fixed inset-0 bg-black/20 z-40 animate-in fade-in duration-300" />
+            )}
+            <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center pt-4 gap-3">
+                {toasts.map(toast => (
+                    <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
+                ))}
+            </div>
+        </>
     )
 }
 
@@ -54,7 +59,7 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
 
     return (
         <div
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${bgMap[toast.type]} shadow-lg animate-in slide-in-from-right-5 fade-in duration-300`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg border ${bgMap[toast.type]} shadow-lg animate-in slide-in-from-top-5 fade-in duration-300 max-w-md`}
         >
             {iconMap[toast.type]}
             <span className={`text-sm font-medium ${textMap[toast.type]}`}>
