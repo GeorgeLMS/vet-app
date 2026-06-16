@@ -19,7 +19,7 @@ type Props = {
     initialFiles: PetFile[]
     uploadingProp?: boolean
     onUploadingChange?: (uploading: boolean) => void
-    fileInputRef?: React.RefObject<HTMLInputElement>
+    fileInputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 const Spinner = () => (
