@@ -133,7 +133,7 @@ export function EditPetForm({
                     id="birth_date"
                     name="birth_date"
                     defaultValue={state.data?.birth_date}
-                    className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.birth_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
+                    className={`mt-1 block w-full min-w-0 max-w-full appearance-none rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.birth_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
                 />
                 {state?.errors?.birth_date && <p className="mt-1 text-sm text-red-600">{state.errors.birth_date}</p>}
             </div>
