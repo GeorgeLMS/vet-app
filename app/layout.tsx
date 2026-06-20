@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
+import BottomNav from "@/components/BottomNav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,9 +37,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={outfit.variable}>
-      <body>
+      <body className="pb-20">
         <NextTopLoader showSpinner={false} height={5} />
         {children}
+        <BottomNav />
       </body>
     </html>
   )

@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { Plus } from "lucide-react"
 import Link from "next/link"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import PillButton from "@/components/PillButton"
 import { formatDate } from "@/utils"
@@ -98,7 +97,6 @@ export default function VaccinationsClient({ petId, petName }: { petId: string; 
                 </div>
 
                 <div className="flex items-center justify-between mb-2 mt-3">
-                    <NavBar />
                     <PillButton
                         onClick={() => { setSheetVaccination(undefined); setSheetOpen(true) }}
                         ariaLabel="Agregar vacuna"

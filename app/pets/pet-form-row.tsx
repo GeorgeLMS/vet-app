@@ -5,6 +5,7 @@ import PetColorSelect from "@/components/PetColorSelect"
 import PetGenderRadio from "@/components/PetGenderRadio"
 import { createPet, updatePet } from "./actions"
 import { Pet, Species, PetColor, PetFormData, ClientSearchResult } from "./types"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 export default function PetFormRow({
     pet,
@@ -242,8 +243,7 @@ export default function PetFormRow({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelClass}>Fecha de Nacimiento</label>
-                            <input
-                                type="date"
+                            <ClearableDateInput
                                 value={formData.birth_date}
                                 onChange={e => setFormData({ ...formData, birth_date: e.target.value })}
                                 className={`${inputClass} border-gray-300`}

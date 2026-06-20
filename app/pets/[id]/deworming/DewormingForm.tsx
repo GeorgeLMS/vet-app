@@ -2,6 +2,7 @@
 import { useActionState, useEffect, useState } from "react"
 import { SubmitButton } from "@/components/SubmitButton"
 import { createDeworming, updateDeworming } from "./actions"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 type Deworming = {
     id: number
@@ -84,8 +85,7 @@ export default function DewormingForm({ petId, deworming, onSuccess, onCancel }:
                     <label htmlFor="application_date" className="block text-sm font-medium text-gray-900">
                         Fecha de Aplicación *
                     </label>
-                    <input
-                        type="date"
+                    <ClearableDateInput
                         id="application_date"
                         name="application_date"
                         defaultValue={state.data?.application_date ?? deworming?.application_date ?? ""}
@@ -99,8 +99,7 @@ export default function DewormingForm({ petId, deworming, onSuccess, onCancel }:
                     <label htmlFor="next_deworming_date" className="block text-sm font-medium text-gray-900">
                         Próxima Desparasitación
                     </label>
-                    <input
-                        type="date"
+                    <ClearableDateInput
                         id="next_deworming_date"
                         name="next_deworming_date"
                         defaultValue={state.data?.next_deworming_date ?? deworming?.next_deworming_date ?? ""}

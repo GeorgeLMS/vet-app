@@ -113,20 +113,14 @@ export function ConsultationsList({
     petId,
     petName,
     initialConsultations,
-    sheetOpenProp,
-    onSheetOpenChange,
 }: {
     petId: string
     petName: string
     initialConsultations: Consultation[]
-    sheetOpenProp?: boolean
-    onSheetOpenChange?: (open: boolean) => void
 }) {
     const [consultations, setConsultations] = useState(initialConsultations)
     const [sheetConsultation, setSheetConsultation] = useState<Consultation | null>(null)
-    const [sheetOpenLocal, setSheetOpenLocal] = useState(false)
-    const sheetOpen = sheetOpenProp !== undefined ? sheetOpenProp : sheetOpenLocal
-    const setSheetOpen = onSheetOpenChange || setSheetOpenLocal
+    const [sheetOpen, setSheetOpen] = useState(false)
 
     const handleSave = (updated: Consultation) => {
         setConsultations(prev => prev.map(c => c.id === updated.id ? updated : c))
@@ -146,6 +140,16 @@ export function ConsultationsList({
 
     return (
         <div className="space-y-2">
+
+            <div className="flex items-end justify-between mb-2">
+                <h2 className="text-sm text-gray-600 leading-none">
+                    {consultations.length} consultas registradas
+                </h2>
+                <PillButton onClick={() => { setSheetConsultation(null); setSheetOpen(true) }} ariaLabel="Agregar consulta">
+                    <Plus size={11} strokeWidth={2.5} />
+                    Agregar consulta
+                </PillButton>
+            </div>
 
             {consultations.length === 0 && (
                 <div className="rounded-lg bg-white shadow overflow-hidden">

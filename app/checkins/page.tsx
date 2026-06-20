@@ -1,7 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { CheckinClient } from "./checkin-client"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 import { formatToday } from "@/utils"
@@ -91,7 +90,6 @@ export default async function CheckinsPage() {
                     <p className="text-sm text-gray-500 mt-0.5 mb-2">
                         {formatToday(tz)}
                     </p>
-                    <NavBar />
                 </div>
                 <CheckinClient waiting={waiting} seen={seen} />
             </div>

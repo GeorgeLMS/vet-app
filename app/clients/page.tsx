@@ -2,7 +2,6 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Plus } from "lucide-react"
 import NavButton from "@/components/NavButton"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import ClientTable from "./client-table"
 import pool from "@/pool"
@@ -63,7 +62,6 @@ export default async function ClientsPage() {
             <div className="mx-auto max-w-6xl">
                 <PageTitle>Clientes</PageTitle>
                 <div className="flex items-center justify-between mb-2">
-                    <NavBar />
                     <NavButton href="/clients/new" icon={<Plus size={18} />} label="Agregar cliente" />
                 </div>
 

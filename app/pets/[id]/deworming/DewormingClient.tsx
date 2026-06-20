@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback } from "react"
 import { Plus, ChevronDown } from "lucide-react"
 import Link from "next/link"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import PillButton from "@/components/PillButton"
 import { SlideDown } from "@/components/SlideDown"
@@ -98,7 +97,6 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
                 </div>
 
                 <div className="flex items-center justify-between mb-2 mt-3">
-                    <NavBar />
                     <PillButton
                         onClick={() => { setCreatingNew(true); setEditingId(null) }}
                         disabled={creatingNew}

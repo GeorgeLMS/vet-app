@@ -1,6 +1,5 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 import EditVaccinationForm from "./vaccination-form"
@@ -69,9 +68,6 @@ export default async function EditVaccinationPage({
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
                     <PageTitle>{pet.name} — Editar Vacuna</PageTitle>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                    </div>
                 </div>
                 <EditVaccinationForm petId={id} vaccinationId={vaccinationId} vaccination={vaccination} vaccineTypes={vaccineTypes} />
             </div>

@@ -1,7 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Plus } from "lucide-react"
-import NavBar from "@/components/NavBar"
 import NavButton from "@/components/NavButton"
 import { SquarePen } from "lucide-react"
 import pool from "@/pool"
@@ -67,9 +66,6 @@ export default async function ClientPage({
             <div className="mx-auto max-w-4xl">
                 <div className="mb-2">
                     <PageTitle>Detalles del Cliente</PageTitle>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                    </div>
                 </div>
 
                 <div className="grid gap-2">

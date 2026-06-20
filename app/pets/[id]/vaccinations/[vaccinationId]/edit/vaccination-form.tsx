@@ -3,6 +3,7 @@ import { useActionState } from "react"
 import Link from "next/link"
 import { SubmitButton } from "@/components/SubmitButton"
 import { updateVaccination } from "./actions"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 type VaccineType = { id: number; name: string }
 type Vaccination = {
@@ -57,8 +58,7 @@ export default function EditVaccinationForm({ petId, vaccinationId, vaccination,
                 <label htmlFor="application_date" className="block text-sm font-medium text-gray-900">
                     Fecha de Aplicación *
                 </label>
-                <input
-                    type="date"
+                <ClearableDateInput
                     id="application_date"
                     name="application_date"
                     defaultValue={state.data?.application_date ?? vaccination.application_date}
@@ -73,8 +73,7 @@ export default function EditVaccinationForm({ petId, vaccinationId, vaccination,
                 <label htmlFor="next_vaccination_date" className="block text-sm font-medium text-gray-900">
                     Próxima Vacunación
                 </label>
-                <input
-                    type="date"
+                <ClearableDateInput
                     id="next_vaccination_date"
                     name="next_vaccination_date"
                     defaultValue={state.data?.next_vaccination_date ?? vaccination.next_vaccination_date ?? ""}

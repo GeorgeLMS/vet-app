@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react"
 import { createConsultation, updateConsultation, type FormState } from "./actions"
 import { SubmitButton } from "@/components/SubmitButton"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 function todayISO() {
     const d = new Date()
@@ -83,8 +84,7 @@ export function ConsultationForm({
             )}
 
             <Field label="Fecha de Consulta *" error={dateError}>
-                <input
-                    type="date"
+                <ClearableDateInput
                     name="consultation_date"
                     value={consultationDate}
                     onChange={e => setConsultationDate(e.target.value)}
@@ -120,8 +120,7 @@ export function ConsultationForm({
             <div className="rounded-lg bg-gray-100 border border-gray-200 p-3 space-y-2">
                 <p className="text-xs font-bold tracking-[0.15em] uppercase text-gray-600">Próxima Visita</p>
                 <Field label="Fecha" error={state?.errors?.next_visit_date}>
-                    <input
-                        type="date"
+                    <ClearableDateInput
                         name="next_visit_date"
                         value={nextVisitDate}
                         onChange={e => setNextVisitDate(e.target.value)}

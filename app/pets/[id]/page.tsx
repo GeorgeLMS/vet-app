@@ -1,7 +1,6 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { notFound } from "next/navigation"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import { ConsultationsList } from "./consultations/consultations-list"
 import { PetDetailsCard } from "./pet-details-card"
@@ -115,11 +114,6 @@ export default async function PetPage({
                             {pet.client_name}
                         </a>
                     </div>
-                    <div className="flex items-center justify-between mb-2 mt-1">
-                        <div className="flex items-center gap-2">
-                            <NavBar />
-                        </div>
-                    </div>
                 </div>
 
                 <div className="grid gap-2">
@@ -140,7 +134,6 @@ export default async function PetPage({
                             petName={pet.name}
                             initialConsultations={consultations}
                         />
-
                     </div>
 
                 </div>

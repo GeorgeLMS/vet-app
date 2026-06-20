@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
 import pool from "@/pool"
-import ConsultationsWrapper from "./consultations-wrapper"
+import { ConsultationsList } from "./consultations-list"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -75,7 +75,7 @@ export default async function ConsultationsPage({
                 </div>
 
                 <div className="mt-4">
-                    <ConsultationsWrapper
+                    <ConsultationsList
                         petId={id}
                         petName={pet.name}
                         initialConsultations={consultations}

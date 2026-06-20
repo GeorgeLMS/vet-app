@@ -249,29 +249,29 @@ function HistoryCard({ petId, history, isFirst, isLast }: { petId: string; histo
 export default function HistoryList({
     petId,
     histories,
-    creatingProp,
-    onCreatingChange
 }: {
     petId: string
     histories: History[]
-    creatingProp?: boolean
-    onCreatingChange?: (creating: boolean) => void
 }) {
     const [creating, setCreating] = useState(false)
-    const isCreating = creatingProp !== undefined ? creatingProp : creating
-    const setIsCreating = onCreatingChange || setCreating
 
     return (
         <div className="space-y-0.5">
-            {!isCreating && (
-                <></>
+            <div className="flex items-end justify-between mb-2">
+                <h2 className="text-sm text-gray-600 leading-none">
+                    {histories.length} historiales registrados
+                </h2>
+                <PillButton onClick={() => setCreating(true)} ariaLabel="Nuevo historial">
+                    <Plus size={11} strokeWidth={2.5} />
+                    Nuevo historial
+                </PillButton>
+            </div>
+
+            {creating && (
+                <InlineForm petId={petId} onDone={() => setCreating(false)} />
             )}
 
-            {isCreating && (
-                <InlineForm petId={petId} onDone={() => setIsCreating(false)} />
-            )}
-
-            {histories.length === 0 && !isCreating && (
+            {histories.length === 0 && !creating && (
                 <div className="rounded-lg bg-white shadow p-12 text-center">
                     <p className="text-gray-500 mb-4">No hay historiales clínicos registrados</p>
                     <button

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { SubmitButton } from "@/components/SubmitButton"
 import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
 import PetGenderRadio from "@/components/PetGenderRadio"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 export function EditPetForm({
     petId,
@@ -128,8 +129,7 @@ export function EditPetForm({
 
             <div>
                 <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
-                <input
-                    type="date"
+                <ClearableDateInput
                     id="birth_date"
                     name="birth_date"
                     defaultValue={state.data?.birth_date}

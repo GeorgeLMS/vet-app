@@ -3,7 +3,6 @@ import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
 import { Pool } from "pg"
 import { EditConsultationForm } from "./page-form"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 
@@ -69,9 +68,6 @@ export default async function EditConsultationPage({
                                 {consultation.pet_name}
                             </Link>
                         </p>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
                     </div>
                 </div>
                 <div className="rounded-lg bg-white p-6 shadow">

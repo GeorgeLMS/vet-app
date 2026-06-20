@@ -3,6 +3,7 @@ import { useActionState, useEffect, useRef, useState } from "react"
 import { SubmitButton } from "@/components/SubmitButton"
 import { createVaccination, updateVaccination } from "./actions"
 import VaccineTypeSelect, { VaccineType } from "./VaccineTypeSelect"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 type Vaccination = {
     id: number
@@ -55,8 +56,7 @@ export default function VaccinationForm({ petId, vaccineTypes, vaccination, onSu
                     <label htmlFor="application_date" className="block text-sm font-medium text-gray-900">
                         Fecha de Aplicación *
                     </label>
-                    <input
-                        type="date"
+                    <ClearableDateInput
                         id="application_date"
                         name="application_date"
                         defaultValue={state.data?.application_date ?? vaccination?.application_date ?? ""}
@@ -70,8 +70,7 @@ export default function VaccinationForm({ petId, vaccineTypes, vaccination, onSu
                     <label htmlFor="next_vaccination_date" className="block text-sm font-medium text-gray-900">
                         Próxima Vacunación
                     </label>
-                    <input
-                        type="date"
+                    <ClearableDateInput
                         id="next_vaccination_date"
                         name="next_vaccination_date"
                         defaultValue={state.data?.next_vaccination_date ?? vaccination?.next_vaccination_date ?? ""}

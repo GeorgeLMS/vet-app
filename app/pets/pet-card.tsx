@@ -47,7 +47,7 @@ export default function PetCard({
 
     return (
         <>
-            <div className="rounded-lg bg-white shadow relative cursor-pointer" onClick={toggle}>
+            <div className="bg-white shadow relative cursor-pointer" onClick={toggle}>
                 {/* Header */}
                 <div className="flex items-center gap-3 p-2 bg-white">
                     <div className="flex-1 min-w-0">

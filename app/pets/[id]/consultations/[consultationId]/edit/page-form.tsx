@@ -1,10 +1,11 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { updateConsultation, type FormState } from "./actions"
 import Link from "next/link"
 import { SubmitButton } from "@/components/SubmitButton"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 type Consultation = {
     id: string
@@ -37,6 +38,10 @@ export function EditConsultationForm({
         }
     )
 
+    const [consultationDate, setConsultationDate] = useState(
+        state.data?.consultation_date ?? ""
+    )
+
     return (
         <form action={action} className="space-y-4">
             {from && <input type="hidden" name="from" value={from} />}
@@ -51,11 +56,11 @@ export function EditConsultationForm({
                 <label htmlFor="consultation_date" className="block text-sm font-medium text-gray-700">
                     Fecha de Consulta *
                 </label>
-                <input
-                    type="date"
+                <ClearableDateInput
                     id="consultation_date"
                     name="consultation_date"
-                    defaultValue={state.data?.consultation_date}
+                    value={consultationDate}
+                    onChange={e => setConsultationDate(e.target.value)}
                     className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-1 ${state?.errors?.consultation_date ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"}`}
                 />
                 {state?.errors?.consultation_date && (

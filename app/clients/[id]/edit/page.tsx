@@ -6,7 +6,6 @@ import { LoadingLink as Link } from "@/components/LoadingLink"
 import { ArrowLeft } from "lucide-react"
 import EditForm from "./edit-form"
 import { updateClient } from "./actions"
-import NavBar from "@/components/NavBar"
 import PageTitle from "@/components/PageTitle"
 import pool from "@/pool"
 
@@ -45,9 +44,6 @@ export default async function EditClientPage({
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
                     <PageTitle>Editar Cliente</PageTitle>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                    </div>
                 </div>
 
                 <div className="rounded-lg bg-white p-4 shadow">

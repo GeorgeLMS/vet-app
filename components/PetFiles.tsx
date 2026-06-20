@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useRef } from "react"
-import { FileText, Trash2 } from "lucide-react"
+import { FileText, Trash2, Upload } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { Toast, type Toast as ToastType } from "@/components/Toast"
 import { formatDate } from "@/utils"
+import PillButton from "@/components/PillButton"
 
 type PetFile = {
     id: number
@@ -18,9 +19,6 @@ type PetFile = {
 type Props = {
     petId: string
     initialFiles: PetFile[]
-    uploadingProp?: boolean
-    onUploadingChange?: (uploading: boolean) => void
-    fileInputRef?: React.RefObject<HTMLInputElement | null>
 }
 
 const Spinner = () => (
@@ -30,17 +28,14 @@ const Spinner = () => (
     </svg>
 )
 
-export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadingChange, fileInputRef }: Props) {
+export default function PetFiles({ petId, initialFiles }: Props) {
     const [files, setFiles] = useState<PetFile[]>(initialFiles)
-    const [uploadingLocal, setUploadingLocal] = useState(false)
-    const uploading = uploadingProp !== undefined ? uploadingProp : uploadingLocal
-    const setUploading = onUploadingChange || setUploadingLocal
+    const [uploading, setUploading] = useState(false)
     const [deleting, setDeleting] = useState<number | null>(null)
     const [downloading, setDownloading] = useState<number | null>(null)
     const [confirmFile, setConfirmFile] = useState<PetFile | null>(null)
     const [toasts, setToasts] = useState<ToastType[]>([])
-    const localFileInputRef = useRef<HTMLInputElement>(null)
-    const finalInputRef = fileInputRef || localFileInputRef
+    const finalInputRef = useRef<HTMLInputElement>(null)
 
     const addToast = (message: string, type: 'success' | 'error' | 'loading' = 'success') => {
         const id = Date.now().toString()
@@ -143,10 +138,19 @@ export default function PetFiles({ petId, initialFiles, uploadingProp, onUploadi
                 />
             )}
 
+            <div className="flex items-end justify-between mb-2">
+                <h2 className="text-sm text-gray-600 leading-none">
+                    {files.length} archivos subidos
+                </h2>
+                <PillButton onClick={() => finalInputRef.current?.click()} ariaLabel="Subir archivo">
+                    <Upload size={11} />
+                    Subir archivo
+                </PillButton>
+            </div>
+
+            <input ref={finalInputRef} type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
+
             <div className="rounded-lg bg-white p-4 shadow">
-                <div>
-                    <input ref={finalInputRef} type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
-                </div>
 
                 {files.length === 0 ? (
                     <p className="text-sm text-gray-400 text-center py-4">No hay archivos subidos.</p>

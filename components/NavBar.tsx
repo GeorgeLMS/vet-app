@@ -19,7 +19,7 @@ export default function NavBar() {
     const [backLoading, setBackLoading] = useState(false)
 
     return (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
             <button
                 onClick={() => { setBackLoading(true); router.back() }}
                 className={btnClass}

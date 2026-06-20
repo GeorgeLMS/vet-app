@@ -6,7 +6,7 @@ import { SubmitButton } from "@/components/SubmitButton"
 import PetColorSelect, { type PetColor } from "@/components/PetColorSelect"
 import PetGenderRadio from "@/components/PetGenderRadio"
 import { createPetWithClient, type FormState } from "./actions"
-import NavBar from "@/components/NavBar"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 type ClientSearchResult = {
     id: number
@@ -75,9 +75,6 @@ export default function PetForm({
             <div className="mx-auto max-w-2xl">
                 <div className="mb-2">
                     <h1 className="mt-2 text-3xl font-bold text-gray-900">Agregar Mascota</h1>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                    </div>
                 </div>
 
                 <form action={formAction} className="space-y-6 rounded-lg bg-white p-6 shadow">
@@ -310,8 +307,7 @@ export default function PetForm({
                             <label htmlFor="birth_date" className="block text-sm font-medium text-gray-900">
                                 Fecha de Nacimiento
                             </label>
-                            <input
-                                type="date"
+                            <ClearableDateInput
                                 id="birth_date"
                                 name="birth_date"
                                 max={new Date().toISOString().split('T')[0]}

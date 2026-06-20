@@ -4,7 +4,7 @@ import pool from "@/pool"
 import { LoadingRow } from "@/components/LoadingRow"
 import { SpeciesIcon } from "@/components/SpeciesIcon"
 import PageTitle from "@/components/PageTitle"
-import NavBar from "@/components/NavBar"
+import { ClearableDateInput } from "@/components/ClearableDateInput"
 
 type ConsultationRow = {
     id: number
@@ -76,9 +76,6 @@ export default async function ReportsPage({
                 {/* Header */}
                 <div className="mb-2">
                     <PageTitle>Consultas por fecha</PageTitle>
-                    <div className="flex items-center justify-between mb-2">
-                        <NavBar />
-                    </div>
                 </div>
 
                 {/* Filter form */}
@@ -88,8 +85,7 @@ export default async function ReportsPage({
                             <label className="block text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-1">
                                 Desde
                             </label>
-                            <input
-                                type="date"
+                            <ClearableDateInput
                                 name="from"
                                 defaultValue={fromDate}
                                 className="w-full text-sm text-gray-700 border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -99,8 +95,7 @@ export default async function ReportsPage({
                             <label className="block text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-1">
                                 Hasta
                             </label>
-                            <input
-                                type="date"
+                            <ClearableDateInput
                                 name="to"
                                 defaultValue={toDate}
                                 className="w-full text-sm text-gray-700 border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-300"

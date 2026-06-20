@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
-import FilesWrapper from "./files-wrapper"
+import PetFiles from "@/components/PetFiles"
 import pool from "@/pool"
 
 
@@ -67,7 +67,7 @@ export default async function FilesListPage({
                 </div>
 
                 <div id="archivos" className="mt-4">
-                    <FilesWrapper petId={id} initialFiles={files} />
+                    <PetFiles petId={id} initialFiles={files} />
                 </div>
             </div>
         </main>

@@ -2,7 +2,7 @@ import { auth } from "@/auth"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
 import pool from "@/pool"
-import HistoryWrapper from "./history-wrapper"
+import HistoryList from "./history-list"
 
 async function getPet(id: string) {
     const client = await pool.connect()
@@ -81,7 +81,7 @@ export default async function ClinicalHistoryListPage({
                 </div>
 
                 <div className="mt-4">
-                    <HistoryWrapper petId={id} histories={histories} />
+                    <HistoryList petId={id} histories={histories} />
                 </div>
             </div>
         </main>
