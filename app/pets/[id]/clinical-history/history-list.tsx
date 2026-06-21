@@ -275,7 +275,7 @@ export default function HistoryList({
                 <div className="rounded-lg bg-white shadow p-12 text-center">
                     <p className="text-gray-500 mb-4">No hay historiales clínicos registrados</p>
                     <button
-                        onClick={() => setIsCreating(true)}
+                        onClick={() => setCreating(true)}
                         className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     >
                         <Plus size={16} />
