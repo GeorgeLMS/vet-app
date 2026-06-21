@@ -2,8 +2,8 @@ import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { notFound } from "next/navigation"
 import PageTitle from "@/components/PageTitle"
-import { ConsultationsList } from "./consultations/consultations-list"
 import { PetDetailsCard } from "./pet-details-card"
+import PetPageTabs from "./pet-page-tabs"
 import pool from "@/pool"
 
 
@@ -47,6 +47,14 @@ export async function getPet(id: string) {
     }
 }
 
+
+async function getPetImages(petId: string) {
+    const { rows } = await pool.query(
+        `SELECT * FROM pet_files WHERE pet_id = $1 AND resource_type = 'image' ORDER BY uploaded_at DESC`,
+        [petId]
+    )
+    return rows
+}
 
 async function getPetConsultations(petId: string, tz: string) {
     const { rows } = await pool.query(
@@ -92,8 +100,9 @@ export default async function PetPage({
     const pet = await getPet(id)
     if (!pet) notFound()
 
-    const [consultations, species, colors] = await Promise.all([
+    const [consultations, images, species, colors] = await Promise.all([
         getPetConsultations(id, tz),
+        getPetImages(id),
         getSpecies(),
         getPetColors(),
     ])
@@ -127,14 +136,12 @@ export default async function PetPage({
                         lastConsultationDate={consultations[0]?.consultation_date ?? null}
                     />
 
-                    {/* Consultations */}
-                    <div>
-                        <ConsultationsList
-                            petId={id}
-                            petName={pet.name}
-                            initialConsultations={consultations}
-                        />
-                    </div>
+                    <PetPageTabs
+                        petId={id}
+                        petName={pet.name}
+                        initialImages={images}
+                        initialConsultations={consultations}
+                    />
 
                 </div>
             </div>

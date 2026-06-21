@@ -9,7 +9,7 @@ import { formatDate } from "@/utils"
 import { ConsultationSheet } from "@/components/ConsultationSheet"
 import PillButton from "@/components/PillButton"
 
-type Consultation = {
+export type Consultation = {
     id: string
     consultation_date: string
     next_visit_date: string | null
