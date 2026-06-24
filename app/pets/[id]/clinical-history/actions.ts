@@ -15,23 +15,27 @@ export type FormState = {
     errors?: Record<string, string>
     message?: string
     ok?: boolean
+    historyId?: number
 }
 
 async function saveHistory(petId: number, historyId: number | null, formData: FormData): Promise<FormState> {
     const client = await pool.connect()
     try {
         const motivo_consulta = formData.get("motivo_consulta") || null
+        const fecha = (formData.get("fecha") as string) || null
 
         if (historyId) {
             await client.query(
-                `UPDATE clinical_histories SET motivo_consulta = $1, updated_at = NOW() WHERE pet_id = $2 AND id = $3`,
-                [motivo_consulta, petId, historyId]
+                `UPDATE clinical_histories SET motivo_consulta = $1, fecha = COALESCE($4::date, fecha), updated_at = NOW() WHERE pet_id = $2 AND id = $3`,
+                [motivo_consulta, petId, historyId, fecha]
             )
         } else {
-            await client.query(
-                `INSERT INTO clinical_histories (pet_id, fecha, motivo_consulta) VALUES ($1, NOW(), $2)`,
-                [petId, motivo_consulta]
+            const { rows } = await client.query(
+                `INSERT INTO clinical_histories (pet_id, fecha, motivo_consulta) VALUES ($1, COALESCE($2::date, CURRENT_DATE), $3) RETURNING id`,
+                [petId, fecha, motivo_consulta]
             )
+            revalidatePath(`/pets/${petId}/clinical-history`)
+            return { ok: true, historyId: rows[0].id }
         }
 
         revalidatePath(`/pets/${petId}/clinical-history`)
@@ -50,6 +54,10 @@ export async function createClinicalHistory(petId: number, _prevState: FormState
 
 export async function updateClinicalHistory(petId: number, historyId: number, _prevState: FormState, formData: FormData): Promise<FormState> {
     return saveHistory(petId, historyId, formData)
+}
+
+export async function revalidateHistory(petId: number) {
+    revalidatePath(`/pets/${petId}/clinical-history`)
 }
 
 export async function deleteClinicalHistory(petId: number, historyId: number) {

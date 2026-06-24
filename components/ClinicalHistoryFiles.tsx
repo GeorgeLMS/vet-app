@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Upload, FileText, Trash2 } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import { Toast, type Toast as ToastType } from "@/components/Toast"
@@ -31,6 +31,15 @@ const Spinner = () => (
 export default function ClinicalHistoryFiles({ historyId, initialFiles }: Props) {
     const [files, setFiles] = useState<HistoryFile[]>(initialFiles)
     const [uploading, setUploading] = useState(false)
+
+    // Sync when the server sends a different set of files (e.g. after a
+    // freshly-created history gets its uploads revalidated). Keyed on the file
+    // ids so local optimistic uploads/deletes aren't clobbered on every render.
+    const initialIds = initialFiles.map(f => f.id).join(',')
+    useEffect(() => {
+        setFiles(initialFiles)
+    }, [initialIds])
+
     const [deleting, setDeleting] = useState<number | null>(null)
     const [downloading, setDownloading] = useState<number | null>(null)
     const [confirmFile, setConfirmFile] = useState<HistoryFile | null>(null)

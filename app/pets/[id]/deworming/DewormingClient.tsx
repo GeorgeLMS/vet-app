@@ -5,6 +5,7 @@ import Link from "next/link"
 import PageTitle from "@/components/PageTitle"
 import PillButton from "@/components/PillButton"
 import { SlideDown } from "@/components/SlideDown"
+import { BottomSheet } from "@/components/BottomSheet"
 import { formatDate } from "@/utils"
 import { useBump } from "@/hooks/useBump"
 import { getDewormingData, deleteDeworming } from "./actions"
@@ -48,7 +49,7 @@ function getStatus(nextDate: string | null, isLatestOfType: boolean) {
 
 export default function DewormingClient({ petId, petName }: { petId: string; petName: string }) {
     const [records, setRecords] = useState<Deworming[]>([])
-    const [editingId, setEditingId] = useState<number | null>(null)
+    const [editingRecord, setEditingRecord] = useState<Deworming | null>(null)
     const [creatingNew, setCreatingNew] = useState(false)
     const [deletingId, setDeletingId] = useState<number | null>(null)
     const [expandedTypes, setExpandedTypes] = useState<Record<string, boolean>>({})
@@ -62,7 +63,7 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
     useEffect(() => { load() }, [load])
 
     async function handleSuccess() {
-        setEditingId(null)
+        setEditingRecord(null)
         setCreatingNew(false)
         await load()
     }
@@ -98,8 +99,7 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
 
                 <div className="flex items-center justify-between mb-2 mt-3">
                     <PillButton
-                        onClick={() => { setCreatingNew(true); setEditingId(null) }}
-                        disabled={creatingNew}
+                        onClick={() => setCreatingNew(true)}
                         ariaLabel="Agregar desparasitación"
                     >
                         <Plus size={11} strokeWidth={2.5} /> Agregar desparasitación
@@ -107,15 +107,7 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
                 </div>
 
                 <div className="flex flex-col gap-2.5">
-                    {creatingNew && (
-                        <DewormingForm
-                            petId={petId}
-                            onSuccess={handleSuccess}
-                            onCancel={() => setCreatingNew(false)}
-                        />
-                    )}
-
-                    {records.length === 0 && !creatingNew && (
+                    {records.length === 0 && (
                         <div className="rounded-lg bg-white shadow p-12 text-center">
                             <p className="text-gray-400">No hay registros de desparasitación.</p>
                         </div>
@@ -143,18 +135,6 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
                             const obsoleteCount = obsolete.length
 
                             function renderCard(d: Deworming, statusKey: keyof typeof STATUS_MAP, isLastVigente: boolean) {
-                                if (editingId === d.id) {
-                                    return (
-                                        <DewormingForm
-                                            key={d.id}
-                                            petId={petId}
-                                            deworming={d}
-                                            onSuccess={handleSuccess}
-                                            onCancel={() => setEditingId(null)}
-                                        />
-                                    )
-                                }
-
                                 const status = STATUS_MAP[statusKey]
                                 const isObsolete = statusKey === 'obsolete'
                                 const daysRemaining = getDaysRemaining(d.next_deworming_date)
@@ -221,7 +201,7 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
                                                     </div>
                                                 </div>
                                                 <DewormingRowMenu
-                                                    onEdit={() => { setEditingId(d.id); setCreatingNew(false) }}
+                                                    onEdit={() => setEditingRecord(d)}
                                                     onDelete={() => handleDelete(d.id)}
                                                     isPending={deletingId === d.id}
                                                 />
@@ -276,6 +256,25 @@ export default function DewormingClient({ petId, petName }: { petId: string; pet
                     })()}
                 </div>
             </div>
+
+            <BottomSheet open={creatingNew} onClose={() => setCreatingNew(false)} height="70dvh">
+                <DewormingForm
+                    petId={petId}
+                    onSuccess={handleSuccess}
+                    onCancel={() => setCreatingNew(false)}
+                />
+            </BottomSheet>
+
+            <BottomSheet open={!!editingRecord} onClose={() => setEditingRecord(null)} height="70dvh">
+                {editingRecord && (
+                    <DewormingForm
+                        petId={petId}
+                        deworming={editingRecord}
+                        onSuccess={handleSuccess}
+                        onCancel={() => setEditingRecord(null)}
+                    />
+                )}
+            </BottomSheet>
         </main>
     )
 }

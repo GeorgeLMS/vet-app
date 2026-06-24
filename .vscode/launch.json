@@ -11,6 +11,9 @@
                 "run",
                 "dev"
             ],
+            "env": {
+                "NODE_OPTIONS": "--no-deprecation"
+            },
             "console": "integratedTerminal",
             "serverReadyAction": {
                 "pattern": "Local:        http://localhost:([0-9]+)",

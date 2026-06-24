@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useTransition, useEffect, useActionState, useRef } from "react"
+import { useState, useTransition, useEffect, useActionState, useRef, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { useTopLoader } from "nextjs-toploader"
-import { Edit, Trash2, Plus, X, Save } from "lucide-react"
+import { Edit, Trash2, Plus, X, Save, Upload, FileText, Check } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 import ClinicalHistoryFiles from "@/components/ClinicalHistoryFiles"
 import PillButton from "@/components/PillButton"
+import { BottomSheet } from "@/components/BottomSheet"
 import { formatDate } from "@/utils"
-import { createClinicalHistory, updateClinicalHistory, deleteClinicalHistory, FormState } from "./actions"
+import { createClinicalHistory, updateClinicalHistory, deleteClinicalHistory, revalidateHistory, FormState } from "./actions"
 
 type HistoryFile = {
     id: number
@@ -50,9 +51,49 @@ function InlineForm({
 
     const [state, formAction] = useActionState(action, {} as FormState)
     const [isPending, startTransition] = useTransition()
+    const [pendingFiles, setPendingFiles] = useState<File[]>([])
+    const [uploadingFiles, setUploadingFiles] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const todayStr = useMemo(() => {
+        const d = new Date()
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }, [])
 
     useEffect(() => {
-        if (state.ok) onDone()
+        if (!state.ok) return
+        if (!isEdit && state.historyId && pendingFiles.length > 0) {
+            setUploadingFiles(true)
+            const uploadAll = async () => {
+                for (const file of pendingFiles) {
+                    const fd = new FormData()
+                    fd.append("file", file)
+                    fd.append("historyId", String(state.historyId))
+                    const res = await fetch("/api/history-upload", { method: "POST", body: fd })
+                    const data = await res.json()
+                    await fetch("/api/history-files", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            historyId: state.historyId,
+                            url: data.url,
+                            public_id: data.public_id,
+                            file_name: data.file_name,
+                            resource_type: data.resource_type,
+                        })
+                    })
+                }
+            }
+            uploadAll()
+                .catch(console.error)
+                .finally(async () => {
+                    setUploadingFiles(false)
+                    await revalidateHistory(Number(petId))
+                    onDone()
+                })
+        } else {
+            onDone()
+        }
     }, [state.ok])
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -61,9 +102,32 @@ function InlineForm({
         startTransition(() => formAction(formData))
     }
 
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const newFiles = Array.from(e.target.files || [])
+        if (newFiles.length > 0) setPendingFiles(prev => [...prev, ...newFiles])
+        e.target.value = ""
+    }
+
+    function removeFile(index: number) {
+        setPendingFiles(prev => prev.filter((_, i) => i !== index))
+    }
+
+    const isLoading = isPending || uploadingFiles
+
     return (
         <div className="rounded-lg bg-white shadow p-4 space-y-3">
             <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">Fecha</label>
+                    <input
+                        type="date"
+                        name="fecha"
+                        defaultValue={history?.fecha || todayStr}
+                        required
+                        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                </div>
+
                 <textarea
                     name="motivo_consulta"
                     rows={4}
@@ -71,6 +135,45 @@ function InlineForm({
                     placeholder="Motivo de consulta..."
                     className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
+
+                {!isEdit && (
+                    <div className="space-y-1.5">
+                        {pendingFiles.length > 0 && (
+                            <ul className="space-y-1">
+                                {pendingFiles.map((file, i) => (
+                                    <li key={i} className="flex items-center justify-between gap-2">
+                                        <span className="flex items-center gap-1.5 text-xs text-gray-600 min-w-0">
+                                            <FileText size={13} className="shrink-0 text-gray-400" />
+                                            <span className="truncate">{file.name}</span>
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeFile(i)}
+                                            className="flex items-center justify-center w-5 h-5 rounded text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                            <Upload size={12} />
+                            Adjuntar archivo
+                        </button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={handleFileChange}
+                        />
+                    </div>
+                )}
 
                 {state.message && (
                     <p className="text-sm text-red-600">{state.message}</p>
@@ -80,22 +183,22 @@ function InlineForm({
                     <button
                         type="button"
                         onClick={onDone}
-                        className="flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-100 hover:border-gray-300 transition-colors"
+                        disabled={isLoading}
+                        className="flex items-center justify-center w-8 h-8 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-100 hover:border-gray-300 transition-colors disabled:opacity-50"
                         aria-label="Cancelar"
                     >
-                        <X size={15} />
+                        <X size={18} />
                     </button>
                     <button
                         type="submit"
-                        disabled={isPending}
-                        className="flex items-center justify-center w-8 h-8 rounded-md border border-blue-200 text-gray-600 hover:bg-blue-100 hover:border-blue-300 transition-colors disabled:opacity-50"
+                        disabled={isLoading}
+                        className="flex items-center justify-center w-8 h-8 rounded-md border border-green-200 text-green-600 hover:bg-green-100 hover:border-green-300 transition-colors disabled:opacity-50"
                         aria-label="Guardar"
                     >
-                        {isPending ? <Spinner /> : <Save size={15} />}
+                        {isLoading ? <Spinner /> : <Check size={18} />}
                     </button>
                 </div>
             </form>
-
         </div>
     )
 }
@@ -150,10 +253,6 @@ function HistoryCard({ petId, history, isFirst, isLast }: { petId: string; histo
         const el = textRef.current
         if (el) setIsClamped(el.scrollHeight > el.clientHeight)
     }, [history.motivo_consulta])
-
-    if (editing) {
-        return <InlineForm petId={petId} history={history} onDone={() => setEditing(false)} />
-    }
 
     function handleDelete() {
         setShowConfirm(false)
@@ -242,6 +341,10 @@ function HistoryCard({ petId, history, isFirst, isLast }: { petId: string; histo
 
                 <ClinicalHistoryFiles historyId={history.id} initialFiles={history.files} />
             </div>
+
+            <BottomSheet open={editing} onClose={() => setEditing(false)} height="70dvh">
+                <InlineForm petId={petId} history={history} onDone={() => setEditing(false)} />
+            </BottomSheet>
         </>
     )
 }
@@ -267,10 +370,6 @@ export default function HistoryList({
                 </PillButton>
             </div>
 
-            {creating && (
-                <InlineForm petId={petId} onDone={() => setCreating(false)} />
-            )}
-
             {histories.length === 0 && !creating && (
                 <div className="rounded-lg bg-white shadow p-12 text-center">
                     <p className="text-gray-500 mb-4">No hay historiales clínicos registrados</p>
@@ -287,6 +386,10 @@ export default function HistoryList({
             {histories.map((history, index) => (
                 <HistoryCard key={history.id} petId={petId} history={history} isFirst={index === 0} isLast={index === histories.length - 1} />
             ))}
+
+            <BottomSheet open={creating} onClose={() => setCreating(false)} height="70dvh">
+                <InlineForm petId={petId} onDone={() => setCreating(false)} />
+            </BottomSheet>
         </div>
     )
 }
