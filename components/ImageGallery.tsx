@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
-import { FileText, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { FileText, Trash2, X, ChevronLeft, ChevronRight, Check } from "lucide-react"
 import ConfirmDialog from "@/components/ConfirmDialog"
 
 export type PetFile = {
@@ -11,6 +11,7 @@ export type PetFile = {
     resource_type: string
     file_name: string
     uploaded_at: string
+    title?: string
 }
 
 type Props = {
@@ -30,6 +31,14 @@ function thumbnailUrl(url: string) {
     return url.replace('/upload/', '/upload/w_300,h_300,c_fill/')
 }
 
+function formatDateTitle(dateString: string): string {
+    const date = new Date(dateString)
+    const day = String(date.getDate()).padStart(2, '0')
+    const monthEs = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'][date.getMonth()]
+    const year = String(date.getFullYear()).slice(-2)
+    return `${day}${monthEs}${year}`
+}
+
 export default function ImageGallery({ images: initialImages, onRemove, onReorder }: Props) {
     const [images, setImages] = useState<PetFile[]>(initialImages)
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -38,11 +47,19 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
     const [downloading, setDownloading] = useState<number | null>(null)
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
     const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+    const [editingTitleId, setEditingTitleId] = useState<number | null>(null)
+    const [editedTitle, setEditedTitle] = useState<string>('')
+    const [savingTitle, setSavingTitle] = useState<number | null>(null)
 
     const closeLightbox = useCallback(() => setLightboxIndex(null), [])
 
     useEffect(() => {
         if (lightboxIndex === null) return
+        const lightboxImg = images[lightboxIndex]
+        if (lightboxImg) {
+            setEditingTitleId(lightboxImg.id)
+            setEditedTitle(lightboxImg.title || formatDateTitle(lightboxImg.uploaded_at))
+        }
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') closeLightbox()
             if (e.key === 'ArrowRight') setLightboxIndex(i => i !== null ? Math.min(i + 1, images.length - 1) : null)
@@ -121,6 +138,37 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
         }
     }
 
+    function startEditingTitle(file: PetFile) {
+        setEditingTitleId(file.id)
+        setEditedTitle(file.title || formatDateTitle(file.uploaded_at))
+    }
+
+    async function saveTitle() {
+        if (editingTitleId === null) return
+
+        setSavingTitle(editingTitleId)
+        try {
+            await fetch("/api/pet-files", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: editingTitleId, title: editedTitle })
+            })
+
+            setImages(prev => prev.map(img =>
+                img.id === editingTitleId ? { ...img, title: editedTitle } : img
+            ))
+        } finally {
+            setSavingTitle(null)
+            setEditingTitleId(null)
+            setEditedTitle('')
+        }
+    }
+
+    function cancelEditingTitle() {
+        setEditingTitleId(null)
+        setEditedTitle('')
+    }
+
     const lightboxImage = lightboxIndex !== null ? images[lightboxIndex] : null
 
     return (
@@ -194,8 +242,41 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
                         </button>
                     )}
 
-                    <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-                        <p className="text-white/70 text-sm">{lightboxImage.file_name}</p>
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center px-4">
+                        {editingTitleId === lightboxImage.id ? (
+                            <div className="flex items-center gap-3 bg-black/60 px-4 py-3 rounded-lg">
+                                <input
+                                    type="text"
+                                    value={editedTitle}
+                                    onChange={e => setEditedTitle(e.target.value.slice(0, 15))}
+                                    maxLength={15}
+                                    className="bg-gray-800 text-white px-3 py-2 rounded text-base focus:outline-none focus:ring-2 focus:ring-blue-400 w-40 cursor-text"
+                                    onClick={e => e.stopPropagation()}
+                                />
+                                <button
+                                    onClick={e => { e.stopPropagation(); saveTitle() }}
+                                    disabled={savingTitle === lightboxImage.id}
+                                    className="text-green-400 hover:text-green-300 transition-colors disabled:opacity-50"
+                                    aria-label="Guardar"
+                                >
+                                    <Check size={18} />
+                                </button>
+                                <button
+                                    onClick={e => { e.stopPropagation(); cancelEditingTitle() }}
+                                    className="text-red-400 hover:text-red-300 transition-colors"
+                                    aria-label="Cancelar"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        ) : (
+                            <p
+                                onClick={e => { e.stopPropagation(); startEditingTitle(lightboxImage) }}
+                                className="text-white/70 text-sm cursor-pointer hover:text-white transition-colors bg-black/40 px-3 py-1.5 rounded"
+                            >
+                                {lightboxImage.title || formatDateTitle(lightboxImage.uploaded_at)}
+                            </p>
+                        )}
                     </div>
                 </div>
             )}
@@ -208,37 +289,42 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
                     {images.map((file, index) => (
                         <div
                             key={file.id}
-                            className="group relative aspect-square"
+                            className="flex flex-col gap-1"
                             draggable
                             onDragStart={() => handleDragStart(index)}
                             onDragOver={(e) => handleDragOver(index, e)}
                             onDragLeave={handleDragLeave}
                             onDrop={() => handleDrop(index)}
                         >
-                            <button
-                                onClick={() => setLightboxIndex(index)}
-                                className={`w-full h-full rounded-lg overflow-hidden border-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 ${
-                                    draggedIndex === index
-                                        ? 'opacity-50 border-gray-300'
-                                        : dragOverIndex === index
-                                        ? 'border-blue-500 bg-blue-50'
-                                        : 'border-gray-200 hover:border-blue-400'
-                                }`}
-                            >
-                                <img
-                                    src={thumbnailUrl(file.url)}
-                                    alt={file.file_name}
-                                    className="w-full h-full object-cover"
-                                />
-                            </button>
-                            <button
-                                onClick={() => setConfirmImage(file)}
-                                disabled={deleting === file.id}
-                                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-all disabled:opacity-50"
-                                aria-label="Eliminar imagen"
-                            >
-                                {deleting === file.id ? <Spinner /> : <Trash2 size={12} />}
-                            </button>
+                            <div className="group relative aspect-square">
+                                <button
+                                    onClick={() => setLightboxIndex(index)}
+                                    className={`w-full h-full rounded-lg overflow-hidden border-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                                        draggedIndex === index
+                                            ? 'opacity-50 border-gray-300'
+                                            : dragOverIndex === index
+                                            ? 'border-blue-500 bg-blue-50'
+                                            : 'border-gray-200 hover:border-blue-400'
+                                    }`}
+                                >
+                                    <img
+                                        src={thumbnailUrl(file.url)}
+                                        alt={file.file_name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </button>
+                                <button
+                                    onClick={() => setConfirmImage(file)}
+                                    disabled={deleting === file.id}
+                                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-all disabled:opacity-50"
+                                    aria-label="Eliminar imagen"
+                                >
+                                    {deleting === file.id ? <Spinner /> : <Trash2 size={12} />}
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-600 text-center truncate px-1 cursor-pointer hover:text-gray-800" onClick={() => startEditingTitle(file)}>
+                                {file.title || formatDateTitle(file.uploaded_at)}
+                            </p>
                         </div>
                     ))}
                 </div>

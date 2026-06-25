@@ -46,6 +46,28 @@ export async function PUT(req: Request) {
     }
 }
 
+export async function PATCH(req: Request) {
+    const session = await auth()
+    if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
+
+    const { id, title } = await req.json()
+
+    if (title && title.length > 15) {
+        return Response.json({ error: "Title must be 15 characters or less" }, { status: 400 })
+    }
+
+    const client = await pool.connect()
+    try {
+        const { rows } = await client.query(
+            `UPDATE pet_files SET title = $1 WHERE id = $2 RETURNING *`,
+            [title, id]
+        )
+        return Response.json(rows[0])
+    } finally {
+        client.release()
+    }
+}
+
 export async function DELETE(req: Request) {
     const session = await auth()
     if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
