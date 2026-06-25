@@ -16,6 +16,7 @@ export type PetFile = {
 type Props = {
     images: PetFile[]
     onRemove: (id: number) => void
+    onReorder?: (images: PetFile[]) => void
 }
 
 const Spinner = () => (
@@ -29,11 +30,14 @@ function thumbnailUrl(url: string) {
     return url.replace('/upload/', '/upload/w_300,h_300,c_fill/')
 }
 
-export default function ImageGallery({ images, onRemove }: Props) {
+export default function ImageGallery({ images: initialImages, onRemove, onReorder }: Props) {
+    const [images, setImages] = useState<PetFile[]>(initialImages)
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
     const [confirmImage, setConfirmImage] = useState<PetFile | null>(null)
     const [deleting, setDeleting] = useState<number | null>(null)
     const [downloading, setDownloading] = useState<number | null>(null)
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
     const closeLightbox = useCallback(() => setLightboxIndex(null), [])
 
@@ -76,6 +80,45 @@ export default function ImageGallery({ images, onRemove }: Props) {
         setConfirmImage(null)
         closeLightbox()
         onRemove(file.id)
+    }
+
+    function handleDragStart(index: number) {
+        setDraggedIndex(index)
+    }
+
+    function handleDragOver(index: number, e: React.DragEvent) {
+        e.preventDefault()
+        setDragOverIndex(index)
+    }
+
+    function handleDragLeave() {
+        setDragOverIndex(null)
+    }
+
+    async function handleDrop(dropIndex: number) {
+        if (draggedIndex === null || draggedIndex === dropIndex) {
+            setDraggedIndex(null)
+            setDragOverIndex(null)
+            return
+        }
+
+        const newImages = [...images]
+        const draggedImage = newImages[draggedIndex]
+        newImages.splice(draggedIndex, 1)
+        newImages.splice(dropIndex, 0, draggedImage)
+
+        setImages(newImages)
+        setDraggedIndex(null)
+        setDragOverIndex(null)
+
+        if (onReorder) {
+            await fetch("/api/pet-files", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ imageIds: newImages.map(img => img.id) })
+            })
+            onReorder(newImages)
+        }
     }
 
     const lightboxImage = lightboxIndex !== null ? images[lightboxIndex] : null
@@ -163,10 +206,24 @@ export default function ImageGallery({ images, onRemove }: Props) {
             ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                     {images.map((file, index) => (
-                        <div key={file.id} className="group relative aspect-square">
+                        <div
+                            key={file.id}
+                            className="group relative aspect-square"
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            onDragOver={(e) => handleDragOver(index, e)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={() => handleDrop(index)}
+                        >
                             <button
                                 onClick={() => setLightboxIndex(index)}
-                                className="w-full h-full rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                className={`w-full h-full rounded-lg overflow-hidden border-2 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                                    draggedIndex === index
+                                        ? 'opacity-50 border-gray-300'
+                                        : dragOverIndex === index
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-gray-200 hover:border-blue-400'
+                                }`}
                             >
                                 <img
                                     src={thumbnailUrl(file.url)}

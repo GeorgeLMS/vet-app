@@ -50,7 +50,7 @@ export async function getPet(id: string) {
 
 async function getPetImages(petId: string) {
     const { rows } = await pool.query(
-        `SELECT * FROM pet_files WHERE pet_id = $1 AND resource_type = 'image' ORDER BY uploaded_at DESC`,
+        `SELECT * FROM pet_files WHERE pet_id = $1 AND resource_type = 'image' ORDER BY display_order ASC, uploaded_at DESC`,
         [petId]
     )
     return rows

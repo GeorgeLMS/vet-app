@@ -26,6 +26,26 @@ export async function POST(req: Request) {
     }
 }
 
+export async function PUT(req: Request) {
+    const session = await auth()
+    if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
+
+    const { imageIds } = await req.json()
+
+    const client = await pool.connect()
+    try {
+        for (let i = 0; i < imageIds.length; i++) {
+            await client.query(
+                `UPDATE pet_files SET display_order = $1 WHERE id = $2`,
+                [i, imageIds[i]]
+            )
+        }
+        return Response.json({ success: true })
+    } finally {
+        client.release()
+    }
+}
+
 export async function DELETE(req: Request) {
     const session = await auth()
     if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 })
