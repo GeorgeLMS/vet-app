@@ -25,7 +25,7 @@ async function getPetFiles(petId: string) {
     const client = await pool.connect()
     try {
         const { rows } = await client.query(
-            `SELECT * FROM pet_files WHERE pet_id = $1 ORDER BY uploaded_at DESC`,
+            `SELECT * FROM pet_files WHERE pet_id = $1 ORDER BY display_order ASC NULLS LAST, uploaded_at DESC`,
             [petId]
         )
         return rows

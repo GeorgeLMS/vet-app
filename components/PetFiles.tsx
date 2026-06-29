@@ -33,7 +33,14 @@ export default function PetFiles({ petId, initialFiles }: Props) {
     const finalInputRef = useRef<HTMLInputElement>(null)
 
     const sortedFiles = [...files].sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime())
-    const imageFiles = sortedFiles.filter(f => f.resource_type === 'image')
+    const imageFiles = [...files]
+        .filter(f => f.resource_type === 'image')
+        .sort((a, b) => {
+            if (a.display_order != null && b.display_order != null) return a.display_order - b.display_order
+            if (a.display_order != null) return -1
+            if (b.display_order != null) return 1
+            return new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime()
+        })
     const nonImageFiles = sortedFiles.filter(f => f.resource_type !== 'image')
 
     const addToast = (message: string, type: 'success' | 'error' | 'loading' = 'success') => {
@@ -167,6 +174,10 @@ export default function PetFiles({ petId, initialFiles }: Props) {
                     <ImageGallery
                         images={imageFiles}
                         onRemove={id => setFiles(prev => prev.filter(f => f.id !== id))}
+                        onReorder={reordered => setFiles(prev => [
+                            ...prev.filter(f => f.resource_type !== 'image'),
+                            ...reordered
+                        ])}
                     />
                 </div>
             )}

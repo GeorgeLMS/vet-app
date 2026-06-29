@@ -12,6 +12,7 @@ export type PetFile = {
     file_name: string
     uploaded_at: string
     title?: string
+    display_order?: number | null
 }
 
 type Props = {
@@ -50,6 +51,7 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
     const [editingTitleId, setEditingTitleId] = useState<number | null>(null)
     const [editedTitle, setEditedTitle] = useState<string>('')
     const [savingTitle, setSavingTitle] = useState<number | null>(null)
+    const [reorderSaving, setReorderSaving] = useState<false | 'saving' | 'error'>(false)
 
     const closeLightbox = useCallback(() => setLightboxIndex(null), [])
 
@@ -129,12 +131,20 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
         setDragOverIndex(null)
 
         if (onReorder) {
-            await fetch("/api/pet-files", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ imageIds: newImages.map(img => img.id) })
-            })
-            onReorder(newImages)
+            setReorderSaving('saving')
+            try {
+                const res = await fetch("/api/pet-files", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ imageIds: newImages.map(img => img.id) })
+                })
+                if (!res.ok) throw new Error('server error')
+                onReorder(newImages)
+                setReorderSaving(false)
+            } catch {
+                setReorderSaving('error')
+                setTimeout(() => setReorderSaving(false), 3000)
+            }
         }
     }
 
@@ -173,6 +183,25 @@ export default function ImageGallery({ images: initialImages, onRemove, onReorde
 
     return (
         <>
+            {reorderSaving !== false && (
+                <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/50">
+                    {reorderSaving === 'saving' ? (
+                        <>
+                            <svg className="h-10 w-10 animate-spin text-white mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            <p className="text-white text-base font-medium">Guardando orden...</p>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-red-400 text-base font-medium mb-1">Error al guardar el orden</p>
+                            <p className="text-white/70 text-sm">Intenta de nuevo</p>
+                        </>
+                    )}
+                </div>
+            )}
+
             {confirmImage && (
                 <ConfirmDialog
                     title="Eliminar imagen"
